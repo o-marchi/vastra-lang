@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Pointer events</title>
+  <style>
+    body { margin: 0; }
+    #box { position: absolute; left: 0; top: 0; width: 100px; height: 100px; background: #ddd; }
+  </style>
+  <script>
+    // Counts the program's :after runs, which print "after" (lines arrive with
+    // their newline, sometimes several at once).
+    window.afters = 0;
+    const log = console.log;
+    console.log = (...parts) => {
+      window.afters += (String(parts[0]).match(/^after$/gm) || []).length;
+      log(...parts);
+    };
+  </script>
+  <script src="vastra.js" defer></script>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="text/vastra" src="pointer.vas"></script>
+</body>
+</html>

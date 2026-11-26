@@ -1,0 +1,120 @@
+(ns vastra.js
+  "JavaScript, reached from any program: what comes back is checked by
+   the type on its let, as JSON is."
+  (:target :js)
+  (:require [vastra.json :as json]))
+
+; A JavaScript value, untrusted until decoded.
+(type Value)
+
+; What can go wrong reaching JavaScript.
+(type Error
+  (Thrown String String)   ; an exception: its name and message
+  (Missing String)         ; no such global, property or method
+  (BadArgument String)     ; a value that can't go to JavaScript
+  (BadValue String))       ; not the data the let's type says
+
+(fn describe-error [error]
+  (match error
+    [(Thrown name message) (str name ": " message)]
+    [(Missing what) (str "no " what)]
+    [(BadArgument why) (str "can't give JavaScript " why)]
+    [(BadValue why) (str "unexpected value: " why)]))
+
+; Each is told the type of its answer by the :: on its let; with none,
+; the answer is a Value. A Promise is waited for.
+(native global (-> String (Task Error (Told Value))))
+(native get (-> Value String (Task Error (Told Value))))
+(native call* (-> Value [Value] (Task Error (Told Value))))
+(native method* (-> Value String [Value] (Task Error (Told Value))))
+(native new* (-> Value [Value] (Task Error (Told Value))))
+(native set (-> Value String a (Task Error Unit)))
+
+; A value going to JavaScript, by the rules for JSON: maps become objects,
+; vectors arrays, a constructor its outside word, None null.
+(native value (-> a Value))
+
+; A function of n Values JavaScript can call, with its first n arguments, the
+; missing ones undefined. An action runs as a handler does, so the views are
+; drawn again.
+(native callback* (-> Int f Value))
+
+; What a callback gives back: a value for JavaScript, or a task it runs. Its
+; clause may give a value where f gives a task, as a let's clause may where
+; the body waits.
+(type Reply)
+(native reply (-> a Reply))
+
+; Whether an argument is written js/Value, told by the name after the alias,
+; which may be anything.
+(fn raw? [param]
+  (match (form/view param)
+    [(ListView [_ _ written]) (match (form/view written)
+                                [(SymbolView name) (match (string/split name "/")
+                                                     [[_ "Value"] true]
+                                                     [_ false])]
+                                [_ false])]
+    [_ false]))
+
+(fn typed? [param] (match (form/view param) [(ListView [_ _ _]) true] [_ false]))
+
+(fn typed [name written] (form/list [(form/symbol "::") name written]))
+
+; An argument written name::Type: the js/Value JavaScript passes, and the let
+; giving f its value, decoded with the clause unless it is a js/Value. Its
+; names are new, so the clause sees only the names around the callback.
+(fn argument [clause param]
+  (let value (gensym "value"))
+  (let name (gensym "arg"))
+  (let written (match (form/view param) [(ListView [_ _ written]) written] [_ param]))
+  {:value (typed value 'vastra.js/Value)
+   :name name
+   :line `(let ~(typed name written) ~value ~@(if (raw? param) [] clause))})
+
+; A clause, [pattern line ...], whose last line's value goes to JavaScript.
+(fn replying [clause]
+  (match (form/view clause)
+    [(VectorView items)
+     (let last (dec (count items)))
+     (let replied (map-indexed #(if (= %1 last) `(vastra.js/reply ~%2) %2) items))
+     (form/at (form/vector replied) clause)]
+    [_ clause]))
+
+; (callback f [event::Key] [(Err why) unit]) is a function JavaScript can call:
+; its arguments, decoded in order by the types written, go to f. When
+; one doesn't fit, the clause ends the function, as a let's does.
+(macro callback [f params & clause]
+  (let written (match (form/view params) [(VectorView items) items] [_ [params]]))
+  (let replied (map replying clause))
+  (let args (map #(argument replied %) written))
+  (let decoded (remove raw? written))
+  (cond
+    [(not (empty? (remove typed? written)))
+     (Err (str "callback needs the types of what JavaScript passes\n"
+               "for example: (js/callback f [event::Key] [(Err why) unit])"))]
+    [(and (empty? decoded) (not (empty? clause)))
+     (Err "a callback given only js/Values can't fail, so it takes no clause")]
+    [(and (empty? clause) (not (empty? decoded)))
+     (Err (str "decoding a JavaScript value needs an (Err why) clause\n"
+               "data from outside can always be wrong"))]
+    [_
+     (Ok `(vastra.js/callback* ~(form/int (count written))
+            ((fn [f#]
+               (fn ~(form/vector (map :value args))
+                 ~@(map :line args)
+                 (vastra.js/reply (f# ~@(map :name args)))))
+             ~f)))]))
+
+; (call f [a b]) is (call* f [(value a) (value b)]); a vector that isn't
+; written out is a vector of Values already.
+(fn values [args]
+  (match (form/view args)
+    [(VectorView items) (form/vector (map (fn [a] `(vastra.js/value ~a)) items))]
+    [_ args]))
+
+(macro call [f args] `(vastra.js/call* ~f ~(values args)))
+(macro method [target name args] `(vastra.js/method* ~target ~name ~(values args)))
+(macro new [constructor args] `(vastra.js/new* ~constructor ~(values args)))
+
+; Any JavaScript value as Json, ready for vastra.decode.
+(native to-json (-> Value json/Json))

@@ -1,0 +1,11 @@
+(ns vastra.json "JSON text, parsed into a value to decode (see vastra.decode).")
+
+(type Json
+  JNull
+  (JBool Bool)
+  (JNumber Float)
+  (JString String)
+  (JArray [Json])
+  (JObject (Dict String Json)))
+
+(native parse (-> String (Result String Json)))

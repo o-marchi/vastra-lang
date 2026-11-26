@@ -1,0 +1,39 @@
+;; A page's REPL into itself (browser/submit), for the browser checks: what it
+;; submits runs in its own session, so a definition it submits replaces the
+;; one its code uses.
+
+(ns console
+  (:require [vastra.html :as html :refer [html]]
+            [vastra.browser :as browser]))
+
+(fn rule [x] (> x 2))
+(fn ruled [] (if (rule 5) "yes" "no"))
+
+(let page {:input "" :entries []})
+
+(type Msg
+  (Typed String)
+  Submit)
+
+(fn reply-text [reply]
+  (match reply
+    [(browser/Value v t) (str v " : " t)]
+    [(browser/Note t)    t]
+    [(browser/Problem t) t]))
+
+(on (Typed text) (set! page :input text))
+(on Submit
+  (let source (:input page))
+  (set! page :input "")
+  (let replies @(browser/submit source))
+  (update! page :entries
+    (fn [entries] (conj entries (string/join " " (vector/concat [source] (map reply-text replies)))))))
+
+(view "#app"
+  (html
+    [:main
+     [:p {:class "ruled"} (html/text (ruled))]
+     (html/element "div" []
+       (map (fn [entry] (html [:p {:class "entry"} (html/text entry)])) (:entries page)))
+     [:form {:on-submit Submit}
+      [:input {:value (:input page) :on-input Typed}]]]))

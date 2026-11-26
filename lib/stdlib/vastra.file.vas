@@ -1,0 +1,15 @@
+(ns vastra.file "Reading and writing text files, as tasks.")
+
+(type Error
+  NotFound
+  PermissionDenied
+  (Other String))
+
+(native read-text (-> String (Task Error String)))
+(native write-text (-> String String (Task Error Unit)))
+
+(fn describe-error [error]
+  (match error
+    [NotFound "file not found"]
+    [PermissionDenied "permission denied"]
+    [(Other message) message]))

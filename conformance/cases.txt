@@ -1,0 +1,3871 @@
+;; Conformance cases: programs that every implementation must handle
+;; identically (same output, same errors, same exit code).
+;;
+;; Each case starts with a header line:
+;;
+;;   ;;; file: NAME    the case is run as a source file:  vastra FILE
+;;   ;;; repl: NAME    the case is piped into the REPL:   vastra < FILE
+;;
+;; Everything up to the next header is the case's source. Run the suite
+;; with conformance/compare.py (see conformance/README.md).
+
+;;; file: greet-define-and-call
+(fn greet [person]
+  (str "Hi " (:name person)))
+(greet {:name "Ana"})
+(greet {:name "Bo" :pet "cat"})
+
+;;; file: greet-missing-key
+(fn greet [person] (str "Hi " (:name person)))
+(greet {:nmae "Bo"})
+
+;;; file: greet-not-a-map
+(fn greet [person] (str "Hi " (:name person)))
+(greet 42)
+
+;;; file: greet-wrong-field-type
+(fn greet [person] (str "Hi " (:name person)))
+(greet {:name 42})
+
+;;; file: greet-too-many-arguments
+(fn greet [person] (str "Hi " (:name person)))
+(greet {:name "a"} {:name "b"})
+
+;;; file: greet-typo-in-name
+(fn greet [person] (str "Hi " (:name person)))
+(gret {:name "Ana"})
+
+;;; file: values
+42
+-17
+0
+9223372036854775807
+-9223372036854775808
+true
+false
+"text"
+""
+"say \"hi\"\n\tand \\ bye"
+"olá 👋"
+
+;;; file: polymorphic-identity
+(fn identity [x] x)
+(identity 1)
+(identity "a")
+(identity true)
+(identity identity)
+
+;;; file: inferred-function-types
+(fn [x y] x)
+(fn [f x] (f (f x)))
+(fn [p] (+ (:x p) (:y p)))
+(fn [f g] (fn [x] (f (g x))))
+(fn [a b c] (if a b c))
+(fn [] 1)
+(fn [r] {:a (:a r) :b (:a r)})
+
+;;; file: let-polymorphism
+(do (let id (fn [x] x)) (if (id true) (id 1) 2))
+
+;;; file: lambda-parameters-are-monomorphic
+(fn [f] (if (f true) (f 1) 2))
+
+;;; file: self-application
+(fn [x] (x x))
+
+;;; file: occurs-in-map
+(fn [m] (:a m m))
+
+;;; file: occurs-through-row
+(fn [x] (:a x x))
+
+;;; file: deeper-occurs
+(fn [f] (f (fn [y] (f y))))
+
+;;; file: wrong-argument-type
+(+ 1 "two")
+
+;;; file: str-requires-strings
+(str "Age: " 30)
+
+;;; file: str-variants
+(str)
+(str "a")
+(str "a" "b")
+(str "a" "b" "c" "d")
+
+;;; file: calling-a-non-function
+(1 2)
+
+;;; file: calling-a-string
+("f" 1)
+
+;;; file: arity-of-builtin
+(+ 1)
+
+;;; file: arity-of-lambda
+((fn [x y] x) 1)
+
+;;; file: higher-order-arity
+(fn call-with-two [f] (f 1 2))
+(call-with-two (fn [x] x))
+
+;;; file: unknown-name
+(undefined-thing 1)
+
+;;; file: unknown-name-suggests-local
+(do (let counter 1) (+ countr 1))
+
+;;; file: if-without-else
+(if true 1)
+
+;;; file: if-wrong-shape
+(if)
+
+;;; file: if-condition-not-bool
+(if 1 2 3)
+
+;;; file: if-branches-differ
+(if true 1 "one")
+
+;;; file: if-branches-different-maps
+(if true {:a 1} {:a 1 :b 2})
+
+;;; file: if-branches-maps-with-different-key
+(if true {:a 1} {:b 1})
+
+;;; file: closures
+(fn adder [n] (fn [x] (+ x n)))
+((adder 2) 40)
+(let add-ten (adder 10))
+(add-ten 5)
+
+;;; file: lexical-scope
+(do (let x 1) (let f (fn [y] (+ x y))) (do (let x 100) (f 10)))
+
+;;; file: recursion
+(fn factorial [n] (if (= n 0) 1 (* n (factorial (- n 1)))))
+(factorial 10)
+(factorial 20)
+(fn fib [n] (if (< n 2) n (+ (fib (- n 1)) (fib (- n 2)))))
+(fib 15)
+
+;;; file: recursion-type-mismatch
+(fn f [x] (if (f x) 1 2))
+
+;;; file: zero-argument-functions
+(fn hello [] "hello")
+(hello)
+
+;;; file: functions-print-by-name
+(fn greet [person] (str "Hi " (:name person)))
+greet
++
+string-append
+(fn [x] x)
+
+;;; file: maps
+{:name "Ana" :age 30}
+{}
+(:city (:address {:name "Ana" :address {:city "Lisbon"}}))
+(fn make-person [name age] {:name name :age age})
+(make-person "Caio" 12)
+
+;;; file: map-missing-key
+(:age {:name 1})
+
+;;; file: map-key-on-non-map
+(:age 5)
+
+;;; file: map-duplicate-key
+{:a 1 :a 2}
+
+;;; file: map-non-keyword-key
+{"a" 1}
+
+;;; file: map-keyword-access-arity
+(:a {:a 1} {:a 2})
+
+;;; file: name-of-is-polymorphic
+(fn name-of [thing] (:name thing))
+(name-of {:name "Rex" :species "dog"})
+(name-of {:name 42})
+
+;;; file: row-unification
+(fn both [a b] (if true a b))
+(both {:x 1 :y 2} {:y 3 :x 4})
+
+;;; file: row-unification-open
+(fn [r] (if true r {:x 1}))
+(fn [r] (+ (:x r) (:y (if true r {:x 1 :y 2}))))
+
+;;; file: apply-n-on-maps
+(fn apply-n [f n x] (if (= n 0) x (apply-n f (- n 1) (f x))))
+(fn birthday [person] {:name (:name person) :age (+ (:age person) 1)})
+(apply-n birthday 3 {:name "Ana" :age 30})
+
+;;; file: there-is-no-nil
+nil
+
+;;; file: nil-as-binding
+(do (let nil 1) 2)
+
+;;; file: a-line-that-does-nothing
+(fn [x] 1 2)
+
+;;; file: fn-without-body
+(fn [x])
+
+;;; file: fn-without-params
+(fn)
+
+;;; file: fn-params-not-vector
+(fn x x)
+
+;;; file: fn-duplicate-params
+(fn [x x] x)
+
+;;; file: fn-param-not-symbol
+(fn [1] 1)
+
+;;; file: let-without-anything
+(let)
+
+;;; file: macro-as-value
+str
+
+;;; file: special-form-as-value
+if
+
+;;; file: let-macro-name
+(let str 1)
+
+;;; file: let-special-form-name
+(let if 1)
+
+;;; file: let-wrong-shape
+(let x)
+
+;;; file: let-in-an-expression
+(+ 1 (let y 1))
+
+;;; file: keyword-alone
+:name
+
+;;; file: vector-value
+[1 2 3]
+
+;;; file: empty-list
+()
+
+;;; file: fn-named-no-body
+(fn f [x])
+
+;;; file: fn-named-no-params
+(fn f)
+
+;;; file: fn-docstring
+(fn id "Returns x." [x] x)
+(id 5)
+
+;;; file: fn-docstring-only
+(fn f "doc")
+;; Names: a body is lines, each let names a value to the end of its
+;; body, and set and update as lines change a name of the body.
+
+;;; file: let-names-a-value-to-the-end-of-its-body
+(let width 16)
+(fn area [h]
+  (let width 4)
+  (* width h))
+(area 2)
+width
+
+;;; file: a-body-is-lines
+(fn fill [screen v]
+  (let a (* v 2))
+  (set screen 0 a)
+  (update screen 1 inc)
+  screen)
+(fill [0 0 0] 5)
+(do (let px 1.5) (+ px 0.5))
+((fn [x] (let y (* x 2)) (+ y 1)) 3)
+
+;;; file: a-second-let-of-a-name
+(fn f [x]
+  (let y 1)
+  (let y 2)
+  y)
+
+;;; file: a-let-of-a-parameter
+(fn f [count] (let count 2) count)
+
+;;; file: a-name-defined-twice-in-a-file
+(let width 16)
+(fn width [] 4)
+
+;;; repl: a-name-defined-twice-in-one-submission
+(let a 1) (let a 2)
+(let a 3)
+a
+
+;;; file: hiding-an-outer-name
+(fn twice [count] (* count 2))
+(twice 4)
+(fn f [x]
+  (let y (do (let x 10) (+ x 1)))
+  (+ x y))
+(f 1)
+
+;;; file: set-keeps-a-names-type
+(fn f []
+  (let x 1)
+  (set x "a")
+  x)
+
+;;; file: set-adds-no-key
+(fn f []
+  (let p {:name "Bo"})
+  (set p :email "bo@example.com")
+  p)
+
+;;; file: set-changes-the-functions-own-names
+(let width 16)
+(fn wider []
+  (set width 20)
+  width)
+
+;;; file: set-on-a-name-of-the-function-around
+(fn outer [x]
+  (fn inner [] (set x 2) x)
+  (inner))
+
+;;; file: a-function-value-holding-a-name
+(fn near-all [points at radius]
+  (let near? #(< (abs (- % at)) radius))
+  (set radius 20.0)
+  (filter near? points))
+
+;;; file: a-function-value-given-the-name
+(fn near-all [points at radius]
+  (let near? #(< (abs (- %1 at)) %2))
+  (set radius 20.0)
+  (filter #(near? % radius) points))
+(near-all [1.0 15.0 40.0] 0.0 10.0)
+
+;;; file: a-change-nothing-reads
+(fn f [x]
+  (set x 2)
+  5)
+
+;;; file: set-in-a-branch
+(fn clamp [x low high]
+  (if (< x low) (set x low) unit)
+  (if (> x high) (set x high) unit)
+  x)
+(clamp 20 0 10)
+(clamp -3 0 10)
+(fn order [a b]
+  (let low a)
+  (let high b)
+  (if (> a b)
+    (do (set low b) (set high a))
+    unit)
+  [low high])
+(order 5 2)
+(fn grade [n]
+  (let g "low")
+  (cond [(> n 90) (set g "high")]
+        [(> n 50) (set g "middle")]
+        [_ unit])
+  g)
+[(grade 95) (grade 60) (grade 1)]
+(fn first-or [xs default]
+  (match (first xs)
+    [(Some x) (set default x)]
+    [None unit])
+  default)
+[(first-or [7] 0) (first-or [] 0)]
+
+;;; file: a-buffer-set-in-a-branch
+(fn mark [n]
+  (let cells (buffer/repeat 3 0))
+  (let marks 0)
+  (if (> n 0)
+    (do (set cells 0 n) (set marks 1))
+    unit)
+  {:cells (buffer/freeze cells) :marks marks})
+(mark 7)
+(mark 0)
+
+;;; file: a-branch-line-that-changes-nothing
+(fn f [x]
+  (if (> x 1) unit unit)
+  x)
+
+;;; file: set-in-a-do-that-gives-a-value
+(fn f [x]
+  (let y (do (set x 2) (* x 3)))
+  (+ x y))
+
+;;; file: set-as-a-line-needs-a-name
+(fn f [m]
+  (set (:a m) 2)
+  m)
+
+;;; file: set-at-the-top-level-is-an-expression
+(let person {:name "Bo" :age 35})
+(set person :age 36)
+person
+
+;;; file: a-local-function-calls-itself
+(fn digits [n]
+  (fn more [n found]
+    (if (< n 10)
+      (cons n found)
+      (more (option/or (quot n 10) 0) (cons (option/or (mod n 10) 0) found))))
+  (more n []))
+(digits 4096)
+
+;;; file: a-named-fn-in-an-expression
+(map (fn square [x] (* x x)) [1 2])
+
+;;; file: let-in-the-last-line
+(fn f [x] (let y x))
+
+;; State without a keyword: the file's names, changed with set! and
+;; update! by the file's own code, ! functions and the prompt.
+
+;;; file: set!-changes-a-files-name
+(let score 0)
+(let log [])
+(fn hit! [points]
+  (set! score (+ score points)))
+(fn note! [line]
+  (update! log #(conj % line))
+  (count log))
+(hit! 5)
+(hit! 2)
+score
+(note! "started")
+log
+(set! score 0)
+score
+
+;;; file: a-line-whose-branches-only-act
+(let score 0)
+(fn bump-if! [n]
+  (if (> n 0) (set! score (+ score n)) unit)
+  score)
+(bump-if! 3)
+(bump-if! -1)
+
+;;; file: a-function-that-changes-names-ends-in-!
+(let score 0)
+(fn hit [points]
+  (set! score (+ score points)))
+
+;;; file: a-function-calling-a-!-function-ends-in-!
+(let score 0)
+(fn hit! [points] (set! score (+ score points)))
+(fn twice [points]
+  (hit! points)
+  (hit! points))
+
+;;; file: actions-passed-as-values
+; The ! goes where the action runs: in the name called, or added to a call.
+(let score 0)
+(let last 0)
+(fn hit! [points] (set! score (+ score points)))
+(fn apply-to [f x] (f x))
+(apply-to! hit! 3)
+(apply-to inc 3)
+(map! hit! [1 2 3])
+(map! (fn [n] (hit! n) (set! last n)) [1 2 3])
+[score last]
+(fn twice [f] (fn [x] (f (f x))))
+(fn jump! [x] (set! score (+ score x)) x)
+(let jump-twice! (twice jump!))
+(jump-twice! 1)
+score
+(let moves {:jump jump!})
+(let move! (:jump moves))
+(move! 2)
+score
+
+;;; file: what-a-function-promises-about-the-functions-it-takes
+map
+reduce
+par/map
+sort-by
+task/map
+stop!
+
+;;; file: a-call-that-acts-shows-a-!
+(let score 0)
+(fn hit! [points] (set! score (+ score points)))
+(map hit! [1 2 3])
+
+;;; file: a-call-given-an-action-shows-a-!
+(let score 0)
+(map (fn [points] (set! score (+ score points))) [1 2 3])
+
+;;; file: a-!-added-to-a-call-that-cannot-act
+(map! inc [1 2 3])
+
+;;; file: a-call-through-a-parameter-needs-no-!
+(fn apply-to [f x] (f x))
+(fn twice [f x] (apply-to! f (apply-to f x)))
+
+;;; file: a-function-that-writes-a-!-call-ends-in-!
+(let score 0)
+(fn hit! [points] (set! score (+ score points)))
+(fn hit-all [points] (map! hit! points))
+
+;;; file: a-name-holding-an-action-ends-in-!
+(let score 0)
+(fn hit! [points] (set! score (+ score points)))
+(let moves {:jump hit!})
+(let jump (:jump moves))
+
+;;; file: a-call-of-an-unnamed-action
+(let score 0)
+(fn hit! [points] (set! score (+ score points)))
+(let moves {:jump hit!})
+((:jump moves) 2)
+
+;;; file: par/map-takes-no-action
+(let score 0)
+(fn hit! [points] (set! score (+ score points)))
+(par/map! hit! [1 2 3])
+
+;;; file: sort-by-takes-no-action
+(let score 0)
+(sort-by (fn [x] (set! score (inc score)) x) < [3 1 2])
+
+;;; file: a-parameter-given-to-par/map-takes-no-action
+(let score 0)
+(fn hit! [points] (set! score (+ score points)))
+(fn each [f xs] (par/map f xs))
+(each! hit! [1 2])
+
+;;; file: a-function-taking-functions-shares-no-name-with-its-!
+(fn apply-to [f x] (f x))
+(fn apply-to! [x] x)
+
+;;; file: a-type-holds-an-action
+(let n 0)
+(type Move (Move (->! Unit)))
+(fn bump! [] (set! n (inc n)))
+(let m (Move bump!))
+(match m [(Move run) (run!)])
+n
+
+;;; file: a-types-plain-function-takes-no-action
+(let n 0)
+(type Step (Step (-> Int Int)))
+(Step inc)
+(Step (fn [x] (set! n x) x))
+
+;;; file: a-task-function-takes-an-action
+; Making the task changes nothing; running it does.
+(let score 0)
+(fn hit! [points] (set! score (+ score points)))
+(let later-hit (task/map (task/succeed 5) hit!))
+score
+
+;;; file: a-!-function-that-waits-is-a-task
+(let score 0)
+(fn hit-later! [points]
+  @(task/succeed unit)
+  (set! score (+ score points)))
+(let hits (map hit-later! [1 2 3]))
+score
+
+;;; file: a-plain-function-does-not-read-a-modules-changing-name
+(ns app (:require [scores]))
+(fn shown [] (str scores/total))
+;;;; file: scores.vas
+(ns scores)
+(let total 0)
+(fn add! [n] (set! total (+ total n)))
+
+;;; file: a-name-changes-only-in-its-own-file
+; Another file asks the cart to change, through its ! functions.
+(ns app (:require [shop.cart :as cart]))
+(cart/add! "tea")
+(set! cart/items [])
+;;;; file: shop/cart.vas
+(ns shop.cart)
+(let items [])
+(fn add! [item] (set! items (conj items item)))
+
+;;; file: update!-of-another-files-name
+(ns app (:require [shop.cart :as cart]))
+(fn empty! [] (update! cart/items (fn [_] [])))
+;;;; file: shop/cart.vas
+(ns shop.cart)
+(let items [])
+(fn add! [item] (set! items (conj items item)))
+
+;;; file: a-path-change-of-another-files-name
+(ns app (:require [shop.cart :as cart]))
+(type Msg Cheaper)
+(on Cheaper (set! cart/items 0 :price 1))
+;;;; file: shop/cart.vas
+(ns shop.cart)
+(let items [{:name "tea" :price 3}])
+
+;;; file: another-file-calls-its-!-functions
+(ns app (:require [shop.cart :as cart]))
+(cart/add! "tea")
+(cart/add! "cake")
+cart/items
+(cart/clear!)
+cart/items
+;;;; file: shop/cart.vas
+(ns shop.cart)
+(let items [])
+(fn add! [item] (set! items (conj items item)))
+(fn clear! [] (set! items []))
+
+;;; repl: the-prompt-changes-another-files-name
+(ns app (:require [shop.cart :as cart]))
+(set! cart/items ["from the prompt"])
+cart/items
+(fn empty! [] (set! cart/items []))
+(empty!)
+cart/items
+;;;; file: shop/cart.vas
+(ns shop.cart)
+(let items [])
+(fn add! [item] (set! items (conj items item)))
+
+;;; file: a-plain-function-does-not-read-a-changing-name
+(let score 0)
+(fn doubled [] (* 2 score))
+(fn hit! [points] (set! score (+ score points)))
+
+;;; file: set!-on-a-functions-own-name
+(fn hit! [score] (set! score 2) score)
+
+;;; file: set!-keeps-a-names-type
+(let score 0)
+(set! score "high")
+
+;;; file: set!-adds-no-key
+(let person {:name "Bo"})
+(set! person :email "bo@example.com")
+
+;;; file: a-macro-cannot-change-names
+(macro reset [x] (set! score 0) x)
+
+;;; file: let-with-clauses-takes-_
+(ns t (:require [vastra.file :as file]))
+(fn save [text]
+  (let _ @(file/write-text "/nowhere/at/all.txt" text)
+    [(Err _) unit])
+  unit)
+(fn twice [r]
+  (let _ r
+    [None 0])
+  (let _ r
+    [None 1])
+  2)
+[(twice (Some 1)) (twice None)]
+
+;;; file: handlers-and-views
+(ns app (:require [vastra.html :as html :refer [html]]))
+(type Msg Increment (Add Int))
+(let total 0)
+(on Increment (set! total (inc total)))
+(on (Add n) (set! total (+ total n)))
+(view "#app" (html [:button {:on-click Increment} (html/text (str total))]))
+
+;;; run: send!-delivers-after-the-handler
+messages.vas
+;;;; file: messages.vas
+; Inc sends Show before it counts, and Show is handled after Inc ends.
+(ns app (:require [vastra.console :as console]))
+(type Msg Inc (Add Int) Show)
+(let n 0)
+(on Inc
+  (send! Show)
+  (set! n (inc n)))
+(on (Add k) (set! n (+ n k)))
+(on Show @(console/print (str "n is " n)))
+(send! Inc)
+
+;;; file: the-first-on-that-matches-takes-the-message
+(type Msg Inc Reset)
+(let n 0)
+(on Inc (set! n 1))
+(on Reset (set! n 0))
+(on Inc (set! n 2))
+
+;;; file: every-message-has-an-on
+(type Msg Inc Reset)
+(let n 0)
+(on Inc (set! n (inc n)))
+
+;;; file: a-cycle-of-messages-without-a-wait
+(type Msg Ping Pong)
+(on Ping (send! Pong))
+(on Pong (send! Ping))
+
+;;; file: a-cycle-through-a-!-function
+(type Msg Reset Other)
+(fn again! [] (send! Reset))
+(on Reset (again!))
+(on Other unit)
+
+;;; file: a-handler-that-waits-first-is-a-retry
+(type Msg Retry Done)
+(on Retry
+  @(task/succeed unit)
+  (send! Retry))
+(on Done unit)
+
+;;; file: send!-takes-the-files-messages
+(type Msg Inc)
+(on Inc unit)
+(send! "Inc")
+
+;;; file: a-send-in-later-is-a-retry
+(type Msg Again Done)
+(on Again
+  (later (task/succeed 1)
+    [(Ok _) (send! Again)]
+    [(Err _) unit]))
+(on Done unit)
+
+;;; file: window-events-need-no-on-each
+(ns app (:require [vastra.window :as window]))
+(on (window/Press window/Escape) unit)
+
+;;; file: window-events-cannot-be-sent
+(ns app (:require [vastra.window :as window]))
+(on (window/Press window/Escape) unit)
+(send! (window/Press window/Tab))
+
+;;; file: a-handler-cannot-fail
+(ns app (:require [vastra.file :as file] [vastra.html :as html]))
+(type Msg Save)
+(on Save @(file/write-text "notes.txt" "saved"))
+
+;;; file: a-handler-ends-with-a-task-it-runs
+(ns app (:require [vastra.console :as console]))
+(type Msg Hello)
+(on Hello (console/print "hello"))
+
+;;; file: a-file-has-one-message-type
+(ns app (:require [vastra.html :as html :refer [html]]))
+(type Msg Increment)
+(type Other Something)
+(let total 0)
+(on Increment (set! total (inc total)))
+(on Something (set! total 0))
+
+;;; file: a-view-only-reads
+(ns app (:require [vastra.html :as html :refer [html]]))
+(let shown 0)
+(view "#app"
+  (set! shown (inc shown))
+  (html [:p (html/text (str shown))]))
+
+;;; file: a-view-calls-no-!-function
+(ns app (:require [vastra.html :as html :refer [html]]))
+(let shown 0)
+(fn count! [] (set! shown (inc shown)))
+(view "#app"
+  (count!)
+  (html [:p (html/text (str shown))]))
+
+;;; file: a-view-makes-no-call-that-acts
+(ns app (:require [vastra.html :as html :refer [html]]))
+(let shown 0)
+(fn count! [n] (set! shown (+ shown n)))
+(view "#app"
+  (map! count! [1 2])
+  (html [:p (html/text (str shown))]))
+
+;;; file: a-view-cannot-wait
+(ns app (:require [vastra.html :as html :refer [html]] [vastra.clock :as clock]))
+(view "#app" (html [:p (html/text (str @clock/now))]))
+
+;;; file: a-view-names-its-place
+(ns app (:require [vastra.html :as html :refer [html]]))
+(view 42 (html [:p "here"]))
+
+;;; file: a-view-in-a-page-gives-html
+(view "#app" 42)
+
+;;; repl: dir-marks-the-names-that-change
+(let total 0)
+(fn bump! [] (set! total (inc total)))
+(bump!)
+(let width 16)
+:dir
+
+;;; repl: set!-at-the-prompt
+(let score 0)
+(set! score 41)
+(update! score inc)
+score
+(set! score 1) (undefined-name)
+score
+(let nothing-yet [])
+(set! nothing-yet [1])
+
+;;; file: read-unclosed
+(greet
+
+;;; file: read-unclosed-inner
+(a [b
+
+;;; file: read-mismatched
+[1 (2]
+
+;;; file: read-unexpected-closing
+1 )
+
+;;; file: read-unterminated-string
+x "abc
+
+;;; file: read-invalid-escape
+"a\qb"
+
+;;; file: read-invalid-escape-unicode
+"a\éb"
+
+;;; file: read-odd-map
+{:a}
+
+;;; file: read-a-number-has-no-exponent
+(* 2 1e300)
+
+;;; file: read-big-integer
+99999999999999999999
+
+;;; file: read-integer-beyond-64-bits
+9223372036854775808
+
+;;; file: read-invalid-number
+12abc
+
+;;; file: read-float
+1.5
+
+;;; file: read-empty-keyword
+: a
+
+;;; file: read-error-on-second-line
+(let x 1)
+(+ x "y"
+
+;;; file: read-commas-and-comments
+; leading comment
+{:a 1, :b 2} ; trailing
+[1,2,,3]
+
+;;; file: big-integer-multiply
+(* 9223372036854775807 2)
+
+;;; file: big-integer-add
+(+ 9223372036854775807 1)
+
+;;; file: big-integer-subtract
+(- -9223372036854775808 1)
+
+;;; file: integer-edge-arithmetic
+(* -1 9223372036854775807)
+(- 0 9223372036854775807)
+(* 3037000499 3037000499)
+
+;;; file: big-integer-multiply-negative
+(* -9223372036854775808 -1)
+
+;;; file: comparisons
+(= 1 1)
+(< 1 2)
+(> 1 2)
+(<= 2 2)
+(>= 1 2)
+(not true)
+
+;;; file: deep-recursion-limit
+(fn forever [n] (+ 1 (forever n)))
+(forever 1)
+
+;;; repl: an-error-in-an-earlier-submission-points-there
+(fn forever [n]
+  (+ 1 (forever n)))
+(forever 1)
+
+;;; file: deep-but-allowed-recursion
+(fn count-down [n] (if (= n 0) 0 (count-down (- n 1))))
+(count-down 10000)
+
+;;; repl: redefinition-suspends-dependents
+(let base 10)
+(fn add-base [x] (+ x base))
+(let base "text") (add-base 1)
+base
+
+;;; repl: definition-uses-previous-value
+(let x 1)
+(let x (+ x 1))
+x
+
+;;; file: shadowing-builtin
+(let + (fn [a b] (- a b)))
+(+ 10 3)
+
+;;; file: unicode-spans-in-errors
+(let café "olá")
+(+ café 1)
+
+;;; file: tab-in-source
+(+	1	"x")
+
+;;; file: empty-file
+
+;;; file: only-comments
+; nothing here
+
+;;; repl: repl-greet-across-lines
+(fn greet [person]
+  (str "Hi " (:name person)))
+(greet {:name "Ana"})
+
+;;; repl: repl-error-then-recovery
+(fn greet [person] (str "Hi " (:name person)))
+(greet {:nmae "Bo"})
+(greet {:name "Bo"})
+
+;;; repl: repl-atomic-submission
+(let x 1) (undefined-name)
+x
+
+;;; repl: repl-redefinition
+(let base 10) (fn add-base [x] (+ x base))
+(let base "text")
+(add-base 1)
+
+;;; repl: repl-redefinition-never-mixes-types
+(fn helper [x] (+ x 1))
+(fn render [m] (helper m))
+(let handlers [render])
+(fn call-first [fs x] (match fs [[f] (f x)] [_ 0]))
+(fn helper [s] (string/length s)) (fn render [m] (helper (str (+ m 0))))
+(call-first handlers 41)
+
+;;; repl: repl-redefinition-reaches-stored-functions
+(fn render [m] (+ m 1))
+(let handlers [render])
+(fn call-first [fs x] (match fs [[f] (f x)] [_ 0]))
+(call-first handlers 41)
+(fn render [m] (* m 2))
+(call-first handlers 41)
+handlers
+
+;;; repl: repl-new-type-not-seen-by-old-values
+(fn helper [x] (+ x 1))
+(fn render [m] (helper (+ m 0)))
+(let handlers [(fn [x] (helper (+ x 0)))])
+(fn call-first [fs x] (match fs [[f] (f x)] [_ 0]))
+(fn helper [x] 7)
+(render 41)
+(call-first handlers 41)
+
+;;; repl: repl-failed-submission-keeps-functions
+(fn render [m] (+ m 1))
+(let handlers [render])
+(fn call-first [fs x] (match fs [[f] (f x)] [_ 0]))
+(fn render [m] (* m 2)) (undefined-name)
+(call-first handlers 41)
+
+;;; repl: repl-doc-inside-a-module
+(ns m) (fn f "Gives back its argument." [x] x)
+:doc f
+:doc m/f
+
+;;; repl: repl-same-module-twice
+(ns shapes) (type Shape (Circle Float) (Square Float)) (fn area [s] (match s [(Circle r) (* 3.0 (* r r))] [(Square w) (* w w)])) (let unit-square (Square 1.0))
+(ns shapes) (type Shape (Circle Float) (Square Float)) (fn area [s] (match s [(Circle r) (* 3.0 (* r r))] [(Square w) (* w w)])) (let unit-square (Square 1.0))
+(area unit-square)
+(type Shape (Circle Float))
+
+;;; repl: repl-quit-stops
+(+ 1 2)
+:quit
+(+ 3 4)
+
+;;; repl: repl-unfinished-form-at-eof
+(fn greet [person]
+
+;;; repl: repl-blank-lines
+(+ 1 2)
+
+
+(+ 3 4)
+
+;;; repl: repl-multiple-forms-per-line
+(let a 1) (let b 2) (+ a b)
+
+;; ---------------------------------------------------------------------------
+;; Types, match, numbers and collections
+;; ---------------------------------------------------------------------------
+
+;;; file: string-field-required
+(fn shout [person] (string-append (:name person) "!"))
+(shout {:name 42})
+
+;;; file: str-accepts-any-value
+(str "Age: " 30 ", ratio " 0.5 ", tags " ["a" "b"] ", " (Some 1) ", " {:k 1})
+
+;;; file: adt-define-and-match
+(type Shape (Circle Float) (Rect Float Float))
+(fn area [s] (match s [(Circle r) (* 3.0 (* r r))] [(Rect w h) (* w h)]))
+(area (Circle 2.0))
+(area (Rect 2.0 3.0))
+Circle
+
+;;; file: constructor-arity
+(type Shape (Circle Float) (Rect Float Float))
+(Rect 1.0)
+
+;;; file: adt-parameterized-recursive
+(type (Tree a) Leaf (Node (Tree a) a (Tree a)))
+(fn insert [x t]
+  (match t
+    [Leaf (Node Leaf x Leaf)]
+    [(Node l v r) (if (< x v) (Node (insert x l) v r) (Node l v (insert x r)))]))
+(insert 2 (insert 3 (insert 1 Leaf)))
+
+;;; file: match-missing-constructor
+(fn f [o] (match o [(Some x) x]))
+
+;;; file: match-missing-nested
+(fn f [r] (match r [(Ok (Some x)) x] [(Ok None) 0]))
+
+;;; file: match-missing-bool
+(fn f [b] (match b [true 1]))
+
+;;; file: match-missing-literal-catch-all
+(fn f [n] (match n [0 "zero"] [1 "one"]))
+
+;;; file: match-missing-vector
+(fn f [v] (match v [[] 0] [[x] x]))
+
+;;; file: match-redundant-clause
+(fn f [o] (match o [_ 0] [(Some x) x]))
+
+;;; file: match-redundant-duplicate
+(fn f [b] (match b [true 1] [false 2] [true 3]))
+
+;;; file: match-pattern-type-mismatch
+(match 5 [(Some x) x] [None 0])
+
+;;; file: match-clause-types-differ
+(match (Some 1) [(Some x) x] [None "none"])
+
+;;; file: match-constructor-arity
+(match (Some 1) [(Some a b) a] [None 0])
+
+;;; file: match-unknown-constructor
+(match (Some 1) [(Sme x) x] [None 0])
+
+;;; file: match-duplicate-name-in-pattern
+(match [1 2] [[x x] x] [_ 0])
+
+;;; file: match-clause-without-brackets
+(match 1 1 "one" _ "other")
+
+;;; file: match-clauses-without-brackets-after-one-with
+(type T A B C)
+(fn f [x]
+  (match x
+    [A 0]
+    B 1
+    C (+ 1
+         1)))
+
+;;; file: match-clause-without-lines
+(match 1 [1] [_ 0])
+
+;;; file: a-clause-is-a-body
+(fn describe [o]
+  (match o
+    [(Some n)
+     (let doubled (* n 2))
+     (str "twice " doubled)]
+    [None "nothing"]))
+[(describe (Some 4)) (describe None)]
+(fn sign [x]
+  (cond
+    [(< x 0)
+     (let shown (str x))
+     (str shown " is below")]
+    [_ "not below"]))
+(sign -2)
+(fn next-of [o]
+  (match o
+    [(Some n)
+     (set n (inc n))
+     n]
+    [None 0]))
+(next-of (Some 1))
+(fn grade [n]
+  (let g "low")
+  (let seen 0)
+  (cond
+    [(> n 90) (set g "high") (set seen 1)]
+    [_ unit])
+  {:grade g :seen seen})
+(grade 95)
+(fn age [text]
+  (let n (string/to-int text)
+    [None
+     (let fallback 10)
+     (* fallback 2)])
+  n)
+(age "x")
+
+;;; file: a-clause-that-gives-a-value-changes-only-its-own-names
+(fn f [o]
+  (let total 0)
+  (inc (match o
+         [(Some x) (set total x) total]
+         [None 0])))
+
+;;; file: match-float-pattern
+(match 1.5 [1.5 true] [_ false])
+
+;;; file: match-literals-and-strings
+(fn sound [animal] (match animal ["dog" "woof"] ["cat" "meow"] [_ "..."]))
+(sound "cat")
+(sound "fish")
+
+;;; file: type-unknown-type
+(type Box (Box Strng))
+
+;;; file: type-wrong-arity
+(type Box (Box (Option Int Int)))
+
+;;; file: type-unknown-variable
+(type Box (Box a))
+
+;;; file: type-redefined
+(type Color Red Green)
+(type Color Blue)
+
+;;; repl: a-type-the-prompt-defined-changes-there
+(type Shape (Circle Float) (Square Float))
+(fn area [s] (match s [(Circle r) (* 3.0 (* r r))] [(Square w) (* w w)]))
+(fn label [s] (match s [(Circle _) "round"] [_ "angled"]))
+(type Shape (Circle Float) (Square Float) (Triangle Float))
+(type Shape (Circle Float) (Square Float) (Triangle Float)) (fn area [s] (match s [(Circle r) (* 3.0 (* r r))] [(Square w) (* w w)] [(Triangle b) (* 0.5 b)]))
+(area (Triangle 2.0))
+(label (Triangle 2.0))
+(type Shape (Circle Float) (Square Float) (Triangle Float))
+(type Shape (Circle Float)) (type Shape (Circle Float) (Square Float))
+
+;;; repl: a-value-keeps-the-version-of-its-type
+(type Shape (Circle Float) (Square Float))
+(fn area [s] (match s [(Circle r) (* 3.0 (* r r))] [(Square w) (* w w)]))
+(let unit (Square 1.0))
+(Circle 2.0)
+(type Shape (Circle Float) (Square Float) (Triangle Float)) (fn area [s] (match s [(Circle r) (* 3.0 (* r r))] [(Square w) (* w w)] [(Triangle b) (* 0.5 b)]))
+(area unit)
+(area *1)
+unit
+(area (Square 1.0))
+
+;;; file: type-duplicate-constructor
+(type Color Red Red)
+
+;;; file: type-constructor-taken
+(type Answer Yes (Some Int))
+
+;;; file: type-lowercase-name
+(type color Red)
+
+;;; file: type-not-top-level
+(do (let x (type T A)) x)
+
+;;; file: native-not-allowed
+(native hack (-> Int Int))
+
+;;; file: uppercase-binding
+(let Answer 42)
+
+;;; file: numbers
+(+ 1 2)
+(+ 1.5 2.25)
+(- 10.0 0.5)
+(/ 7.0 2.0)
+(/ 1.0 0.0)
+(/ 0.0 0.0)
+(quot 7 2)
+(quot 7 0)
+(mod -7 3)
+(mod 7 0)
+(to-float 3)
+(round 2.5)
+(string/fixed 3.14159 2)
+(fn [x] (* x x))
+
+;;; file: number-mixed-types
+(+ 1.5 (count [1 2]))
+
+;;; file: literals-take-the-type-they-meet
+(* 1.5 2)
+3
+3.0
+(+ 0.5 (sum []))
+(sum [])
+(inc 1.5)
+(map inc [1.5 2.5])
+(do (let n 0) (+ n 1.5))
+(do (let twice (fn [x] (* x 2))) [(twice 1) (twice 1.5)])
+(fn fib [n] (if (< n 2) n (+ (fib (- n 1)) (fib (- n 2)))))
+(fib 10)
+(fib 10.0)
+(fn adder [] (let one 1) (fn [x] (+ x one)))
+((adder) 2.5)
+(fn [x] (* x 2))
+
+;;; repl: only-functions-are-generic
+(let two 2)
+two
+(* 1.5 two)
+
+;;; repl: types-at-the-prompt
+(fn scale [x] (* x 2))
+:type scale
+:type (scale 3)
+(scale 3)
+
+;;; file: integer-constraint
+(fn half [x] (quot x 2))
+(half 9)
+(fn zero? [n] (match n [0 true] [_ false]))
+(zero? 0)
+(fn sign [n] (match n [-1 "minus one"] [0 "zero"] [_ "other"]))
+(sign -1)
+
+;;; file: quot-takes-whole-numbers
+(quot 7.5 2)
+
+;;; file: floats-cannot-be-matched
+(match 1.5 [2 "two"] [_ "other"])
+
+;;; file: fixed-width-integers
+(to-u8 300)
+(to-u8 -3)
+(to-i16 40000)
+(to-u16 -1)
+(to-i32 4294967295)
+(+ (to-u8 250) 10)
+(- (to-u8 0) 1)
+(* (to-i8 100) 2)
+(= (to-u8 3) 3)
+(< (to-i32 -1) (to-i32 5))
+(max (to-u16 3) 7)
+(quot (to-i8 -128) -1)
+(mod (to-i16 -7) 3)
+(mod (to-u8 7) 0)
+(match (to-u8 255) [255 "max"] [_ "other"])
+(str (to-u8 7) " and " (to-i8 -7))
+(to-int (to-i8 -7))
+(fn hash-step [h x] (* (+ h x) 31))
+(hash-step (to-u32 4000000000) 7)
+
+;;; file: fixed-width-edges-in-javascript
+; js_of_ocaml's integers have 32 bits: what passes through them.
+(* (to-u32 4000000000) (to-u32 3))
+(* (to-i32 2147483647) 2)
+(- (to-i32 -2147483648) 1)
+(< (to-u32 4000000000) (to-u32 5))
+(sort [(to-u32 4000000000) (to-u32 1)])
+(to-int (to-u32 4294967295))
+(to-float (to-u32 4294967295))
+
+;;; file: to-float-takes-whole-numbers
+(to-float 1.5)
+
+;;; file: fixed-widths-clamp-a-float
+(fn [x] (to-u8 x))
+(to-u8 300.0)
+(to-u8 300)
+(to-u8 -3.0)
+(to-u8 -3)
+(to-u8 254.9)
+(to-i8 -128.9)
+(to-i8 -129.0)
+(to-i32 3000000000.0)
+(to-i32 (/ 0.0 0.0))
+(to-u16 (/ 1.0 0.0))
+(to-i16 (/ -1.0 0.0))
+
+;;; file: fixed-width-float-edges-in-javascript
+; js_of_ocaml's integers have 32 bits: a U32 and an I32 from a Float.
+(to-u32 4294967295.9)
+(to-u32 4294967296.0)
+(to-i32 -2147483648.5)
+(to-i32 -2147483649.0)
+(to-i32 2147483647.9)
+
+;;; file: rounding-chooses-the-direction
+(round 2.5)
+(floor 2.7)
+(ceil 2.2)
+(truncate -2.7)
+(floor -2.5)
+(ceil -0.5)
+(truncate -0.5)
+(floor (/ 0.0 0.0))
+(ceil (/ -1.0 0.0))
+
+;;; file: rounding-takes-a-float
+(floor (count [1 2]))
+
+;;; file: square-roots-and-absolute-values
+(sqrt 2.0)
+(sqrt 4)
+(sqrt -0.0)
+(sqrt -1.0)
+(sqrt (/ 1.0 0.0))
+(fn distance [x y] (sqrt (+ (* x x) (* y y))))
+(distance 3.0 4.0)
+(abs -3)
+(abs -2.5)
+(abs -0.0)
+(abs (/ 0.0 0.0))
+(abs -123456789012345678901234567890)
+(abs (to-i8 -5))
+(abs (to-i8 -128))
+(abs (to-i32 -2147483648))
+(abs (to-u8 200))
+(abs (to-u32 4000000000))
+(fn [x] (abs x))
+
+;;; file: min-and-max-ignore-nan
+(min (/ 0.0 0.0) 1.0)
+(min 1.0 (/ 0.0 0.0))
+(max (/ 0.0 0.0) 1.0)
+(max 1.0 (/ 0.0 0.0))
+(min (/ 0.0 0.0) (/ 0.0 0.0))
+(max (/ 0.0 0.0) (/ 0.0 0.0))
+(min -0.0 0.0)
+(min 0.0 -0.0)
+(max -0.0 0.0)
+(max 0.0 -0.0)
+(max (/ -1.0 0.0) (/ 0.0 0.0))
+(reduce max (/ 0.0 0.0) [3.0 1.0 2.0])
+(max 2 3)
+(min "b" "a")
+
+;;; repl: sqrt-takes-a-float
+(sqrt (count [1 2 3 4]))
+(abs "three")
+
+;;; file: numbers-in-hex
+(string/hex 255)
+(string/hex 0)
+(string/hex -255)
+(string/hex 0xDEADBEEF)
+(string/hex (bit/shift-left 1 100))
+(string/hex (to-u32 255))
+(string/hex (to-u32 0xff000000))
+(string/hex (to-u16 0))
+(string/hex (to-u8 10))
+(string/hex (to-i8 -1))
+(string/hex (to-i16 -2))
+(string/hex (to-i32 -2147483648))
+(fn [x] (string/hex x))
+
+;;; repl: hex-takes-a-whole-number
+(string/hex 1.5)
+
+;;; file: operators-take-more-arguments
+;; More arguments fold left: (+ a b c) is (+ (+ a b) c), as C's a + b + c.
+(+ 1 2 3 4)
+(- 10 1 2)
+(* 2 3 4)
+(/ 8.0 2.0 2.0)
+(+ 0.1 0.2 0.3)
+(+ 0.1 (+ 0.2 0.3))
+(min 3 1 2)
+(max 2.5 (/ 0.0 0.0) 1.0)
+(+ (to-u8 250) 3 4)
+(+ 123456789012345678901234567890 1 1)
+(reduce + 0 [1 2 3])
+(reduce max 0 [4 9 2])
+
+;;; file: minus-negates
+(- 0.0)
+(- -0.0)
+(- 2.5)
+(- 5)
+(- -123456789012345678901234567890)
+(- (to-i8 -128))
+(- (to-u8 1))
+(- (/ 0.0 0.0))
+(- (/ 1.0 0.0))
+(map #(- %) [1 2 3])
+(fn negated [x] (- x))
+(negated (to-i16 7))
+
+;;; file: range-counts-from-zero
+;; (range n) is (range 0 n), a rule of the call; as a value, range still
+;; takes two arguments, as - does.
+(range 3)
+(range 1 4)
+(range 0)
+(range -2)
+(let from range)
+(from 2 5)
+(map (fn [n] (range n)) [1 2 3])
+
+;;; repl: range-takes-one-or-two-arguments
+(range)
+(range 1 2 3)
+(range "a")
+(map range [1 2])
+(fn range [n] (* n 2))
+(range 5)
+
+;;; repl: operators-need-their-arguments
+(+ 1)
+(*)
+(-)
+(min 1)
+(+ 1 2 3 "a")
+(- "a")
+(+ 1.5 2 (count [1]))
+(+ (to-u8 1) 2 300)
+
+;;; file: a-local-plus-is-called-as-written
+(do (let + (fn [a b c] (str a b c))) (+ 1 2 3))
+((fn [+] (+ 1 2 3)) (fn [a b c] (* a (* b c))))
+
+;;; repl: a-redefined-plus-is-called-as-written
+(fn + [a b] (* a b))
+(+ 2 3)
+(+ 2 3 4)
+
+;;; file: a-modules-own-plus-is-called-as-written
+(ns joined)
+(fn + [a b c] (str a b c))
+(+ 1 2 3)
+
+;;; file: and-or-take-more
+(and true true false)
+(and (> 2 1) (< 1 2) (= 1 1))
+(or false false true)
+(or false (= 1 2) (> 1 2))
+;; Each stops at the first that decides, so endless is never called.
+(fn endless [n] (+ 1 (endless n)))
+(or false true (= (endless 1) 0))
+(and true false (= (endless 1) 0))
+
+;;; repl: and-or-need-two
+(and true)
+(or false false 1)
+
+;;; file: not-equal
+(not= 1 2)
+(not= "a" "a")
+(not= {:x 1} {:x 1.0})
+(filter #(not= % 2) [1 2 3])
+not=
+
+;;; repl: not-equal-takes-two-of-a-type
+(not= 1 "one")
+(not= 1 2 3)
+
+;;; file: cond-gives-the-first-that-holds
+(fn status [p]
+  (cond [(< p 3) 500]
+        [(< p 9) 404]
+        [_       200]))
+(map status [1 5 50])
+(cond [_ "only"])
+(fn sign [x] (cond [(< x 0) "below"] [(= x 0) "zero"] [_ "above"]))
+(sign -0.5)
+(:else {:else "a keyword elsewhere"})
+
+;;; file: a-cond-in-html-ends-with-_
+(ns app (:require [vastra.html :as html :refer [html]]))
+(let n 2)
+(html [:p {:class (cond [(= n 1) "a"] [_ "b"])} "x"])
+
+;;; file: a-cond-in-html-ending-with-else-is-an-element
+(ns app (:require [vastra.html :as html :refer [html]]))
+(let n 2)
+(html [:p {:class (cond [(= n 1) "a"] [:else "b"])} "x"])
+
+;;; repl: cond-errors
+(cond [(< 1 2) "yes"])
+(cond [_ 1] [(< 1 2) 2])
+(cond [(< 1 2) 1] [(> 1 2)])
+(cond (< 1 2) 1 _ 2)
+(cond [(< 1 2) 1] [:else 2])
+(cond [1 2] [_ 3])
+(cond [(< 1 2) 1] [_ "one"])
+cond
+
+;;; file: to-int-drops-the-fraction
+(fn [x] (to-int x))
+(to-int 2.7)
+(to-int -2.7)
+(to-int -0.5)
+(to-int (floor -2.5))
+(to-int 123456789012.7)
+(fn power [base n] (reduce (fn [x _] (* x base)) 1.0 (range 0 n)))
+(to-int (power 2.0 100))
+(= (to-int (power 2.0 1000)) (bit/shift-left 1 1000))
+(to-int (/ 0.0 0.0))
+(to-int (/ 1.0 0.0))
+(to-int (/ -1.0 0.0))
+(to-int (to-u8 200))
+
+;;; file: literals-at-the-edges
+(+ (to-u8 0) 255)
+(+ (to-i8 0) -128)
+(+ (to-u32 0) 4294967295)
+(+ (to-i32 0) -2147483648)
+
+;;; repl: literals-must-fit
+(+ (to-u32 1) 4294967296)
+(+ (to-i8 1) -129)
+[(to-u8 1) 300]
+(match (to-u8 1) [300 "big"] [_ "small"])
+(do (let n 300) (+ n (to-u8 1)))
+(fn add-big [x] (+ x 300))
+(add-big (to-u8 1))
+(add-big (to-u16 1))
+(fn add-bigger [x] (add-big (- x 1)))
+(add-bigger (to-i8 1))
+
+;;; repl: a-literal-that-rules-out-a-type-changes-it
+(fn f [x] (+ x 1))
+(fn g [y] (f (to-u8 y)))
+(fn f [x] (+ x 300))
+(fn f [x] (+ x 2))
+(g 3)
+
+;;; repl: number-types-dont-mix
+(+ (to-u8 1) (to-u32 2))
+(+ (count [1]) 1.5)
+(+ (to-u8 1) 2.5)
+(= [(to-u8 1)] [(to-u32 1)])
+
+;;; file: bit-operations
+(bit/xor 0xff 15)
+(bit/and (to-u8 0xf0) 0x3c)
+(bit/or (to-i16 0x0f00) 0xff)
+(bit/not 5)
+(bit/not (to-u8 5))
+(bit/not (to-i8 5))
+(fn mask [x] (bit/and x 0xff))
+(mask (to-u16 0x1234))
+
+;;; file: shifts-by-any-amount
+(bit/shift-left (to-u8 1) 7)
+(bit/shift-left (to-u8 1) 8)
+(bit/shift-left (to-u8 3) -1)
+(bit/shift-left (to-i32 1) 31)
+(bit/shift-left (to-u32 0xffffffff) 32)
+(bit/shift-right (to-i8 -128) 3)
+(bit/shift-right (to-i8 -1) 100)
+(bit/shift-right (to-u32 0xffffffff) 28)
+(bit/shift-right (to-u32 1) -31)
+(bit/shift-right (to-i32 -8) 1)
+(bit/shift-left 1 100)
+(bit/shift-right -7 1)
+(bit/shift-right 5 -2)
+(bit/shift-right -12345 1000000000000)
+
+;;; file: hex-literals
+0xff
+-0x10
+(to-u32 0xff000000)
+(+ (to-u32 0) 0xff000000)
+(match (to-u8 255) [0xff "max"] [_ "other"])
+'(+ 0xff -0x1A)
+
+;;; repl: hex-literals-are-whole-numbers
+(+ 0.5 0xff)
+(+ (to-i32 0) 0xff000000)
+0xg1
+(bit/and 1.5 2)
+(bit/shift-left (to-u8 1) (to-u8 2))
+
+;;; file: generic-functions-in-builds
+;; A build copies each generic function for the number types it is used at;
+;; every copy gives what the interpreter gives.
+(fn double [x] (* x 2))
+(fn quadruple [x] (double (double x)))
+(quadruple 3)
+(quadruple 1.5)
+(quadruple (to-u8 100))
+(fn doubles [xs] (map double xs))
+(doubles [1.5 2.5])
+(fn zero [] 0)
+(+ 0.5 (zero))
+(fn scaled [x] (let by (fn [y] (* y 10))) (by (+ x 1)))
+(scaled 2)
+(scaled 2.0)
+(fn mix [a b] [(+ a 1) (+ b 1)])
+(mix 1 (to-i8 127))
+(fn sum-to [n] (if (= n 0) 0 (+ n (sum-to (- n 1)))))
+(sum-to 100)
+(sum-to (to-u8 30))
+
+;;; file: c-hash-and-random-numbers
+;; A game's hash and random numbers, written in C, whose results match C's.
+;; C's (uint32_t)x of a negative int is what to-u32 does.
+(fn hash [x y]
+  (let h (+ (* (to-u32 x) 374761393) (* (to-u32 y) 668265263)))
+  (set h (* (bit/xor h (bit/shift-right h 13)) 1274126177))
+  (bit/xor h (bit/shift-right h 16)))
+(hash 0 0)
+(hash 1 2)
+(hash -3 7)
+(hash 2147483647 -2147483648)
+(hash -1 -1)
+(hash 40 100000)
+
+;; A xorshift: from 0 to 1, and the next seed.
+(fn next-random [seed]
+  (let s (bit/xor seed (bit/shift-left seed 13)))
+  (set s (bit/xor s (bit/shift-right s 17)))
+  (set s (bit/xor s (bit/shift-left s 5)))
+  {:value (* (to-float (bit/shift-right s 8)) (/ 1.0 16777216.0)) :seed s})
+(fn randoms [n seed]
+  (if (= n 0)
+    []
+    (do (let r (next-random seed)) (cons r (randoms (- n 1) (:seed r))))))
+(randoms 5 (to-u32 1))
+
+;;; file: c-double-conversions
+;; A game's conversions of doubles, written in C, whose results match C's:
+;; (int)x, its floor_int, and the index of a colour channel's screen value.
+(let xs [-98765.4321 -2.5 -1.0 -0.7 -0.0 0.3 1.5 2.99 1234.5678])
+(map to-i32 xs)
+(fn floor-int [x] (to-i32 (floor x)))
+(map floor-int xs)
+(fn clamp [v lo hi] (if (< v lo) lo (if (> v hi) hi v)))
+(fn channel [v] (to-i32 (+ (* (clamp v 0.0 1.0) 16384.0) 0.5)))
+(map channel [-0.2 0.0 0.25 0.5 0.70710678 0.99999 1.0 1.3])
+
+;;; file: number-on-string
+(* "a" 2)
+
+;;; file: comparable-and-equatable
+(< "apple" "banana")
+(max 3 7)
+(= [1 2] [1 2])
+(= {:a 1 :b 2} {:b 2 :a 1})
+(= (Some 1) None)
+(fn [a b] (if (< a b) a b))
+(fn [a b] (= a b))
+
+;;; file: equality-on-functions
+(= inc dec)
+
+;;; file: equality-on-records-with-functions
+(= {:f inc} {:f inc})
+
+;;; file: comparison-on-records
+(< {:a 1} {:a 2})
+
+;;; file: vectors
+[]
+[1 2 3]
+(count [1 2 3])
+(conj [1 2] 3)
+(cons 0 [1 2])
+(nth [10 20] 1)
+(nth [10 20] 5)
+(take 2 [1 2 3])
+(drop 2 [1 2 3])
+(range 0 4)
+(map inc [1 2 3])
+(map-indexed (fn [i x] (* i x)) [5 5 5])
+(filter (fn [x] (> x 1)) [1 2 3])
+(remove (fn [x] (> x 1)) [1 2 3])
+(reduce + 0 [1 2 3])
+(sort [3 1 2])
+(sort-by :age < [{:age 3} {:age 1}])
+(sum [1 2 3])
+(empty? [])
+
+;;; file: vector-mixed-elements
+[1 "two"]
+
+;;; file: dictionaries
+(frequencies [3 1 3 2 3])
+(dict/insert "b" 2 (dict/insert "a" 1 dict/empty))
+(dict/get "a" (dict/insert "a" 1 dict/empty))
+(dict/count (frequencies ["x" "y"]))
+(dict/entries (frequencies ["b" "a" "b"]))
+
+;;; file: keyword-functions
+:name
+(:name {:name "Ana"})
+(map :age [{:age 1} {:age 2}])
+(fn [people] (map :name people))
+
+;;; file: set-and-update
+(set {:a 1 :b 2} :a 10)
+(set {:a 1 :b 2} :a "now a string")
+(update {:count 1} :count inc)
+(fn [m] (set m :count 0))
+(fn [m] (update m :count (fn [n] (+ n 1))))
+
+;;; file: assoc-is-set
+(assoc {:a 1 :b 2} :a 10)
+(assoc {:users [{:name "Ana"}]} :users 0 :name "Bo")
+
+;;; file: set-and-update-along-paths
+(let data {:users [{:name "Ana" :age 22} {:name "Bo" :age 30}]
+           :ages (dict/insert "Ana" 22 dict/empty)})
+(set data :users 1 :name "Angela")
+(update data :users 0 :age inc)
+(set data :ages "Ana" 23)
+(update data :ages "Ana" inc)
+(fn rename [users i new-name] (set users i :name new-name))
+(rename (:users data) 0 "Ana Maria")
+
+;;; file: set-adds-the-last-step
+(set {:a 1} :b 2)
+(set {:user {:name "Ana"}} :user :email "ana@x.y")
+(set {:users [{:name "Ana"}]} :users 1 {:name "Bo"})
+(set (dict/insert "Ana" 22 dict/empty) "Bo" 30)
+
+;;; file: missing-steps-leave-the-value-unaltered
+(let users [{:name "Ana"} {:name "Bo"}])
+(set users 5 :name "Angela")
+(set users 3 {:name "Cleo"})
+(set users -1 :name "Angela")
+(update users 2 :name (fn [n] (str n "!")))
+(let people (dict/insert "Ana" {:age 22} dict/empty))
+(set people "Cleo" :age 40)
+(update people "Cleo" :age inc)
+
+;;; file: update-missing-key
+(update {:name "Ana"} :age inc)
+
+;;; file: set-misspelt-key-before-the-last-step
+(set {:user {:name "Ana"}} :usr :name "Bo")
+
+;;; file: set-in-generic-code-needs-the-key
+(fn [m] (set (update m :a inc) :b 2))
+(fn reset [m] (set m :count 0))
+(reset {:count 5 :step "1"})
+
+;;; file: set-non-keyword
+(set {:a 1} "a" 2)
+
+;;; file: set-step-of-the-wrong-kind
+(set [1 2 3] :first 10)
+
+;;; file: set-index-of-the-wrong-type
+(set [1 2 3] "zero" 10)
+
+;;; file: set-inside-a-vector-keeps-the-type
+(set [{:age 1}] 0 :age "old")
+
+;;; file: type-error-names-the-path
+(let table {:deals 0 :feel {:sway 4.0 :tilt 3.0}})
+(set! table :feel :sway "high")
+
+;;; file: type-error-inside-a-vector-shows-where
+(let table {:deals 0 :cards [{:card 1 :offset {:x 0.0 :y 0.0}}]})
+(set! table {:deals 0 :cards [{:card 1 :offset {:x "far" :y 0.0}}]})
+
+;;; file: set-needs-a-path
+(set {:a 1} :a)
+
+;;; file: update-wrong-function
+(update {:count 1} :count (fn [s] (string-append s "!")))
+;;; file: get-along-paths
+(let data {:users [{:name "Ana" :age 22} {:name "Bo" :age 30}]
+           :ages (dict/insert "Ana" 22 dict/empty)
+           :owner {:name "Cleo" :address {:city "Porto"}}})
+(get data :owner :address :city)
+(get data :users 1 :name)
+(get data :ages "Ana")
+(get [[1 2] [3 4]] 1 0)
+(fn [d] (get d :users 1 :name))
+(fn [d] (get d :owner :address :city))
+
+;;; file: get-missing-steps-give-none
+(let users [{:name "Ana"} {:name "Bo"}])
+(get users 5 :name)
+(get users -1 :name)
+(get (dict/insert "Ana" 22 dict/empty) "Cleo")
+(get [(Some 1) None] 1)
+(get [(Some 1) None] 2)
+
+;;; file: get-misspelt-key
+(get {:user {:name "Ana"}} :usr :name)
+
+;;; file: get-step-of-the-wrong-kind
+(get [1 2 3] :first)
+
+;;; file: get-map-key-not-a-keyword
+(get {:a 1} "a")
+
+;;; repl: get-needs-a-path
+(let table {:cards [1 2]})
+(get table)
+(get)
+
+;;; file: get-is-not-a-value
+(map get [[1]])
+
+;; Buffers: vectors one name holds.
+;;; file: buffers-take-a-vectors-paths
+(buffer/repeat 3 0)
+(set (buffer/repeat 3 0) 1 7)
+(set (buffer/repeat 3 0) 3 7)
+(set (buffer/repeat 3 0) 9 7)
+(update (buffer/from [1 2 3]) 0 inc)
+(get (buffer/from [1 2 3]) 1)
+(get (buffer/from [1 2 3]) 5)
+(set {:depth (buffer/repeat 2 0.0) :color (buffer/repeat 2 0)} :depth 0 1.5)
+(buffer/freeze (buffer/from [1 2]))
+(buffer/to-vector (buffer/from [1 2]))
+(fn [n] (buffer/repeat n 0.0))
+(fn tally [rolls]
+  (buffer/freeze
+    (reduce (fn [counts roll] (update counts (dec roll) inc))
+            (buffer/repeat 6 0)
+            rolls)))
+(tally [3 6 6 1 3 6])
+
+;;; repl: a-buffer-given-back-is-kept-as-a-vector
+(buffer/repeat 2 5)
+(conj *1 6)
+:type *2
+
+;;; file: buffer-step-of-the-wrong-kind
+(set (buffer/repeat 2 0) :first 1)
+
+;;; file: other-functions-take-vectors
+(count (buffer/repeat 2 0))
+
+;;; file: a-buffer-is-used-once
+(do
+  (let screen (buffer/repeat 3 0))
+  (let after (set screen 0 9))
+  [screen after])
+
+;;; file: a-buffer-handed-on-read-and-used-on-each-path
+(do
+  (let screen (buffer/repeat 3 0))
+  (set screen 0 9)
+  (update screen 1 inc)
+  (buffer/freeze screen))
+(do
+  (let s (buffer/from [1 2 3]))
+  (buffer/freeze (set s 0 (option/or (get s 2) 0))))
+(do
+  (let s (buffer/from [1 2 3]))
+  (if (> (option/or (get s 0) 0) 0)
+    (buffer/freeze (set s 0 0))
+    (buffer/freeze s)))
+(do
+  (let s (buffer/repeat 2 0))
+  (match (Some 5)
+    [(Some x) (buffer/freeze (set s 0 x))]
+    [None (buffer/freeze s)]))
+
+;;; file: a-buffer-given-twice
+(do
+  (let s (buffer/repeat 3 0))
+  [(buffer/freeze s) (buffer/freeze s)])
+
+;;; file: a-buffer-read-after-its-use
+(do
+  (let s (buffer/repeat 3 0))
+  (let t (set s 0 1))
+  (get s 0))
+
+;;; file: a-buffer-used-in-one-branch-is-used-after
+(do
+  (let s (buffer/repeat 3 0))
+  (let t (if true (set s 0 1) s))
+  (get s 0))
+
+;;; file: a-path-into-a-parameter-takes-a-vector-or-a-buffer
+(fn at [screen i] (option/or (get screen i) 0.0))
+(fn plot [screen i z c]
+  (if (> z (option/or (get screen :depth i) 0.0))
+    (-> screen (set :depth i z) (set :color i c))
+    screen))
+(fn copy-cell [from to i] (set to i (option/or (get from i) 0)))
+(at [1.0 2.0] 1)
+(at (buffer/from [1.0 2.0]) 1)
+(plot {:depth [0.0 0.0] :color [0 0]} 1 0.5 7)
+(plot {:depth (buffer/repeat 2 0.0) :color [0 0]} 1 0.5 7)
+(copy-cell [1 2] (buffer/repeat 2 0) 1)
+(fn [v w] (= (set v 0 1) (set w 0 1)))
+
+;;; file: a-function-reads-or-takes-what-it-is-given
+(fn at [screen i] (option/or (get screen i) 0.0))
+(fn clear [screen i] (set screen i 0.0))
+(do
+  (let s (buffer/from [1.0 2.0 3.0]))
+  (let x (at s 0))
+  (set s (clear s 1))
+  {:x x :s (buffer/freeze s)})
+(fn sum-from [b i acc]
+  (if (< i 3) (sum-from b (inc i) (+ acc (option/or (get b i) 0))) acc))
+(fn fill [b i] (if (< i 3) (fill (set b i i) (inc i)) b))
+(do
+  (let b (buffer/from [1 2 3]))
+  (let total (sum-from b 0 0))
+  {:total total :b (buffer/freeze b)})
+(buffer/freeze (fill (buffer/repeat 3 0) 0))
+buffer/to-vector
+(do
+  (let b (buffer/from [1 2 3]))
+  (let v (buffer/to-vector b))
+  {:v v :b (buffer/freeze (set b 0 9))})
+(fn twice [f x] (f (f x)))
+(buffer/freeze (twice (fn [b] (set b 0 1)) (buffer/repeat 2 0)))
+
+;;; file: a-function-that-takes-uses-a-buffer-up
+(fn clear [screen i] (set screen i 0.0))
+(do
+  (let s (buffer/from [1.0 2.0 3.0]))
+  (let t (clear s 1))
+  (get s 0))
+
+;;; file: a-vector-or-buffer-used-twice-is-a-vector
+(fn mark [screen]
+  (let after (set screen 0 9))
+  [screen after])
+(fn keep [v] (fn [i] (get v i)))
+
+;;; file: a-function-on-vectors-is-not-given-a-buffer
+(fn mark [screen]
+  (let after (set screen 0 9))
+  [screen after])
+(mark (buffer/repeat 3 0))
+
+;;; file: a-function-cannot-hold-a-buffer-from-outside
+(do
+  (let screen (buffer/repeat 3 0))
+  (map (fn [i] (set screen i 7)) [0 1 2]))
+
+;;; file: for-cannot-hold-a-buffer-from-outside
+(do
+  (let screen (buffer/repeat 3 0))
+  (for [i [0 1 2]] (set screen i 7)))
+
+;;; file: a-lifted-@-cannot-hold-a-buffer-from-outside
+(fn f [b] (+ @(task/succeed 1) (option/or (get (buffer/freeze b) 0) 0)))
+
+;;; file: generic-code-passes-a-buffer-on
+(fn pick [c a b] (if c a b))
+(fn [x] [x x])
+(buffer/freeze (pick true (buffer/repeat 2 1) (buffer/repeat 2 0)))
+(buffer/freeze (-> (buffer/repeat 3 0) (set 0 1) (set 1 2)))
+(option/or (Some (buffer/repeat 1 5)) (buffer/repeat 1 0))
+
+;;; file: generic-code-using-a-value-twice-is-not-given-a-buffer
+(fn both [x] [x x])
+(both (buffer/repeat 2 0))
+
+;;; file: a-local-function-using-a-value-twice-is-not-given-a-buffer
+(do (let dup (fn [x] [x x])) (dup (buffer/repeat 2 0)))
+
+;;; file: a-function-given-a-buffer-uses-it-once
+((fn [x] {:a x :b x}) (buffer/repeat 2 0))
+
+;;; file: a-function-made-inside-holds-no-buffer
+(fn const [x] (fn [y] x))
+(const (buffer/repeat 2 0))
+
+;;; file: a-vector-holds-no-buffer
+(fn wrap [x] [x])
+(wrap (buffer/repeat 2 0))
+
+;;; file: a-buffer-holds-no-buffer
+(buffer/repeat 2 (buffer/repeat 2 0))
+
+;;; file: a-dictionary-holds-no-buffer
+(dict/insert 1 (buffer/repeat 2 0) dict/empty)
+
+;;; file: a-task-holds-no-buffer
+(task/succeed (buffer/repeat 2 0))
+
+;;; repl: a-function-redefined-to-take-rechecks-its-callers
+(fn peek [v] (option/or (get v 0) 0))
+(fn g [b] (let x (peek b)) (buffer/freeze (set b 0 x)))
+(fn peek [v] (option/or (get (set v 1 0) 0) 0))
+
+;;; file: a-par-let-binding-cannot-use-a-buffer-from-outside
+(do
+  (let b (buffer/from [1 2 3]))
+  (par/let [x (option/or (get b 0) 0)
+            c (set b 0 9)]
+    {:x x :b (buffer/freeze c)}))
+
+;;; file: a-definition-holds-no-buffer
+(let screen (buffer/repeat 3 0))
+
+;;; file: triangles-drawn-into-buffers
+;; A game's triangles, drawn into a screen of buffers: a pixel is drawn where
+;; it is nearer than what the screen shows there. The same code in C prints
+;; the same rows and depth sum.
+(let width 16)
+(let height 10)
+
+(fn edge [a b x y]
+  (- (* (- (:sx b) (:sx a)) (- y (:sy a))) (* (- (:sy b) (:sy a)) (- x (:sx a)))))
+
+(fn plot [screen i iz c]
+  (if (<= iz (option/or (get screen :depth i) 0.0))
+    screen
+    (-> screen (set :depth i iz) (set :color i c))))
+
+(fn row [screen t y x right w0 w1 w2]
+  (if (> (to-float x) right)
+    screen
+    (do
+      (let v0 (:v0 t))
+      (let v1 (:v1 t))
+      (let v2 (:v2 t))
+      (let screen (if (or (< w0 0.0) (< w1 0.0) (< w2 0.0))
+                    screen
+                    (do
+                      (let s (+ (* w0 (:iz v0)) (* w1 (:iz v1)) (* w2 (:iz v2))))
+                      (plot screen (+ (* y width) x) (* s (:per t)) (:color t)))))
+      (row screen t y (inc x) right
+           (+ w0 (- (:sy v1) (:sy v2)))
+           (+ w1 (- (:sy v2) (:sy v0)))
+           (+ w2 (- (:sy v0) (:sy v1)))))))
+
+(fn rows [screen t y bottom left right]
+  (if (> (to-float y) bottom)
+    screen
+    (do
+      (let px (+ left 0.5))
+      (let py (+ (to-float y) 0.5))
+      (let v0 (:v0 t))
+      (let v1 (:v1 t))
+      (let v2 (:v2 t))
+      (let screen (row screen t y (to-int left) right
+                       (edge v1 v2 px py) (edge v2 v0 px py) (edge v0 v1 px py)))
+      (rows screen t (inc y) bottom left right))))
+
+(fn fill [screen v0 v1 v2 color]
+  (let area (edge v0 v1 (:sx v2) (:sy v2)))
+  (let left (max 0.0 (floor (min (:sx v0) (:sx v1) (:sx v2)))))
+  (let right (min (to-float (- width 1)) (ceil (max (:sx v0) (:sx v1) (:sx v2)))))
+  (let top (max 0.0 (floor (min (:sy v0) (:sy v1) (:sy v2)))))
+  (let bottom (min (to-float (- height 1)) (ceil (max (:sy v0) (:sy v1) (:sy v2)))))
+  (if (or (<= area 0.0) (> left right) (> top bottom))
+    screen
+    (rows screen {:v0 v0 :v1 v1 :v2 v2 :color color :per (/ 1.0 area)}
+          (to-int top) bottom left right)))
+
+(fn v [sx sy iz] {:sx sx :sy sy :iz iz})
+
+(fn draw [triangles]
+  (reduce (fn [screen t] (fill screen (:a t) (:b t) (:c t) (:color t)))
+          {:depth (buffer/repeat (* width height) 0.0) :color (buffer/repeat (* width height) 0)}
+          triangles))
+
+(do
+  (let screen (-> (draw [{:a (v 1.5 0.5 0.25) :b (v 14.2 2.7 0.25) :c (v 3.1 9.4 0.5) :color 1}
+                         {:a (v 6.0 -2.0 0.6) :b (v 17.5 8.0 0.1) :c (v 2.25 7.75 0.3) :color 2}
+                         {:a (v 12.0 1.0 0.9) :b (v 13.0 3.0 0.9) :c (v 9.5 4.5 0.9) :color 3}
+                         {:a (v 0.0 0.0 1.0) :b (v 0.0 9.0 1.0) :c (v 15.0 0.0 1.0) :color 4}])
+                  (update :depth buffer/freeze)
+                  (update :color buffer/freeze)))
+  (str (string/join "\n"
+         (map (fn [y] (string/join "" (map to-string (take width (drop (* y width) (:color screen))))))
+              (range 0 height)))
+       "\n"
+       (sum (map (fn [d] (to-int (* d 1000000.0))) (:depth screen)))
+       "\n"))
+
+;;; file: a-map-holding-a-buffer-is-used-once
+(do
+  (let screen {:depth (buffer/repeat 2 0.0) :color (buffer/repeat 2 0)})
+  {:color (:color screen) :depth (:depth screen)})
+
+
+;;; file: threading-and-for
+(-> {:n 1} (update :n inc) :n)
+(->> [1 2 3] (map inc) (filter (fn [x] (> x 2))))
+(for [x [1 2 3]] (* x 10))
+(concat [1] [2] [3 4])
+(concat)
+
+;;; file: for-two-bindings
+(for [x [1] y [2]] x)
+
+;;; file: let-takes-a-failure
+(fn twice-first [xs]
+  (let x (first xs)
+    [None 0])
+  (* x 2))
+[(twice-first [5]) (twice-first [])]
+(fn add [ra rb]
+  (let a ra
+    [(Err why) (Err why)])
+  (let b rb
+    [(Err why) (Err why)])
+  (Ok (+ a b)))
+(add (Ok 1) (Ok 2))
+(add (Ok 1) (Err "stop"))
+
+;;; file: a-let-without-clauses-names-the-value-as-it-is
+(fn parse [text]
+  (match (string/to-int text) [(Some n) (Ok n)] [None (Err "not a number")]))
+(do
+  (let r (parse "x"))
+  r)
+
+;;; run: let-takes-a-tasks-failure
+read.vas
+;;;; file: read.vas
+(ns read (:require [vastra.file :as file] [vastra.console :as console]))
+(fn first-line [path]
+  (let text @(file/read-text path)
+    [(Err why) (str "cannot read it: " (file/describe-error why))])
+  (option/or (first (string/lines text)) ""))
+@(console/print @(first-line "notes.txt"))
+@(console/print @(first-line "missing.txt"))
+;;;; file: notes.txt
+first
+second
+
+;;; file: a-let-must-take-every-failure
+(fn f [text]
+  (let n (string/to-int text)
+    [None 0])
+  (let m (if (> n 0) (Ok n) (Err "negative"))
+    [(Err "zero") 0])
+  m)
+
+;;; file: a-clause-of-let-takes-a-failure
+(fn f [text]
+  (let n (string/to-int text)
+    [(Some x) 0])
+  n)
+
+;;; file: a-clause-of-let-needs-its-lines
+(fn f [text]
+  (let n (string/to-int text)
+    [None])
+  n)
+
+;;; file: a-clause-of-let-goes-in-brackets
+(fn f [text]
+  (let n (string/to-int text)
+    None 0)
+  n)
+
+;;; file: a-let-at-the-top-of-a-file-takes-no-clause
+(let n (string/to-int "4")
+  [None 0])
+
+;;; file: a-clause-of-let-gives-the-bodys-value
+(fn f [text]
+  (let n (string/to-int text)
+    [None "none"])
+  (inc n))
+
+;;; run: an-at-line-runs-the-task-and-goes-on
+lines.vas
+;;;; file: lines.vas
+(ns lines (:require [vastra.console :as console]))
+(fn greet [name]
+  @(console/print "hello")
+  @(console/print name)
+  (string/length name))
+@(console/print (str @(greet "Ana")))
+
+;;; file: a-task-on-a-line-without-at-does-nothing
+(ns t (:require [vastra.console :as console]))
+(fn greet [name]
+  (console/print "hello")
+  name)
+
+;;; run: later-starts-a-task-and-goes-on
+later.vas
+;;;; file: later.vas
+(ns later (:require [vastra.console :as console]))
+(fn start []
+  (later (task/fail "no answer")
+    [(Ok text) @(console/print text)]
+    [(Err why) @(console/print (str "failed: " why))])
+  @(console/print "went on")
+  unit)
+@(start)
+
+;;; file: the-results-of-later-share-a-type
+(later (task/fail "no answer")
+  [(Ok v) 1]
+  [(Err why) why])
+
+;;; file: the-clauses-of-later-cannot-fail
+(ns t (:require [vastra.file :as file]))
+(fn save []
+  (later (task/succeed "text")
+    [(Ok text) @(file/write-text "out.txt" text)]
+    [(Err why) unit])
+  unit)
+
+;;; file: later-without-clauses-takes-a-task-that-cannot-fail
+(fn start []
+  (later (task/succeed 1))
+  unit)
+
+;;; file: a-task-that-can-fail-needs-clauses-in-later
+(fn start []
+  (later (task/fail "no answer"))
+  unit)
+
+;;; file: a-clause-of-later-goes-in-brackets
+(fn start []
+  (later (task/fail "no answer")
+    (Ok v) unit
+    (Err why) unit)
+  unit)
+
+;;; run: clock-timeout-gives-some-or-none
+timeout.vas
+;;;; file: timeout.vas
+(ns timeout (:require [vastra.clock :as clock] [vastra.console :as console]))
+(fn after [seconds text]
+  @(clock/sleep seconds)
+  @(console/print (str text " ended"))
+  text)
+@(console/print (str @(clock/timeout 0.1 (after 0.05 "in time"))))
+@(console/print (str @(clock/timeout 0.05 (after 0.1 "too late"))))
+@(clock/sleep 0.1)
+@(console/print "the late one stopped when the time ran out")
+
+;;; run: a-stopwatch-ticks-until-paused
+stopwatch.vas
+;;;; file: stopwatch.vas
+(ns stopwatch (:require [vastra.clock :as clock] [vastra.console :as console]))
+; A stopwatch, driven by messages sent from the file.
+(type Msg Start Pause (Tick Float))
+(let shown 0.0)
+(let ticks 0)
+(let ticking task/ended)
+
+(fn every! [seconds wrap]          ; a repeating timer is Vastra code
+  @(clock/sleep seconds)
+  (send! (wrap @clock/elapsed))
+  @(every! seconds wrap))
+
+(on Start
+  (stop! ticking)                  ; never two timers at once
+  (set! ticking (later (every! 0.1 Tick))))
+(on Pause (stop! ticking))
+(on (Tick at)
+  (set! shown at)
+  (update! ticks inc))
+
+(send! Start)
+@(clock/sleep 0.35)
+(send! Pause)
+@(clock/sleep 0.01)
+(let paused ticks)
+@(clock/sleep 0.3)
+@(console/print (str "ticked: " (> paused 0) ", none after the pause: " (= ticks paused)
+                     ", shown at a tick: " (> shown 0.0)))
+
+;;; file: option-and-result-functions
+(option/map inc (Some 1))
+(option/and-then (Some "12") string/to-int)
+(option/or None 5)
+(result/map (Ok 2) inc)
+(result/map-err (Err "x") string/length)
+(result/partition [(Ok 1) (Err "a") (Ok 2)])
+
+;;; file: strings
+(string/length "olá")
+(string/split "a,b,,c" ",")
+(string/lines "one\ntwo\n")
+(string/join "-" ["a" "b"])
+(string/trim "  hi  ")
+(string/blank? "   ")
+(string/to-int "-12")
+(string/to-int "1.5")
+(string/pad-left "7" 3)
+(string/pad-right "ab" 4)
+(pr-str "quoted")
+(to-string "raw")
+
+;;; file: comment-is-ignored
+(comment (this would not type check))
+
+;; ---------------------------------------------------------------------------
+;; Redefinition, tail calls and the REPL
+;; ---------------------------------------------------------------------------
+
+;;; repl: late-binding-reaches-functions
+(let base 10)
+(fn add-base [x] (+ x base))
+(let base 100)
+(add-base 1)
+
+;;; repl: grouped-redefinition
+(let base 10)
+(fn add-base [x] (+ x base))
+(let base "!") (fn add-base [x] (str x base))
+(add-base 1)
+
+;;; repl: dependent-still-fits-new-type
+(let base 1)
+(fn show-base [] (str "base is " base))
+(let base "one")
+(show-base)
+
+;;; repl: dependent-takes-the-new-type
+(fn helper [x] x)
+(fn wrap [x] (helper x))
+(fn helper [x] (+ x 1))
+(wrap 2)
+(fn double [x] (* (wrap x) 2))
+(fn helper [x] (str x))
+(double 3)
+
+;;; repl: transitive-suspension
+(let unit-price 10)
+(fn price [n] (* n unit-price))
+(fn total [items] (sum (map price items)))
+(let unit-price "ten")
+(total [1 2])
+
+;;; repl: a-value-keeps-its-type
+(fn base [] 1)
+(let total (+ (base) 1))
+(fn base [] "one")
+total
+
+;;; repl: a-copy-keeps-its-type
+(let person {:name "Bob" :age 34})
+(let before person)
+(fn report [] (str "before: " before))
+(let person {:name "Ana" :age "young"})
+(report)
+(let person {:name (:name before) :age (if (< (:age before) 30) "young" "old")})
+
+;;; repl: redefining-a-builtin-checks-the-prelude
+(let + (fn [a b] (str a b)))
+(inc 1)
+
+;;; file: tail-calls-do-not-grow
+(fn count-down [n] (if (= n 0) "done" (count-down (- n 1))))
+(count-down 1000000)
+(fn loop-sum [n acc] (match n [0 acc] [_ (loop-sum (- n 1) (+ acc n))]))
+(loop-sum 100000 0)
+
+;;; file: docstrings
+(let answer "The answer to everything." 42)
+(fn twice "Applies f twice." [f x] (f (f x)))
+answer
+
+;;; repl: repl-commands
+(fn twice "Applies f twice." [f x] (f (f x)))
+:type (twice inc 1)
+:type (fn [x] x)
+:doc twice
+:doc +
+:doc nothing-here
+:type (+ 1 "x")
+:name
+:what is this
+
+;;; repl: repl-last-results
+(+ 1 2)
+(* *1 10)
+"text"
+*3
+(let x 5)
+*1
+(+ 1 "a")
+*1
+(fn first-result [] *1)
+"now a string"
+(first-result)
+*1
+
+;;; repl: repl-dir
+(let model {:count 2}) (fn bump! [] (update! model :count inc))
+(fn double [m] (update m :count #(* % 2)))
+(type Color Red Green)
+(macro unless [c x y] `(if ~c ~y ~x))
+:dir
+:dir option/
+:dir task/m
+
+;;; repl: repl-save-writes-copies-as-values
+(let person {:name "Bob" :age 34}) (fn birthday! [] (update! person :age inc))
+(birthday!)
+(let before "Bob, before the change." person)
+(let age (:age person))
+(let total (+ age 1))
+person
+(let last *1)
+(fn [x] x)
+(let same *1)
+:save /dev/stdout
+
+;;; file: unknown-name-lists-its-group
+(buffer)
+
+;;; file: a-qualified-name-is-suggested-by-its-own-name
+(string/repeat "a" 3)
+
+;;; file: unknown-name-lists-eight-of-its-group
+(string 1)
+
+;; ---------------------------------------------------------------------------
+;; Macros and modules
+;; ---------------------------------------------------------------------------
+
+;;; file: quote-and-quasiquote
+'(+ 1 2)
+'x
+(do (let x '(a b)) `(list ~x ~@[x x]))
+`[1 ~(form/symbol "two") {:k ~'v}]
+(form/view '(f a))
+(form/view 'name)
+
+;;; file: macro-simple
+(macro unless [condition then else] `(if ~condition ~else ~then))
+(unless (> 1 2) "no" "yes")
+(fn sign [n] (unless (< n 0) "non-negative" "negative"))
+(sign -3)
+
+;;; file: macro-rest-and-recursion
+(macro my-and [& conditions]
+  (match (first conditions)
+    [None `true]
+    [(Some c) (if (= (count conditions) 1) c `(if ~c (my-and ~@(drop 1 conditions)) false))]))
+(my-and true (> 2 1) (= 1 1))
+(my-and true false)
+(my-and)
+
+;;; file: macro-gensym
+(macro swap-pair [p] `(do (let pair# ~p) {:a (:b pair#) :b (:a pair#)}))
+(do (let pair# 1) (swap-pair {:a "x" :b "y"}))
+(swap-pair {:a 1 :b 2})
+
+;;; file: macro-rejects-input
+(macro only-symbols [x]
+  (match (form/view x)
+    [(SymbolView name) (Ok (form/symbol name))]
+    [_ (Err "only-symbols needs a symbol\nfor example: (only-symbols x)")]))
+(only-symbols 42)
+
+;;; file: macro-wrong-arity
+(macro unless [condition then else] `(if ~condition ~else ~then))
+(unless true 1)
+
+;;; file: macro-must-return-form
+(macro bad [x] 42)
+
+;;; file: macro-type-error-in-body
+(macro bad [x] (form/symbol x))
+
+;;; file: macro-expansion-type-error-points-at-user-code
+(macro twice [x] `(+ ~x ~x))
+(twice "a")
+
+;;; repl: macro-form-at-places-a-built-form
+(macro twice [x] (let n (form/at (gensym "n") x)) `(do (let ~n ~x) (+ ~n ~n)))
+(twice 21)
+(twice "a")
+(macro twice-at-the-use [x] `(do (let n# ~x) (+ n# n#)))
+(twice-at-the-use "a")
+
+;;; file: macro-is-not-a-value
+(macro unless [condition then else] `(if ~condition ~else ~then))
+unless
+
+;;; file: unquote-outside-quasiquote
+(+ 1 ~x)
+
+;;; file: unquote-wrong-type
+`(+ 1 ~42)
+
+;;; file: local-name-with-slash
+(do (let a/b 1) a/b)
+
+;;; file: and-or-comment
+(and true false)
+(or false true)
+(and (> 2 1) (or false (= 1 1)))
+(comment anything here)
+
+;;; file: ns-qualifies-definitions
+(ns shop)
+(let tax 0.2)
+(fn price [net] (* net (+ 1.0 tax)))
+(price 10.0)
+
+;;; file: module-require-alias
+(ns app (:require [util.text :as text]))
+(text/shout "hi")
+(text/shout-all ["a" "b"])
+;;;; file: util/text.vas
+(ns util.text)
+(fn shout [s] (str s "!"))
+(fn shout-all [xs] (map shout xs))
+
+;;; file: module-require-refer
+(ns app (:require [geometry.shapes :refer [area Square]]))
+(area (Square 3.0))
+;;;; file: geometry/shapes.vas
+(ns geometry.shapes)
+(type Shape (Square Float) (Circle Float))
+(fn area [s] (match s [(Square side) (* side side)] [(Circle r) (* 3.0 (* r r))]))
+
+;;; file: module-types-are-qualified
+(ns app (:require [geometry.shapes :as shapes]))
+(shapes/area (shapes/Circle 1.0))
+(fn [s] (shapes/area s))
+(match (shapes/Square 2.0) [(shapes/Square side) side] [(shapes/Circle r) r])
+;;;; file: geometry/shapes.vas
+(ns geometry.shapes)
+(type Shape (Square Float) (Circle Float))
+(fn area [s] (match s [(Square side) (* side side)] [(Circle r) (* 3.0 (* r r))]))
+
+;;; file: names-as-typed-and-in-output
+(ns app (:require [geometry.shapes :as shapes :refer [Square]] [vastra.json]))
+(Square 2.0)
+(shapes/Circle 1.0)
+(vastra.json/parse "null")
+(str (shapes/Circle 1.0))
+(pr-str [(Square 2.0) (shapes/Circle 1.0)])
+(pr-str vastra.json/JNull)
+;;;; file: geometry/shapes.vas
+(ns geometry.shapes)
+(type Shape (Square Float) (Circle Float))
+
+;;; repl: names-in-errors-inside-a-module
+(ns m) (fn f [x] (+ x 1)) (fn g [y] (+ (f y) 1))
+(fn f [x] (str x))
+(g "a")
+
+;;; file: unknown-alias-lists-its-names
+(ns app (:require [vastra.html :as html]))
+(html 1)
+
+;;; file: module-private-names-need-the-alias
+(ns app (:require [util.text :as text]))
+(shout "hi")
+;;;; file: util/text.vas
+(ns util.text)
+(fn shout [s] (str s "!"))
+
+;;; file: module-missing
+(ns app (:require [no.such.module :as x]))
+
+;;; file: module-error-shows-its-file
+(ns app (:require [broken.mod :as b]))
+;;;; file: broken/mod.vas
+(ns broken.mod)
+(fn oops [x] (+ x "one"))
+
+;;; file: module-declares-another-name
+(ns app (:require [util.text :as text]))
+;;;; file: util/text.vas
+(ns something.else)
+
+;;; file: module-refer-unknown
+(ns app (:require [util.text :refer [whisper]]))
+;;;; file: util/text.vas
+(ns util.text)
+(fn shout [s] (str s "!"))
+
+;;; file: module-macros
+(ns app (:require [util.flow :as flow]))
+(flow/unless false "ran" "skipped")
+;;;; file: util/flow.vas
+(ns util.flow)
+(macro unless [c then else] `(if ~c ~else ~then))
+
+;;; file: modules-that-require-each-other
+; Not decided: for now, a clear error.
+(ns app (:require [p.a :as a]))
+(a/f)
+;;;; file: p/a.vas
+(ns p.a (:require [p.b :as b]))
+(fn f [] (b/g))
+;;;; file: p/b.vas
+(ns p.b (:require [p.a :as a]))
+(fn g [] 2)
+
+;; ---------------------------------------------------------------------------
+;; Written types: name::Type, checked against the type inferred.
+;; ---------------------------------------------------------------------------
+
+;;; file: written-types-on-lets-and-parameters
+(let seed::U32 1)
+(fn clamp [x::Float low::Float high::Float] (max low (min x high)))
+(clamp 5 0 3)
+(fn next [n] (let k::Int (+ n 1)) k)
+(fn parse [s] (let n::Int (string/to-int s) [None 0]) n)
+(parse "12")
+(fn twice [f::(-> Int Int) x] (f (f x)))
+(twice inc 1)
+(let named::{:name String | r} {:name "Ada" :born 1815})
+(par/let [a::Int 1 b::Int 2] (+ a b))
+'(fn shout [p::{:name String}] p)
+
+;;; file: written-vector-types
+;; A vector's type is written like a vector, and printed so.
+(let log::[String] [])
+(let grid::[[Int]] [[1 2] [3]])
+(type Bag (Bag [Int]))
+(Bag [1 2])
+(fn total [xs::[Int]] (reduce + 0 xs))
+(total [1 2 3])
+
+;;; file: vector-type-is-written-in-brackets
+(let log::(Vector String) [])
+
+;;; file: vector-type-holds-one-type
+(let pair::[Int String] [])
+
+;;; file: type-names-a-map-type
+;; (type Person {...}) names a map type: Person is that map.
+(type Person {:name String :age Int})
+(let ada::Person {:name "Ada" :age 36})
+(fn older [p::Person] (update p :age inc))
+(older ada)
+(type (Pair a) {:first a :second a})
+(let two::(Pair Int) {:first 1 :second 2})
+
+;;; file: named-map-type-means-exactly-its-keys
+(type Person {:name String :age Int})
+(let bo::Person {:name "Bo"})
+
+;;; file: named-map-type-cannot-hold-itself
+(type Tree {:value Int :kids [Tree]})
+
+;;; file: written-type-disagrees-with-the-value
+(let count::Int "three")
+
+;;; file: written-type-of-a-parameter-checks-the-body
+(fn add [x::String] (+ x 1))
+
+;;; file: written-type-of-a-name-with-clauses
+(fn parse [s] (let n::Float (string/to-int s) [None 0.0]) n)
+
+;;; file: written-type-holds-the-literal
+(let level::U8 300)
+
+;;; file: written-map-type-means-exactly-its-keys
+(let named::{:name String} {:name "Ada" :born 1815})
+
+;;; file: written-type-follows-without-a-space
+(let seed:: U32 1)
+
+;;; file: written-type-not-on-a-function-name
+(fn title::String [p] (:name p))
+
+;;; file: written-type-not-in-an-expression
+(str count::Int)
+
+;;; file: written-type-decodes-json
+;; A let's written type decodes a Json value: a key ending in ? may be
+;; missing, an Option may be null, and keys the type doesn't name are
+;; ignored.
+(ns people (:require [vastra.json :as json]))
+(fn decode [text]
+  (let data (json/parse text)
+    [(Err why) (str "not JSON: " why)])
+  (let people::[{:name String :age Int :pet? (Option String)}] data
+    [(Err why) why])
+  (str people))
+(decode "[{\"name\": \"Ada\", \"age\": 36, \"pet\": \"cat\", \"born\": 1815}, {\"name\": \"Bo\", \"age\": 3, \"pet\": null}, {\"name\": \"Cy\", \"age\": 9}]")
+(decode "[{\"name\": \"Ada\", \"age\": 36.5}]")
+(decode "[{\"name\": \"Ada\", \"pet\": null}]")
+(decode "[{\"name\": [], \"age\": 1}]")
+(decode "{\"name\": \"Ada\"}")
+(decode "[1")
+(fn read [text]
+  (let data (json/parse text)
+    [(Err why) (str "not JSON: " why)])
+  (let point::{:x Float :y Float :tags [String] :raw json/Json :on Bool} data
+    [(Err why) why])
+  (str point))
+(read "{\"x\": 1, \"y\": 2.5, \"tags\": [], \"raw\": {\"any\": [true, null]}, \"on\": true}")
+(read "{\"x\": 1, \"y\": 2.5, \"tags\": [\"a\", 2], \"raw\": null, \"on\": true}")
+(read "{\"x\": 1, \"y\": 2.5, \"tags\": [], \"raw\": null, \"on\": \"yes\"}")
+
+;;; file: written-type-decodes-keys-that-may-be-missing
+;; Outside, a key that may be missing is named without its ?; an Option may be
+;; null, but not missing.
+(ns notes (:require [vastra.json :as json]))
+(fn decode [text]
+  (let data (json/parse text)
+    [(Err why) (str "not JSON: " why)])
+  (let notes::[{:id Int :note? String :due (Option Int)}] data
+    [(Err why) why])
+  (str (map (fn [n] (option/or (:note? n) "-")) notes)))
+(decode "[{\"id\": 1, \"note\": \"milk\", \"due\": 3}, {\"id\": 2, \"due\": null}]")
+(decode "[{\"id\": 1, \"note\": null, \"due\": 3}]")
+(decode "[{\"id\": 1}]")
+
+;;; file: json-is-decoded-by-a-let-with-an-err-clause
+(ns d (:require [vastra.json :as json]))
+(fn ages [data::json/Json]
+  (let ages::[Int] data)
+  ages)
+
+;;; file: json-is-decoded-on-a-let-of-its-own
+(ns d (:require [vastra.json :as json]))
+(fn ages [text]
+  (let ages::[Int] (json/parse text)
+    [(Err why) []])
+  ages)
+
+;;; file: json-decoding-needs-an-err-clause-not-none
+(ns d (:require [vastra.json :as json]))
+(fn ages [data::json/Json]
+  (let ages::[Int] data
+    [None []])
+  ages)
+
+;;; file: json-decodes-only-to-a-type-fully-known
+(ns d (:require [vastra.json :as json]))
+(fn names [data::json/Json]
+  (let people::[{:name String | r}] data
+    [(Err why) []])
+  (map :name people))
+
+;;; file: json-doesnt-decode-to-a-dict
+(ns d (:require [vastra.json :as json]))
+(fn counts [data::json/Json]
+  (let counts::(Dict String Int) data
+    [(Err why) dict/empty])
+  counts)
+
+;;; file: constructor-words-decode
+;; Data decodes to a constructor only through its outside word.
+(ns people (:require [vastra.json :as json]))
+(type Gender
+  Female "female"
+  Male "male")
+(type Person
+  {:name String
+   :gender Gender})
+(fn people [text]
+  (let data (json/parse text)
+    [(Err why) (str "not JSON: " why)])
+  (let people::[Person] data
+    [(Err why) why])
+  (str people))
+(people "[{\"name\": \"Ada\", \"gender\": \"female\"}, {\"name\": \"Edsger\", \"gender\": \"male\"}]")
+(people "[{\"name\": \"Ada\", \"gender\": \"female\"}, {\"name\": \"Bo\", \"gender\": \"f\"}]")
+(people "[{\"name\": \"Ada\", \"gender\": 1}]")
+(= Female (:gender {:name "Ada" :gender Female}))
+
+;;; file: constructor-without-a-word-doesnt-decode
+(ns d (:require [vastra.json :as json]))
+(type Gender Female "female" Male)
+(fn genders [data::json/Json]
+  (let genders::[Gender] data
+    [(Err why) []])
+  genders)
+
+;;; file: constructor-holding-values-doesnt-decode
+(ns d (:require [vastra.json :as json]))
+(type Shape Dot "dot" (Circle Float))
+(fn shapes [data::json/Json]
+  (let shapes::[Shape] data
+    [(Err why) []])
+  shapes)
+
+;;; repl: code-that-writes-a-type-follows-it
+;; Code that writes a type is checked again when the type is redefined, as
+;; code that uses a changed name is: it takes the new type, or the
+;; redefinition is refused with what it breaks.
+(type Person {:name String})
+(fn greet [p::Person] (str "Hi " (:name p)))
+(type Person {:name String :age Int})
+(greet {:name "Ada" :age 36})
+(fn older [p::Person] (+ (:age p) 1))
+(type Person {:name String})
+(type Gender Female Male)
+(fn same [g::Gender] g)
+(type Gender Female Male Other)
+(same Other)
+
+;;; repl: decoding-follows-the-outside-words
+;; Decoding by a written type takes a redefined type's words, also through a
+;; named map that holds it.
+(ns people (:require [vastra.json :as json]))
+(type Gender Female "female" Male "male")
+(type Person {:name String :gender Gender})
+(fn genders [text]
+  (let data (json/parse text)
+    [(Err why) why])
+  (let genders::[Gender] data
+    [(Err why) why])
+  (str genders))
+(fn people [text]
+  (let data (json/parse text)
+    [(Err why) why])
+  (let people::[Person] data
+    [(Err why) why])
+  (str people))
+(type Gender Female "f" Male "m")
+(genders "[\"f\", \"m\"]")
+(people "[{\"name\": \"Ada\", \"gender\": \"f\"}]")
+(people "[{\"name\": \"Ada\", \"gender\": \"female\"}]")
+
+;;; file: outside-words-are-unique
+(type Gender Female "f" Male "f")
+
+;; ---------------------------------------------------------------------------
+;; Keys that may be missing: a key ending in ? may be missing, and
+;; reading it gives an Option.
+;; ---------------------------------------------------------------------------
+
+;;; file: keys-that-may-be-missing
+(fn greet [person]
+  (let title (option/or (:title? person) ""))
+  (str title " " (:name person)))
+greet
+(greet {:name "Ada"})
+(greet {:name "Edsger" :title? "Prof."})
+{:title? "Prof."}
+(map :note? [{:id 1} {:id 2 :note? "x"}])
+(= {:id 1} {:id 1 :note? "x"})
+(= {:id 1 :note? "x"} {:id 1 :note? "x"})
+
+;;; file: paths-through-keys-that-may-be-missing
+;; A path through a key that may be missing is an Option; set makes the
+;; key there, and a change through a missing one leaves the map as it is.
+(get {:window? {:scale 2.0}} :window? :scale)
+(get {:size 1} :window? :scale)
+(set {:id 1} :note? "x")
+(set {:id 1 :note? "x"} :note? "y")
+(update {:id 1} :count? inc)
+(update {:id 1 :count? 1} :count? inc)
+(set {:id 1} :window? :scale 2.0)
+(set {:window? {:scale 1.0}} :window? :scale 2.0)
+
+;;; file: forgotten-question-mark-in-a-map
+(fn greet [person] (str (option/or (:title? person) "") " " (:name person)))
+(greet {:name "Edsger" :title "Prof."})
+
+;;; file: forgotten-question-mark-where-read
+(fn shout [person] (str (:title person) "!"))
+(shout {:title? "Prof."})
+
+;;; file: key-and-key-with-question-mark-in-one-map
+(fn both [person] (str (:title? person) (:title person)))
+
+;;; file: map-written-out-misses-a-key
+(fn names [] [{:id 1 :name "Ada"} {:id 2}])
+
+;;; file: map-written-out-gains-no-key
+(fn names [] [{:id 1} {:id 2 :name "Ada"}])
+
+;;; repl: a-name-set!-changes-keeps-its-keys
+;; A name set! changes holds one type: its keys that may be missing may
+;; come and go, but it gains no others.
+(let model {:count 0 :note? "hi"})
+(set! model :note? "bye")
+model
+(set! model {:count 1})
+model
+(set! model :extra? 1)
+(let ada {:name "Ada"})
+(:title? ada)
+(set! ada {:name "Bo"})
+
+;; ---------------------------------------------------------------------------
+;; Tasks, programs and decoders
+;; ---------------------------------------------------------------------------
+
+;;; file: tasks-are-values-in-file-mode
+(task/succeed 1)
+(task/map (task/succeed 1) inc)
+(fn [t] (task/and-then t (fn [x] (task/succeed (+ x 1)))))
+
+;;; repl: tasks-run-in-the-repl
+(ns repl-session (:require [vastra.console :as console]))
+(task/succeed 41)
+(task/map (task/succeed 41) inc)
+(console/print "printed by a task")
+(task/fail "boom")
+(task/recover (task/fail "boom") (fn [e] (task/succeed (str "recovered from " e))))
+(do (let a @(task/succeed 1)) (let b @(task/succeed 2)) (+ a b))
+(do @(console/print "first") @(console/print "second") "done")
+
+;;; run: program-prints-and-exits
+hello.vas Ana
+;;;; file: hello.vas
+(ns hello (:require [vastra.console :as console] [vastra.cli :as cli]))
+(fn main [args]
+  (match args
+    [[name] (console/print (str "Hello, " name "!"))]
+    [_ (task/fail "usage: hello NAME")]))
+(cli/run main (fn [e] e))
+
+;;; run: program-usage-error-exit-status
+hello.vas
+;;;; file: hello.vas
+(ns hello (:require [vastra.console :as console] [vastra.cli :as cli]))
+(fn main [args]
+  (match args
+    [[name] (console/print (str "Hello, " name "!"))]
+    [_ (task/fail "usage: hello NAME")]))
+(cli/run main (fn [e] e))
+
+;;; run: program-reads-and-writes-files
+copy.vas in.txt out.txt
+;;;; file: copy.vas
+(ns copy (:require [vastra.file :as file] [vastra.console :as console] [vastra.cli :as cli]))
+(fn main [args]
+  (match args
+    [[from to]
+     (let text @(file/read-text from))
+     @(file/write-text to (str "copied: " text))
+     (let again @(file/read-text to))
+     @(console/print again)]
+    [_ @(task/fail file/NotFound)]))
+(cli/run main file/describe-error)
+;;;; file: in.txt
+some text
+
+;;; run: program-unhandled-task-failure
+fail.vas
+;;;; file: fail.vas
+(task/fail "nobody handled this")
+
+;;; run: a-definitions-failed-task-says-where
+stop.vas
+;;;; file: stop.vas
+(fn load [] @(task/fail "no answer"))
+(let answer @(load))
+
+;;; run: program-without-tasks-prints-nothing
+quiet.vas
+;;;; file: quiet.vas
+(let x 1)
+(+ x 1)
+
+;;; run: program-missing-file
+nowhere.vas
+
+;;; run: program-stops-on-a-file-it-cannot-read
+copy.vas missing.txt out.txt
+;;;; file: copy.vas
+(ns copy (:require [vastra.file :as file] [vastra.console :as console] [vastra.cli :as cli]))
+(fn main [args]
+  (match args
+    [[from to]
+     (let text @(file/read-text from))
+     @(file/write-text to text)]
+    [_ @(task/fail file/NotFound)]))
+(cli/run main file/describe-error)
+
+;;; file: task-type-errors
+(ns t (:require [vastra.console :as console]))
+(task/and-then (task/succeed 1) (fn [x] (+ x 1)))
+
+;;; file: task-error-types-must-agree
+(do (let a @(task/fail "text")) (let b @(task/fail 42)) a)
+
+;;; run: clock-now-gives-the-time
+clock.vas
+;;;; file: clock.vas
+(ns clock (:require [vastra.clock :as clock] [vastra.console :as console]))
+(let started @clock/now)
+@(console/print (str "seconds after 2023, before 2100: "
+                     (and (> started 1700000000.0) (< started 4102444800.0))))
+
+;;; run: clock-elapsed-never-goes-back
+clock.vas
+;;;; file: clock.vas
+(ns clock (:require [vastra.clock :as clock] [vastra.console :as console]))
+(let readings @(task/all (map (fn [_] clock/elapsed) (range 0 1000))))
+@(console/print (str "in order: " (= readings (sort readings))))
+@(clock/sleep 0.01)
+(let after-sleep @clock/elapsed)
+@(console/print (str "from zero, and on after a sleep: "
+                     (<= 0.0 (option/or (first readings) -1.0))
+                     " " (> after-sleep (reduce max 0.0 readings))))
+
+;;; run: sleeps-finish-in-time-order
+sleeps.vas
+;;;; file: sleeps.vas
+(ns sleeps (:require [vastra.clock :as clock] [vastra.console :as console]))
+(fn after [seconds text]
+  @(clock/sleep seconds)
+  @(console/print text))
+@(task/concurrent [(after 0.2 "slow") (after 0.1 "fast") (after 0.0 "at once")])
+
+;;; run: a-sleep-of-zero-or-less-returns-at-once
+sleeps.vas
+;;;; file: sleeps.vas
+(ns sleeps (:require [vastra.clock :as clock] [vastra.console :as console]))
+(type Msg Ping)
+(on Ping @(console/print "the message, handled at the first real wait"))
+(send! Ping)
+@(clock/sleep 0.0)
+@(console/print "a sleep of zero returns at once")
+@(clock/sleep -1.0)
+@(console/print "so does a negative one")
+@(clock/sleep 0.01)
+@(console/print "after a real sleep")
+
+;;; run: top-level-tasks-that-sleep-run-in-order
+order.vas
+;;;; file: order.vas
+(ns order (:require [vastra.clock :as clock] [vastra.console :as console]))
+(fn after [seconds text]
+  @(clock/sleep seconds)
+  @(console/print text)
+  text)
+(fn start [seconds text]
+  (later (after seconds text) [(Ok _) unit] [(Err _) unit])
+  unit)
+@(start 0.01 "a task started with later goes on while the first waits")
+@(after 0.05 "first, after its sleep")
+@(console/print "second")
+(let third @(after 0.02 "a definition waits for its task"))
+@(console/print (str "third: " third))
+
+;;; run: cli-exit-ends-the-program
+exit.vas
+;;;; file: exit.vas
+(ns ends (:require [vastra.clock :as clock] [vastra.console :as console] [vastra.cli :as cli]))
+(fn wait-long []
+  @(clock/sleep 3600.0)
+  @(console/print "never printed"))
+(fn start []
+  (later (wait-long))
+  unit)
+@(start)
+@(console/print "the program ends at cli/exit, and the task it started stops")
+@(cli/exit 3)
+@(console/print "never printed either")
+
+;;; run: a-program-ends-when-its-top-level-tasks-have-run
+ends.vas
+;;;; file: ends.vas
+(ns ends (:require [vastra.clock :as clock] [vastra.console :as console]))
+(fn wait-long []
+  @(clock/sleep 3600.0)
+  @(console/print "never printed"))
+(fn start []
+  (later (wait-long) [(Ok _) unit] [(Err _) unit])
+  unit)
+@(start)
+@(console/print "the last line: the program ends, and the task it started stops")
+
+;;; file: clock-now-is-a-task
+(ns clock (:require [vastra.clock :as clock]))
+clock/now
+(let reading clock/now)
+
+;;; file: clock-now-is-not-a-function
+(ns clock (:require [vastra.clock :as clock]))
+(clock/now)
+
+;;; repl: why-gives-the-last-errors-long-form
+:why
+(+ 1 "a")
+:why
+(ns clock (:require [vastra.clock :as clock]))
+(clock/now)
+:why
+
+;;; file: clock-needs-its-module
+clock/now
+
+;;; file: json-and-decoders
+(ns d (:require [vastra.json :as json] [vastra.decode :as decode]))
+(json/parse "{\"name\": \"Ana\", \"age\": 30, \"tags\": [\"a\", \"b\"], \"pet\": null}")
+(json/parse "[1, 2,")
+(let person (decode/map3 (fn [n a p] {:name n :age a :pet p})
+                         (decode/field "name" decode/string)
+                         (decode/field "age" decode/int)
+                         (decode/field "pet" (decode/nullable decode/string))))
+(decode/run person "{\"name\": \"Ana\", \"age\": 30, \"pet\": null}")
+(decode/run person "{\"name\": \"Ana\", \"age\": \"thirty\", \"pet\": null}")
+(decode/run person "{\"name\": \"Ana\"}")
+(decode/run (decode/vector decode/int) "[1, 2, 3]")
+(decode/run (decode/vector decode/int) "[1, 2.5]")
+(decode/run decode/string "not json")
+
+;;; file: json-unicode-escapes
+(ns j (:require [vastra.json :as json]))
+(json/parse "\"\\u00e9 \\ud83d\\ude00\"")
+(json/parse "\"\\ud83d\"")
+(json/parse "\"\\ud83d\\u0041\"")
+(json/parse "\"\\ude00\"")
+(json/parse "\"\\u1_23\"")
+
+;; ---------------------------------------------------------------------------
+;; Named state
+;; ---------------------------------------------------------------------------
+
+;;; repl: set!-rejects-what-would-not-compile
+(let counter 0)
+(set! counter "five")
+(update! counter (fn [n] (str n)))
+counter
+
+;;; repl: get-reads-a-name
+(let table {:cards [{:face-up false}]})
+(get table :cards 0 :face-up)
+(update! table :cards 0 :face-up not)
+(get table :cards 0 :face-up)
+(get table :cards 3 :face-up)
+
+;;; repl: set!-changes-along-paths
+(let model {:count 0 :ages (dict/insert "Ana" 22 dict/empty) :users [{:name "Ana"}]})
+(set! model :count 5)
+(update! model :ages "Ana" inc)
+(set! model :ages "Cleo" 40)
+(set! model :users 1 {:name "Bo"})
+(update! model :users 0 :name (fn [n] (str n " Maria")))
+model
+(update! model :cuont inc)
+(set! model)
+model
+
+;;; repl: the-prompt-changes-no-type-a-file-defines
+(ns app (:require [shapes]))
+(ns shapes)
+(type Shape (Circle Float) (Square Float) (Triangle Float))
+(type Shape (Circle Float) (Square Float))
+(let tally {:circles 0 :squares "none"})
+(count! (Circle 2.0))
+(let tally {:circles 0 :squares 0})
+tally
+;;;; file: shapes.vas
+(ns shapes)
+
+(type Shape (Circle Float) (Square Float))
+
+(let tally {:circles 0 :squares 0})
+(fn count! [shape]
+  (match shape
+    [(Circle _) (update! tally :circles inc)]
+    [(Square _) (update! tally :squares inc)]))
+
+;;; repl: a-type-a-macro-writes-follows-the-same-rules
+(macro enum [name & ctors] `(type ~name ~@ctors))
+(enum Mood Calm Busy)
+(let mood Busy)
+(enum Mood Calm Busy Sleepy)
+(let mood Sleepy)
+mood
+(ns app (:require [shapes]))
+(ns shapes)
+(enum Shape Circle Square Triangle)
+(enum Shape Circle Square)
+;;;; file: shapes.vas
+(ns shapes)
+(macro enum [name & ctors] `(type ~name ~@ctors))
+(enum Shape Circle Square)
+
+;;; file: a-changing-names-type-must-be-known
+(let loaded (Err "loading"))
+(fn done! [] (set! loaded (Ok 1)))
+
+;; A name's type fixed by its uses.
+
+;;; repl: open-parts-fixed-by-uses
+(let log []) (fn note! [line] (update! log (fn [l] (conj l line))))
+:type log
+(note! "started")
+:type log
+(let choice None) (fn choose! [n] (set! choice (Some n)))
+(choose! 3)
+(let model {:lines [] :picked None}) (fn pick! [n] (set! model :picked (Some n))) (fn add! [line] (update! model :lines #(conj % line)))
+model
+(add! "a")
+(pick! 1.5)
+model
+
+;;; file: open-parts-fixed-by-uses-in-a-file
+(let log [])
+(fn add! [line] (update! log (fn [l] (conj l line))))
+(fn started! [] (add! "started"))
+log
+(let model {:lines [] :seen dict/empty :picked None})
+(fn pick! [n] (set! model :picked (Some n)))
+(fn seen! [] (dict/get "a" (:seen model)))
+(fn twice! [] (pick! 2.5))
+model
+
+;;; repl: a-read-fixes-a-names-type
+(let log []) (fn add! [line] (update! log (fn [l] (conj l line)))) (fn shown! [] (string/join ", " log))
+:type log
+(add! 1)
+
+;;; repl: a-disagreement-names-what-fixed-the-type
+(let log []) (fn add! [line] (update! log (fn [l] (conj l line))))
+(add! "started")
+(add! 42)
+(let model {:lines [] :picked None}) (fn pick! [n] (set! model :picked n))
+(pick! (Some 1))
+(pick! (Some "one"))
+
+;;; file: a-disagreement-names-where-the-type-was-fixed
+(let log [])
+(fn add! [line] (update! log (fn [l] (conj l line))))
+(fn started! [] (add! "started"))
+(add! 42)
+
+;;; file: a-function-changing-a-name-is-not-generic-in-it
+(let log [])
+(fn add! [line] (update! log (fn [l] (conj l line))))
+[(add! "a") (add! 1)]
+
+;;; file: a-name-no-use-fixes
+(let model {:lines [] :picked None})
+(fn clear! [] (set! model {:lines [] :picked None}))
+(fn lines! [] (count (:lines model)))
+model
+
+;;; file: a-changing-number-is-an-int
+(let n 0)
+(set! n 1.5)
+
+;;; repl: a-literal-in-a-changing-name-is-an-int
+(let counts []) (fn bump! [] (update! counts (fn [c] (conj c 1))))
+:type counts
+(update! counts (fn [c] (conj c 2.5)))
+
+;;; repl: a-name-defined-again-keeps-what-its-uses-fixed
+(let log []) (fn note! [line] (update! log #(conj % line)))
+(note! "started")
+(let log [])
+log
+(let log [1])
+log
+
+;;; repl: a-rejected-submission-fixes-no-type
+(let log []) (fn add! [x] (update! log #(conj % x)))
+(add! 1) (undefined-name)
+(add! "a")
+log
+
+;;; file: view-only-at-top-level
+(fn reset [] (view "#app" 1))
+
+;;; run: names-in-a-program
+clicks.vas
+;;;; file: clicks.vas
+(ns clicks (:require [vastra.console :as console]))
+(let clicks 0)
+(fn click! [] (update! clicks inc))
+(click!)
+(click!)
+@(console/print (str "clicks: " clicks))
+
+;;; run: task-all-runs-tasks-one-at-a-time
+counter.vas
+;;;; file: counter.vas
+; Each task reads counter after the one before has changed it.
+(ns counter (:require [vastra.console :as console]))
+(let counter 0)
+(fn bump! [_]
+  @(task/succeed unit)
+  (set! counter (+ counter 1)))
+@(task/all (map bump! (range 0 100000)))
+@(console/print (str "counter: " counter))
+
+;;; run: task-all-changes-names-in-order
+log.vas
+;;;; file: log.vas
+(ns log (:require [vastra.console :as console]))
+(let log [0])
+(fn note! [i]
+  @(task/succeed unit)
+  (update! log #(conj % i)))
+@(task/all (map note! (range 1 1000)))
+@(console/print (str "in order: " (= log (range 0 1000))))
+
+;;; repl: task-to-result-turns-a-failure-into-a-value
+@(task/to-result (task/succeed 1))
+@(task/to-result (task/fail "b"))
+task/to-result
+
+;;; run: task-to-result-in-a-program
+results.vas
+;;;; file: results.vas
+(ns results (:require [vastra.console :as console]))
+@(console/print (str @(task/to-result (task/succeed 1)) " " @(task/to-result (task/fail "b"))))
+
+;;; file: task-to-result-gives-a-result-not-the-value
+(+ 1 @(task/to-result (task/succeed 1)))
+
+;;; repl: task-concurrent-runs-every-task-to-the-end
+(let seen ["start"]) (fn note! [x] @(task/succeed unit) (update! seen (fn [s] (conj s x))))
+@(task/concurrent [(note! "a") (task/fail "b") (note! "c")])
+seen
+@(task/concurrent [(task/succeed 1) (task/succeed 2) (task/succeed 3)])
+@(task/concurrent [])
+@(task/concurrent [(task/succeed 1) (task/fail "first") (task/fail "second")])
+
+;;; run: task-concurrent-many-tasks-that-finish-at-once
+counter.vas
+;;;; file: counter.vas
+(ns counter (:require [vastra.console :as console]))
+(let counter 0)
+(fn bump! [_]
+  @(task/succeed unit)
+  (update! counter inc))
+@(task/concurrent (map bump! (range 0 100000)))
+@(console/print (str "counter: " counter))
+
+;;; file: task-concurrent-tasks-share-their-error-type
+(task/concurrent [(task/fail "text") (task/fail 42)])
+
+;;; file: later-gives-the-running-task
+(fn start [] (later (task/succeed 1) [(Ok _) unit] [(Err _) unit]))
+task/ended
+
+;;; repl: race-and-first-of-types
+task/race
+task/first-of
+
+;;; run: the-faster-task-wins-a-race
+race.vas
+;;;; file: race.vas
+(ns race (:require [vastra.clock :as clock] [vastra.console :as console]))
+(fn after [seconds text]
+  @(clock/sleep seconds)
+  @(console/print (str text " ended"))
+  text)
+@(console/print (str "the winner: " @(task/race (after 0.1 "slow") (after 0.05 "fast"))))
+@(clock/sleep 0.1)
+@(console/print "the slow one stopped at its wait: its next line never ran")
+
+;;; run: a-failure-that-comes-first-wins-a-race
+race.vas
+;;;; file: race.vas
+(ns race (:require [vastra.clock :as clock] [vastra.console :as console]))
+(fn after [seconds text]
+  @(clock/sleep seconds)
+  @(console/print (str text " ended"))
+  text)
+(fn fail-after [seconds why]
+  @(clock/sleep seconds)
+  @(task/fail why))
+@(console/print (str @(task/to-result (task/race (after 0.1 "slow") (fail-after 0.05 "failed first")))))
+@(clock/sleep 0.1)
+
+;;; run: in-a-tie-the-first-written-wins
+race.vas
+;;;; file: race.vas
+(ns race (:require [vastra.clock :as clock] [vastra.console :as console]))
+(fn after [seconds text]
+  @(clock/sleep seconds)
+  @(console/print (str text " ended"))
+  text)
+(fn says [text]
+  @(console/print (str text " started"))
+  text)
+; The first ends as it starts, so the second never starts.
+@(console/print (str "the winner: " @(task/race (says "first") (says "second"))))
+@(console/print (str "the winner: " @(task/race (after 0.05 "a") (after 0.05 "b"))))
+@(clock/sleep 0.1)
+
+;;; run: a-race-of-three-tasks
+race.vas
+;;;; file: race.vas
+(ns race (:require [vastra.clock :as clock] [vastra.console :as console]))
+(fn after [seconds text]
+  @(clock/sleep seconds)
+  @(console/print (str text " ended"))
+  text)
+(fn says [text]
+  @(console/print (str text " started"))
+  text)
+@(console/print (str "the winner: "
+                     @(task/race (after 0.1 "slow") (after 0.05 "fast") (after 0.15 "slowest"))))
+; Each starts when the one before waits: the second ends as it starts, so the
+; third never starts, and the first stops.
+@(console/print (str "the winner: " @(task/race (after 0.05 "a") (says "b") (says "c"))))
+@(clock/sleep 0.2)
+
+;;; file: a-race-takes-two-or-more-tasks
+(task/race (task/succeed 1))
+
+;;; run: first-of-races-a-vector
+first.vas
+;;;; file: first.vas
+(ns first (:require [vastra.clock :as clock] [vastra.console :as console]))
+(type Msg Ping)
+(on Ping @(console/print "the message, handled at the first real wait"))
+(fn after [seconds text]
+  @(clock/sleep seconds)
+  @(console/print (str text " ended"))
+  text)
+(fn fail-after [seconds why]
+  @(clock/sleep seconds)
+  @(task/fail why))
+@(console/print (str @(task/first-of [(after 0.1 "slow") (after 0.05 "fast")])))
+(send! Ping)
+@(console/print (str "none at once: " @(task/first-of [])))
+@(console/print (str @(task/to-result (task/first-of [(after 0.1 "slow")
+                                                      (fail-after 0.05 "failed first")]))))
+@(clock/sleep 0.1)
+
+;;; run: stop!-stops-a-task-where-it-waits
+stop.vas
+;;;; file: stop.vas
+(ns stop (:require [vastra.clock :as clock] [vastra.console :as console]))
+(let log [])
+(fn note! [text] (update! log #(conj % text)))
+(fn job! []
+  (note! "before its wait")
+  @(clock/sleep 0.05)
+  (note! "after its wait"))
+(let running (later (job!) [(Ok _) (note! "its clauses")] [(Err _) unit]))
+(stop! running)
+@(clock/sleep 0.1)
+@(console/print (str "stopped while it waits: " log))
+(let quick (later (task/succeed 1) [(Ok _) (note! "a task that ended")] [(Err _) unit]))
+(stop! quick)
+(stop! running)
+(stop! task/ended)
+@(console/print (str "stopping one that ended, or task/ended, does nothing: " log))
+
+;;; run: stopping-a-race-or-concurrent-stops-every-task-in-it
+group.vas
+;;;; file: group.vas
+(ns group (:require [vastra.clock :as clock] [vastra.console :as console]))
+(fn after [seconds text]
+  @(clock/sleep seconds)
+  @(console/print text))
+(fn with-a-later [text]
+  (later (after 0.05 (str text ": a task started inside with later goes on"))
+    [(Ok _) unit]
+    [(Err _) unit])
+  @(after 0.05 (str text ": stopped")))
+(let together
+  (later (task/concurrent [(after 0.05 "concurrent: stopped") (with-a-later "concurrent")])
+    [(Ok _) unit]
+    [(Err _) unit]))
+(let racing
+  (later (task/race (after 0.05 "race: stopped") (with-a-later "race"))
+    [(Ok _) unit]
+    [(Err _) unit]))
+(let first
+  (later (task/first-of [(after 0.05 "first-of: stopped") (with-a-later "first-of")])
+    [(Ok _) unit]
+    [(Err _) unit]))
+(stop! together)
+(stop! racing)
+(stop! first)
+@(clock/sleep 0.1)
+
+;;; run: a-search-stops-the-answer-it-no-longer-wants
+search.vas
+;;;; file: search.vas
+(ns search (:require [vastra.clock :as clock] [vastra.console :as console]))
+; A search, with a stand-in for http/get-text that answers after a while.
+(type Msg (Typed String) ClearSearch)
+(let results [])
+(let loading false)
+(let searching task/ended)
+
+(fn get-text [url]
+  @(clock/sleep 0.05)
+  @(console/print (str "answered " url))
+  (str "results for " url))
+
+(on (Typed text)
+  (stop! searching)                ; the old answer will never arrive
+  (set! loading true)
+  (set! searching
+    (later (get-text (str "/search?q=" text))
+      [(Ok body) (set! results [body]) (set! loading false)]
+      [(Err _) (set! results []) (set! loading false)])))
+
+(on ClearSearch
+  (stop! searching)
+  (set! loading false)             ; nothing follows it, so the stopper resets
+  (set! results []))
+
+(send! (Typed "v"))
+(send! (Typed "va"))
+@(clock/sleep 0.1)
+@(console/print (str results " " loading))
+(send! (Typed "vas"))
+(send! ClearSearch)
+@(clock/sleep 0.1)
+@(console/print (str results " " loading))
+
+;;; file: a-function-that-stops-a-task-ends-in-!
+(fn cancel [running] (stop! running))
+
+;;; file: a-view-stops-nothing
+(ns app (:require [vastra.html :as html :refer [html]]))
+(let running task/ended)
+(view "#app" (do (stop! running) (html [:p "x"])))
+
+;;; file: map-given-stop!-shows-a-!
+(map stop! [task/ended])
+
+;; ---------------------------------------------------------------------------
+;; @: reading states and running tasks where they are written
+;; ---------------------------------------------------------------------------
+
+;;; repl: await-runs-tasks
+(let model {:count 2 :step-text "1"})
+(let other 10)
+(:count model)
+(+ (:count model) @(task/succeed 10))
+@(task/succeed "a task's result")
+(do (let x @(task/succeed 10)) (let y (+ x 1)) (+ y other))
+(if true @(task/succeed 2) 0)
+:type (+ 1 @(task/succeed 2))
+
+;;; repl: await-at-the-top-level-binds-the-value
+(let model {:count 2}) (fn grow! [] (set! model :count 7))
+(let snapshot model)
+(grow!)
+snapshot
+(:count model)
+(let from-task @(task/succeed 41))
+from-task
+
+;;; repl: await-in-a-function-gives-a-task
+(let read (fn [] @(task/succeed 2)))
+(read)
+(fn label [] (str "count: " @(task/succeed 2)))
+(label)
+
+;;; run: await-runs-in-order-and-only-the-chosen-branch
+order.vas
+;;;; file: order.vas
+(ns order (:require [vastra.console :as console]))
+(fn say [text] (task/map (console/print text) (fn [_] text)))
+@(console/print (str @(say "first") " then " @(say "second")))
+(if (> 2 1) @(say "chosen") @(say "not chosen"))
+(match (Some 1) [(Some n) @(say "matched")] [None @(say "not matched")])
+
+;;; repl: await-in-a-change-waits-before-it
+(let model {:count 0 :users [{:name "Ana"}]}) (fn reset! [] (set! model {:count 0 :users []}))
+(set! model :count @(task/succeed 5))
+(set! model @(task/succeed {:count 6 :users [{:name "Bo"}]}))
+(update! model :users 0 :name @(task/succeed (fn [n] (str n "!"))))
+(update! model :count (fn [n] @(task/succeed 8)))
+model
+
+;;; run: await-in-a-change-in-a-program
+change.vas
+;;;; file: change.vas
+(ns change (:require [vastra.console :as console]))
+(let model {:count 0})
+(set! model :count @(task/succeed 5))
+@(console/print (str "count: " (:count model)))
+
+;;; file: await-in-pure-code-is-a-task
+(fn label [m] (str "count: " @(task/succeed 1)))
+(string-append (label unit) "!")
+
+;;; file: await-needs-a-state-or-a-task
+@5
+
+;;; file: await-tasks-must-share-their-error
+(+ @(task/fail "x") @(task/fail 1))
+
+;;; file: await-definition-not-run-by-vastra-file
+(let snapshot @(task/succeed 1))
+
+;;; file: await-in-a-macro
+(macro twice [x] @x)
+
+;; ---------------------------------------------------------------------------
+;; #(...): small functions
+;; ---------------------------------------------------------------------------
+
+;;; file: short-fn-percent-is-the-first-parameter
+(let twice #(+ % %1))
+(twice 4)
+(map #(* % 2) [1 2 3])
+
+;;; file: short-fn-takes-up-to-the-highest-parameter
+(let second-as-text #(str %2))
+(second-as-text 1 "b")
+(map-indexed #(str %1 ". " %2) ["Bo" "Ana"])
+
+;;; file: short-fn-without-parameters
+(let hello #(str "hi"))
+(hello)
+
+;;; repl: short-fn-with-await-gives-a-task
+(let read-count #(+ 1 @(task/succeed 2)))
+(read-count)
+
+;;; file: short-fn-in-a-macro
+(macro the-form [x] `'~x)
+(the-form #(+ % 1))
+(macro apply-twice [f x] `(~f (~f ~x)))
+(apply-twice #(* % 3) 2)
+
+;;; repl: short-fn-parameters-only-inside
+(let % 1)
+(+ %2 1)
+(fn [%1] %1)
+
+;;; file: short-fn-inside-short-fn
+(map #(map #(+ % 1) %) [[1]])
+
+;;; file: short-fn-hash-needs-a-paren
+#{1 2}
+
+;; ---------------------------------------------------------------------------
+;; Parallel work: par/. Compiled natively, the parts run on every core.
+;; ---------------------------------------------------------------------------
+
+;;; file: par-map-and-filter-give-what-map-and-filter-give
+par/map
+(par/map inc [1 2 3])
+(par/filter #(> % 1) [1 2 3])
+(par/map to-string (range 0 20))
+(par/map inc [])
+(= (par/map inc (range 0 100000)) (map inc (range 0 100000)))
+(= (par/filter #(= (mod % 3) (Some 0)) (range 0 100000))
+   (filter #(= (mod % 3) (Some 0)) (range 0 100000)))
+(par/map (fn [row] (par/map inc row)) [[1 2] [3] []])
+
+;;; file: par-filter-needs-a-bool
+(par/filter inc [1 2 3])
+
+;;; file: par-reduce-halves-the-vector
+par/reduce
+(par/reduce + 0 (range 0 100000))
+(par/reduce + 0 [])
+(par/reduce + 0 [7])
+(par/reduce (fn [a b] (str "(" a " " b ")")) "" ["a" "b" "c" "d" "e"])
+(par/reduce + 0.0 [10000000000000000.0 1.0 -10000000000000000.0 1.0])
+(reduce + 0.0 [10000000000000000.0 1.0 -10000000000000000.0 1.0])
+(par/reduce + 0.0 (map #(/ 1.0 (to-float %)) (range 1 100001)))
+
+;;; file: par-reduce-combines-two-of-a-kind
+(par/reduce (fn [text n] (str text n)) "" [1 2 3])
+
+;;; file: par-let-runs-its-bindings-together
+(fn fib [n] (if (< n 2) n (+ (fib (- n 1)) (fib (- n 2)))))
+(par/let [a (fib 20) b (str "fib " 20)] (str b ": " a))
+(fn both [n] (par/let [small (fib n) big (fib (+ n 1))] (+ small big)))
+(both 15)
+(par/let [x 1] (par/let [y (inc x) z (dec x)] [y z]))
+(do (let a 1) (par/let [a (inc a) b (fn [a] a)] [a (b 5)]))
+(par/let [id (fn [v] v)] {:n (id 1) :s (id "a")})
+
+;;; repl: par-let-and-tasks
+(par/let [a 1 b 2] (+ a (+ b @(task/succeed 2))))
+(par/let [read (fn [] @(task/succeed 2))] (read))
+
+;;; file: par-let-bindings-cannot-use-each-other
+(par/let [a 1 b (+ a 1)] b)
+
+;;; file: a-par-let-body-is-one-expression
+(par/let [a 1 b 2] (let c (+ a b)) c)
+
+;;; file: par-let-bindings-cannot-wait-for-a-task
+(par/let [a @(task/succeed 2) b 2] (+ a b))
+
+;;; file: par-let-binding-names-are-unique
+(par/let [a 1 a 2] a)
+
+;;; file: caret-is-the-parallel-version
+^map
+(^map inc [1 2 3])
+(^filter #(> % 1) [1 2 3])
+(^reduce + 0 [1 2 3])
+(^let [a 1 b 2] (+ a b))
+
+;;; file: caret-is-the-cores-whatever-a-module-calls-par
+(ns app (:require [util.lists :as par]))
+(par/map 2)
+(^map inc [1 2])
+;;;; file: util/lists.vas
+(ns util.lists)
+(fn map [n] (str "a map of " n))
+
+;;; file: caret-name-without-a-parallel-version
+(^map-indexed (fn [i x] (+ i x)) [1 2])
+
+;;; file: caret-must-be-followed-by-a-name
+(^(fn [x] x) [1])
+
+;; ---------------------------------------------------------------------------
+;; The browser (what can be checked natively; the rest is
+;; `dune build @browser`)
+;; ---------------------------------------------------------------------------
+
+;;; file: types-without-constructors
+(type Token)
+(fn [t] (if true t t))
+(fn [never] (task/succeed never))
+
+;;; file: types-holding-functions-are-not-equatable
+(type Handler (Handler (-> Int Int)))
+(= (Handler inc) (Handler inc))
+
+;;; file: never-is-in-the-prelude
+(fn [t] (task/map-err t (fn [e] e)))
+(let can-fail (task/fail "x"))
+(let handled (task/recover can-fail (fn [e] (task/succeed 0))))
+
+;;; file: es-modules-need-javascript
+(ns app (:import [dayjs "dayjs"]))
+
+;;; file: browser-modules-need-the-browser
+(ns app (:require [vastra.browser :as browser]))
+
+;;; file: storage-needs-the-browser
+(ns app (:require [vastra.storage :as storage]))
+
+;;; file: native-modules-run-natively
+(ns app (:require [shapes :as shapes]))
+(shapes/area 3 4)
+;;;; file: shapes.vas
+(ns shapes "Runs in the interpreter and native builds." (:target :native))
+(fn area [w h] (* w h))
+
+;;; run: a-window-runs-frames-until-it-closes
+window.vas
+;;;; file: window.vas
+; The frames run once the file has: each goes to the handlers, then the view
+; is drawn, with too few pixels, which is fine. Closing the window ends them.
+(ns app (:require [vastra.window :as window] [vastra.console :as console]))
+(let frames 0)
+(let screen @(window/open {:title "frames" :width 4 :height 3 :scale 2}))
+(on (window/Frame _ _)
+  (update! frames inc)
+  @(console/print (str "frame " frames))
+  (if (= frames 3)
+    (do @(console/print "closing") @(window/close screen))
+    unit))
+(view screen [0xff0000ff])
+
+;;; file: html-macro
+(ns page (:require [vastra.html :as html :refer [html]]))
+(html [:p "hello"])
+(html [:button {:on-click 1 :disabled true :class "big"} "+"])
+(html [:ul (html/text "computed")])
+(fn item [s] (html [:li (html/text s)]))
+(item "x")
+
+;;; file: html-style-and-src
+(ns page (:require [vastra.html :as html :refer [html]]))
+(html [:img {:src "cards/the_moon.png" :style "--tilt: 3.0; width: 171px"}])
+
+;;; file: html-style-is-text
+(ns page (:require [vastra.html :as html :refer [html]]))
+(html [:p {:style 3} "x"])
+
+;;; repl: html-pointer-events
+(ns page (:require [vastra.html :as html :refer [html]]))
+:type html/on-pointer-move
+(html [:div {:on-pointer-down (fn [p] (+ (:x p) (:y p)))}])
+
+;;; file: html-pointer-has-no-such-key
+(ns page (:require [vastra.html :as html :refer [html]]))
+(html [:div {:on-pointer-down (fn [p] (:button p))}])
+
+;;; file: html-pointer-misspelled-attribute
+(ns page (:require [vastra.html :as html :refer [html]]))
+(html [:div {:on-pointer-dwon (fn [p] (:x p))}])
+
+;;; file: html-misspelled-attribute
+(ns page (:require [vastra.html :as html :refer [html]]))
+(html [:button {:on-clik 1} "+"])
+
+;;; file: html-children
+(ns page (:require [vastra.html :as html :refer [html]]))
+(let moves [[7 7] [7 8]])
+(let rows 2)
+(let columns 2)
+(html [:main
+       [:h1 "5 in a row"]
+       [:p {:class "turn"} (str "Moves: " (count moves))]
+       [:div {:class "board" "data-size" "15"}
+        (for [row (range 0 rows)]
+          [:div {:class "row"}
+           (for [column (range 0 columns)]
+             (if (= column 0)
+               [:div {:class "cell first"}]
+               [:div {:class "cell"}]))])]])
+(let fruits ["apple" "pear"])
+(html [:ul (for [f fruits] [:li f])])
+(fn row [item] (html [:li (:name item)]))
+(html [:ol (map row [{:name "a"} {:name "b"}])])
+(row {:name (html [:b "bold"])})
+(html [:tr (for [r (range 0 2)] (for [c (range 0 2)] [:td (str r c)]))])
+(type Stone Empty Black White)
+(fn cell [stone]
+  (html (match stone
+          [Empty [:div {:class "cell"}]]
+          [Black [:div {:class "cell black"}]]
+          [White [:div {:class "cell white"}]])))
+(cell White)
+(html [:my-widget {"variant" "primary"} "x"])
+(html [:p (:content {:content [:b "in a map"]})])
+
+;;; file: html-child-is-an-element-a-string-or-a-list
+(ns page (:require [vastra.html :as html :refer [html]]))
+(html [:p "moves: " (count [1 2])])
+
+;;; repl: html-child-types
+(ns page (:require [vastra.html :as html :refer [html]]))
+:type html/child
+(fn wrap [content] (html [:div content]))
+(wrap "text")
+(wrap [(html [:i "a"]) (html [:i "b"])])
+(fn same [a b] (html [:p (if (= a b) a b)]))
+(wrap 3)
+
+;;; file: html-children-share-messages
+(ns page (:require [vastra.html :as html :refer [html]]))
+(fn board [content] (html [:div {:on-click 1} content]))
+(board (html [:b {:on-click "x"}]))
+
+;;; file: html-attributes-are-written-in-place
+(ns page (:require [vastra.html :as html :refer [html]]))
+(let attrs {:class "x"})
+(html [:div attrs "x"])
+
+;;; file: html-misspelled-class
+(ns page (:require [vastra.html :as html :refer [html]]))
+(html [:div {:clas "x"}])
+
+;;; file: html-attribute-key-is-a-keyword-or-a-string
+(ns page (:require [vastra.html :as html :refer [html]]))
+(let name "class")
+(html [:div {name "x"}])
+
+;;; repl: macro-redefinition
+(macro twice [x] `(+ ~x ~x))
+(twice 2)
+(macro twice [x] `(* ~x 2))
+(twice 3)

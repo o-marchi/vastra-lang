@@ -1,0 +1,12 @@
+;; Changing types while a program runs, for the browser checks: a type a
+;; macro writes changes like a hand-written one.
+
+(ns grow
+  (:require [vastra.html :as html :refer [html]]))
+
+(macro enum [name & ctors] `(type ~name ~@ctors))
+(enum Mood Calm)
+(let mood Calm)
+(fn calm! [] (set! mood Calm))
+
+(view "#app" (html [:p {:id "mood"} (html/text (pr-str mood))]))

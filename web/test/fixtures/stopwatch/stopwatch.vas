@@ -1,0 +1,31 @@
+;; A stopwatch, for the browser checks: a repeating timer written in
+;; Vastra, which stop! stops.
+
+(ns stopwatch
+  (:require [vastra.clock :as clock]
+            [vastra.html :as html :refer [html]]))
+
+(type Msg Start Pause (Tick Float))
+(let shown 0.0)
+(let ticks 0)
+(let ticking task/ended)
+
+(fn every! [seconds wrap]          ; a repeating timer is Vastra code
+  @(clock/sleep seconds)
+  (send! (wrap @clock/elapsed))
+  @(every! seconds wrap))
+
+(on Start
+  (stop! ticking)                  ; never two timers at once
+  (set! ticking (later (every! 0.1 Tick))))
+(on Pause (stop! ticking))
+(on (Tick at)
+  (set! shown at)
+  (update! ticks inc))
+
+(view "#app"
+  (html [:div
+         [:button {:on-click Start} "start"]
+         [:button {:on-click Pause} "pause"]
+         [:p {:class "ticks"} (html/text (str ticks))]
+         [:p {:class "shown"} (html/text (str shown))]]))

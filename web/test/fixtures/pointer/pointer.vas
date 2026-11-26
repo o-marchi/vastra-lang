@@ -1,0 +1,37 @@
+;; Pointer events, for the browser checks: the box shows every message
+;; a handler takes. Moves count only while the box is pressed; a press and a
+;; release print, and a move over it unpressed doesn't.
+
+(ns pointer
+  (:require [vastra.html :as html :refer [html]]
+            [vastra.console :as console]))
+
+(type Msg (Down Float Float Float) (Moved Float Float) (Up Float Float))
+
+(let pressed false)
+(let time 0.0)
+(let log ["ready"])
+
+(fn note! [text] (update! log #(conj % text)))
+
+(on (Down x y at)
+  (set! pressed true)
+  (set! time at)
+  (note! (str "down " x " " y))
+  @(console/print "after"))
+(on (Moved x y)
+  (if pressed (note! (str "move " x " " y)) unit))
+(on (Up x y)
+  (set! pressed false)
+  (note! (str "up " x " " y))
+  @(console/print "after"))
+
+(view "#app"
+  (html
+    [:div
+     [:div {:id "box"
+            :on-pointer-down (fn [p] (Down (:x p) (:y p) (:time p)))
+            :on-pointer-move (fn [p] (Moved (:x p) (:y p)))
+            :on-pointer-up   (fn [p] (Up (:x p) (:y p)))}
+      (html/text (string/join ", " log))]
+     [:p {:id "time"} (html/text (str time))]]))

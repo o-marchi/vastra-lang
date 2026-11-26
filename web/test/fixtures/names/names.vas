@@ -1,0 +1,6 @@
+;; The browser checks save this file: it loses names, renames one, and gains
+;; an ns.
+
+(type Mood Calm Busy)
+(let game 1)
+(let score 2)

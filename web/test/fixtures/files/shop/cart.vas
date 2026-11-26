@@ -1,0 +1,8 @@
+;; The cart: its names change only here, through its ! functions.
+
+(ns shop.cart)
+
+(let items [])
+(fn add! [item] (set! items (conj items item)))
+(fn clear! [] (set! items []))
+(fn total [items] (reduce + 0 (map :price items)))

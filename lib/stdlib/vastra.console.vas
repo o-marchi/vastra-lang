@@ -1,0 +1,4 @@
+(ns vastra.console "Printing lines, as tasks that cannot fail.")
+
+(native print (-> String (Task e Unit)))
+(native print-error (-> String (Task e Unit)))

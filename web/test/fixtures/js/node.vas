@@ -1,0 +1,87 @@
+(ns node
+  (:require [vastra.js :as js]
+            [vastra.console :as console])
+  (:import [greet "greeter"] [shapes "./shapes.mjs"]))
+
+; JavaScript reached from a program built for Node: the modules page.vas
+; imports, found by Node from the built program's folder; what comes back is
+; decoded by the type on its let, and each way a call fails says so.
+
+(type Mood Calm "calm" Busy "busy")
+
+(type Person {:name String :age Int :title? String})
+
+(fn say! [text] @(console/print text))
+(fn problem! [why] @(say! (js/describe-error why)))
+
+; A task expected to fail: says how.
+(fn fails! [task]
+  (let _ @task [(Err why) @(problem! why)])
+  @(say! "did not fail"))
+
+(fn double [n] (* 2 n))
+(fn itself [x] x)
+
+(fn main! []
+  (let hello::String @(js/call greet ["node"]) [(Err why) @(problem! why)])
+  (let area::Int @(js/method shapes "area" [3 4]) [(Err why) @(problem! why)])
+  @(say! (str hello ", area " area))
+  (let math @(js/global "Math") [(Err why) @(problem! why)])
+  (let biggest::Int @(js/method math "max" [3 9 4]) [(Err why) @(problem! why)])
+  @(say! (str "max " biggest))
+  (let json @(js/global "JSON") [(Err why) @(problem! why)])
+  (let ada {:name "Ada" :age 36 :title? "Dr" :mood Busy :pet None})
+  (let text::String @(js/method json "stringify" [ada]) [(Err why) @(problem! why)])
+  @(say! text)
+  (let parsed @(js/method json "parse" [text]) [(Err why) @(problem! why)])
+  (let person::Person parsed [(Err why) @(say! why)])
+  @(say! (str (:name person) " " (:title? person)))
+  (let date @(js/global "Date") [(Err why) @(problem! why)])
+  (let day @(js/new date [0]) [(Err why) @(problem! why)])
+  (let year::Int @(js/method day "getUTCFullYear" []) [(Err why) @(problem! why)])
+  @(say! (str "year " year))
+  (let _ @(js/set day "note" "set") [(Err why) @(problem! why)])
+  (let note::String @(js/get day "note") [(Err why) @(problem! why)])
+  @(say! (str "note " note))
+  (let promise @(js/global "Promise") [(Err why) @(problem! why)])
+  (let answer::Int @(js/method promise "resolve" [42]) [(Err why) @(problem! why)])
+  @(say! (str "waited for " answer))
+  (let numbers @(js/method json "parse" ["[1,2,3]"]) [(Err why) @(problem! why)])
+  (let doubled::[Int]
+    @(js/method numbers "map" [(js/callback double [n::Int] [(Err _) 0])])
+    [(Err why) @(problem! why)])
+  @(say! (str "doubled " doubled))
+  (let unsorted @(js/method json "parse" ["[3,1,2]"]) [(Err why) @(problem! why)])
+  (let sorted::[Int]
+    @(js/method unsorted "sort" [(js/callback - [a::Int b::Int] [(Err _) 0])])
+    [(Err why) @(problem! why)])
+  (let total::Int
+    @(js/method numbers "reduce" [(js/callback + [sum::Int n::Int] [(Err _) 0]) 0])
+    [(Err why) @(problem! why)])
+  @(say! (str "sorted " sorted ", total " total))
+  (let mixed @(js/method json "parse" ["[\"a\",2]"]) [(Err why) @(problem! why)])
+  (let fitted::[String]
+    @(js/method mixed "map" [(js/callback itself [s::String] [(Err why) why])])
+    [(Err why) @(problem! why)])
+  @(say! (str "misfits " fitted))
+  (let kept @(js/method mixed "map" [(js/callback itself [v::js/Value])])
+    [(Err why) @(problem! why)])
+  (let passed::String @(js/method json "stringify" [kept]) [(Err why) @(problem! why)])
+  @(say! (str "passed as they are " passed))
+  (let looped @(js/method shapes "looped" []) [(Err why) @(problem! why)])
+  (let named::{:name String} looped [(Err why) @(say! why)])
+  (let key-class @(js/get shapes "Key") [(Err why) @(problem! why)])
+  (let pressed @(js/new key-class []) [(Err why) @(problem! why)])
+  (let key::{:key String} pressed [(Err why) @(say! why)])
+  @(say! (str "read " (:name named) " and " (:key key)))
+  @(fails! (js/global "Nowhere"))
+  @(fails! (js/method math "maxx" [1]))
+  @(fails! (js/get day "size"))
+  @(fails! (js/method json "parse" ["{oops"]))
+  @(fails! (js/method promise "reject" ["no"]))
+  @(fails! (js/method json "stringify" [say!]))
+  @(fails! (js/method json "stringify" [(Ok 1)]))
+  (let wrong::Int @(js/method json "stringify" [1]) [(Err why) @(problem! why)])
+  @(say! "not reached"))
+
+(main!)

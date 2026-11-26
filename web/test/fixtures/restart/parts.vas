@@ -1,0 +1,5 @@
+;; The cell the page reads, from a file of its own.
+
+(ns parts (:require [vastra.html :refer [html]]))
+
+(let cell (html [:p "cell 1"]))

@@ -1,0 +1,2 @@
+# GitHub: highlight Vastra source like Clojure until Vastra has its own grammar.
+*.vas linguist-language=Clojure

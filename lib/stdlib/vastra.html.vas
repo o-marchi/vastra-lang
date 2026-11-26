@@ -1,0 +1,116 @@
+(ns vastra.html "HTML values for vastra.browser, and the html macro to write them.")
+
+(type (Attribute msg)
+  (Attribute String String)
+  (Flag String Bool)
+  (OnClick msg)
+  (OnInput (-> String msg))
+  (OnSubmit msg)
+  (OnPointer String (-> {:x Float, :y Float, :time Float} msg)))
+
+(type (Html msg)
+  (Element String [(Attribute msg)] [(Html msg)])
+  (Text String)
+  Nothing)
+
+(fn element [tag attributes children] (Element tag attributes children))
+(fn text [s] (Text s))
+(let nothing Nothing)
+
+; Attributes, one function per name, so a misspelled one is a compile error.
+(fn class [name] (Attribute "class" name))
+(fn id [name] (Attribute "id" name))
+(fn value [text] (Attribute "value" text))
+(fn placeholder [text] (Attribute "placeholder" text))
+(fn href [url] (Attribute "href" url))
+(fn title [text] (Attribute "title" text))
+(fn src [url] (Attribute "src" url))
+(fn aria-label [text] (Attribute "aria-label" text))
+(fn style [css] (Attribute "style" css))
+(fn disabled [yes] (Flag "disabled" yes))
+(fn checked [yes] (Flag "checked" yes))
+(fn on-click [msg] (OnClick msg))
+(fn on-input [to-msg] (OnInput to-msg))
+; A form's submission (Enter in one of its inputs, or its button): the message,
+; and no page is loaded.
+(fn on-submit [msg] (OnSubmit msg))
+; Pointer events: where the pointer is, in CSS pixels from the window's top
+; left, and when, in seconds since 1970 (the clock of vastra.clock/now).
+(fn on-pointer-down [to-msg] (OnPointer "down" to-msg))
+(fn on-pointer-move [to-msg] (OnPointer "move" to-msg))
+(fn on-pointer-up [to-msg] (OnPointer "up" to-msg))
+
+; A child of html: an element, a String as text, or a list of children as
+; deep as needed, its items going in its place.
+(native child (-> child [(Html msg)]))
+
+; [k1 v1 k2 v2] → [(f k1 v1) (f k2 v2)]
+(fn html-pairs [f parts]
+  (reduce (fn [acc i]
+            (match [(nth parts i) (nth parts (+ i 1))]
+              [[(Some k) (Some v)] (conj acc (f k v))]
+              [_ acc]))
+          []
+          (filter (fn [i] (= (mod i 2) (Some 0))) (range 0 (count parts)))))
+
+(macro html-wrong-key [key]
+  (Err "an attribute's key is a keyword or a string
+:class names html/class; \"data-row\" is an attribute named as written"))
+
+; The tag of an element, [:tag ...].
+(fn html-tag [form]
+  (match (form/view form)
+    [(VectorView items)
+     (match (option/map form/view (first items))
+       [(Some (KeywordView tag)) (Some tag)]
+       [_ None])]
+    [_ None]))
+
+; [:p {:class "x" "data-row" "3"} "text" (f y)] →
+;   (vastra.html/element "p"
+;     [(vastra.html/class "x") (vastra.html/Attribute "data-row" "3")]
+;     (vector/concat [(vastra.html/text "text")] (vastra.html/child (f y))))
+; Every [:tag ...] inside html is an element, wherever it is. Each form
+; rebuilt stays where it was written, so errors point there.
+(fn html-walk [form]
+  (match (form/view form)
+    [(VectorView items)
+     (match (html-tag form)
+       [(Some tag)
+        (let rest (drop 1 items))
+        (let attributes (match (option/map form/view (first rest))
+                          [(Some (MapView parts)) (Some parts)]
+                          [_ None]))
+        (let children (if (option/some? attributes) (drop 1 rest) rest))
+        ; A keyword names an attribute function, so a misspelled one is an unknown
+        ; name, at the key; a string is an attribute named as written.
+        (fn attribute [k v]
+          (match (form/view k)
+            [(KeywordView key)
+             (form/list [(form/at (form/symbol (str "vastra.html/" key)) k)
+                         (html-walk v)])]
+            [(StringView _) `(vastra.html/Attribute ~k ~(html-walk v))]
+            [_ (form/at `(vastra.html/html-wrong-key ~k) k)]))
+        ; Text and elements written there are as they are; anything else goes
+        ; through child.
+        (fn child [c]
+          (match (form/view c)
+            [(StringView _) `[(vastra.html/text ~c)]]
+            [_ (if (option/some? (html-tag c))
+                 `[~(html-walk c)]
+                 (form/at (form/list [(form/at (form/symbol "vastra.html/child") c)
+                                      (html-walk c)])
+                          c))]))
+        (let written (form/vector (html-pairs attribute (option/or attributes []))))
+        (form/at `(vastra.html/element ~(form/string tag) ~written
+                                       ~(macro/concat-parts (map child children)))
+                 form)]
+       [None (form/at (form/vector (map html-walk items)) form)])]
+    [(ListView items) (form/at (form/list (map html-walk items)) form)]
+    [(MapView parts) (form/at (form/map (map html-walk parts)) form)]
+    [_ form]))
+
+(macro html [tree]
+  (match (form/view tree)
+    [(StringView _) `(vastra.html/text ~tree)]
+    [_ (html-walk tree)]))

@@ -1,0 +1,7 @@
+(ns wrong (:require [vastra.http :as http]))
+
+; With no type written, the answer is an http/Answer: not a number.
+(fn size [url]
+  (let answer @(http/get url)
+    [(Err why) 0])
+  (+ answer 1))

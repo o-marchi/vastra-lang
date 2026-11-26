@@ -1,0 +1,40 @@
+(ns answers
+  (:require [vastra.http :as http]
+            [vastra.html :as html :refer [html]]))
+
+(type Gender
+  Female "female"
+  Male "male")
+
+(type Person
+  {:name String
+   :gender Gender})
+
+(fn title [person]
+  (match (:gender person)
+    [Female "Madam"]
+    [Male "Sir"]))
+
+; The people a request answers with, decoded by the type written on its let,
+; or what went wrong.
+(fn people [url]
+  (let people::[Person] @(http/get url)
+    [(Err why) (http/describe-error why)])
+  (string/join ", " (map (fn [p] (str (title p) " " (:name p))) people)))
+
+; With no type written, the answer itself, its header names lowercase.
+(fn answer [url]
+  (let answer @(http/get url)
+    [(Err why) (http/describe-error why)])
+  (let caching (dict/get "cache-control" (:headers answer))
+    [None "no cache-control"])
+  (str (:status answer) " " caching " " (string/trim (:body answer))))
+
+(let lines ["loading"])
+
+(later (task/all [(people "users.json") (people "wrong.json") (people "hello.txt")
+                  (people "missing.json") (answer "hello.txt")])
+  [(Ok loaded) (set! lines loaded)]
+  [(Err _) unit])
+
+(view "#app" (html/element "ul" [] (map (fn [line] (html [:li (html/text line)])) lines)))

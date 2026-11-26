@@ -1,0 +1,71 @@
+(ns vastra.decode
+  "Decoders turn untrusted JSON into typed values, or explain why they cannot."
+  (:require [vastra.json :as json :refer [JNull JBool JNumber JString JArray JObject]]))
+
+; A decoder is a function from Json to a Result with a message.
+
+(fn run [decoder text]
+  (result/and-then (json/parse text) decoder))
+
+(fn kind [j]
+  (match j
+    [JNull "null"]
+    [(JBool _) "a boolean"]
+    [(JNumber _) "a number"]
+    [(JString _) "a string"]
+    [(JArray _) "an array"]
+    [(JObject _) "an object"]))
+
+(fn expected [what j] (Err (str "expected " what ", found " (kind j))))
+
+(fn string [j] (match j [(JString s) (Ok s)] [_ (expected "a string" j)]))
+(fn float [j] (match j [(JNumber n) (Ok n)] [_ (expected "a number" j)]))
+(fn bool [j] (match j [(JBool b) (Ok b)] [_ (expected "a boolean" j)]))
+
+(fn int [j]
+  (match j
+    [(JNumber n) (if (= n (round n))
+                   (option/or (option/map (fn [i] (Ok i)) (string/to-int (string/fixed n 0)))
+                              (expected "a whole number" j))
+                   (expected "a whole number" j))]
+    [_ (expected "a whole number" j)]))
+
+(fn nullable [decoder]
+  (fn [j] (match j [JNull (Ok None)] [_ (result/map (decoder j) (fn [v] (Some v)))])))
+
+(fn vector [decoder]
+  (fn [j]
+    (match j
+      [(JArray items)
+       (reduce (fn [acc item] (result/and-then acc (fn [xs] (result/map (decoder item) (fn [x] (conj xs x))))))
+               (Ok [])
+               items)]
+      [_ (expected "an array" j)])))
+
+(fn field [name decoder]
+  (fn [j]
+    (match j
+      [(JObject fields) (match (dict/get name fields)
+                          [(Some v) (result/map-err (decoder v) (fn [e] (str "in field \"" name "\": " e)))]
+                          [None (Err (str "missing field \"" name "\""))])]
+      [_ (expected "an object" j)])))
+
+(fn map [f decoder] (fn [j] (result/map (decoder j) f)))
+
+(fn map2 [f a b]
+  (fn [j]
+    (let x (a j)
+      [(Err why) (Err why)])
+    (let y (b j)
+      [(Err why) (Err why)])
+    (Ok (f x y))))
+
+(fn map3 [f a b c]
+  (fn [j]
+    (let x (a j)
+      [(Err why) (Err why)])
+    (let y (b j)
+      [(Err why) (Err why)])
+    (let z (c j)
+      [(Err why) (Err why)])
+    (Ok (f x y z))))

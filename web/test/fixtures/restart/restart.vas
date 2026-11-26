@@ -1,0 +1,9 @@
+;; Values computed from the module's cell, one through a function.
+
+(ns restart (:require [parts] [vastra.html :refer [html]]))
+
+(let cells [parts/cell parts/cell])
+(fn row [] (html [:div cells]))
+(let grid (row))
+
+(view "#app" (html [:main grid]))

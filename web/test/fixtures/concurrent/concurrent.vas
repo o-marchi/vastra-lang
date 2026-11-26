@@ -1,0 +1,33 @@
+;; Requests that wait together, for the browser checks. The check holds
+;; the answers until all three requests have been answered, then lets them
+;; through last first: the URLs stop waiting in that order, and the results
+;; still come in the URLs' order.
+
+(ns concurrent
+  (:require [vastra.http :as http]
+            [vastra.html :as html :refer [html]]))
+
+(let urls ["one.txt" "missing.txt" "three.txt"])
+
+; The URLs whose answer has not come yet, then what each URL gave.
+(let waiting urls)
+(let results ["waiting"])
+
+(fn fetch! [url]
+  (let result @(task/to-result (http/get-text url)))
+  (update! waiting (fn [left] (remove (fn [u] (= u url)) left)))
+  @(task/from-result result))
+
+(fn describe [result]
+  (match result
+    [(Ok text) text]
+    [(Err error) (http/describe-error error)]))
+
+(fn items [class texts]
+  (html/element "ul" [(html/class class)] (map (fn [t] (html [:li (html/text t)])) texts)))
+
+(later (task/concurrent (map fetch! urls))
+  [(Ok answers) (set! results (map describe answers))]
+  [(Err _) unit])
+
+(view "#app" (html [:div (items "waiting" waiting) (items "results" results)]))

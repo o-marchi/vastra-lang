@@ -1,0 +1,253 @@
+; The prelude: loaded into every session. `native` gives the type of a
+; function implemented in OCaml (lib/builtins.ml).
+
+(type (Option a) None (Some a))
+(type (Result e a) (Ok a) (Err e))
+
+;; A type with no values: a (Task Never a) cannot fail.
+(type Never)
+
+(native unit Unit)
+
+; Numbers
+(native + (-> number number number))
+(native - (-> number number number))
+(native * (-> number number number))
+(native / (-> Float Float Float))
+; (- x), negating as C's -x does: a Float's sign flips, a fixed width wraps.
+(native macro/negate (-> number number))
+(native quot (-> integer integer (Option integer)))
+(native mod (-> integer integer (Option integer)))
+(native to-float (-> integer Float))
+; From a Float, the fraction is dropped, toward zero.
+(native to-int (-> number Int))
+; Fixed-width integers: a whole number wraps, as C's casts do; a Float
+; drops its fraction and clamps, past an edge the edge.
+(native to-u8 (-> number U8))
+(native to-u16 (-> number U16))
+(native to-u32 (-> number U32))
+(native to-i8 (-> number I8))
+(native to-i16 (-> number I16))
+(native to-i32 (-> number I32))
+; Bits: an Int has endless bits. A shift by a negative amount goes the
+; other way.
+(native bit/and (-> integer integer integer))
+(native bit/or (-> integer integer integer))
+(native bit/xor (-> integer integer integer))
+(native bit/not (-> integer integer))
+(native bit/shift-left (-> integer Int integer))
+(native bit/shift-right (-> integer Int integer))
+; Rounding chooses the direction, and the result stays a Float.
+(native round (-> Float Float))
+(native floor (-> Float Float))
+(native ceil (-> Float Float))
+(native truncate (-> Float Float))
+; Correctly rounded on every target; a negative gives NaN.
+(native sqrt (-> Float Float))
+; A fixed width's lowest value has no positive: it stays itself, as in C.
+(native abs (-> number number))
+
+; Comparison
+(native = (-> equatable equatable Bool))
+(native < (-> comparable comparable Bool))
+(native > (-> comparable comparable Bool))
+(native <= (-> comparable comparable Bool))
+(native >= (-> comparable comparable Bool))
+(native max (-> comparable comparable comparable))
+(native min (-> comparable comparable comparable))
+(native not (-> Bool Bool))
+(fn not= [a b] (not (= a b)))
+
+; Text
+(native to-string (-> a String))
+(native pr-str (-> a String))
+(native string-append (-> String String String))
+(native string/length (-> String Int))
+(native string/split (-> String String [String]))
+(native string/lines (-> String [String]))
+(native string/join (-> String [String] String))
+(native string/trim (-> String String))
+(native string/blank? (-> String Bool))
+(native string/to-int (-> String (Option Int)))
+(native string/pad-left (-> String Int String))
+(native string/pad-right (-> String Int String))
+(native string/fixed (-> Float Int String))
+; Lowercase, without 0x. A fixed width gives all its digits, as bits; an
+; Int the digits it needs, with a sign.
+(native string/hex (-> integer String))
+
+; Vectors
+(native count (-> [a] Int))
+(native empty? (-> [a] Bool))
+(native conj (-> [a] a [a]))
+(native cons (-> a [a] [a]))
+(native vector/concat (-> [a] [a] [a]))
+(native nth (-> [a] Int (Option a)))
+(native first (-> [a] (Option a)))
+(native take (-> Int [a] [a]))
+(native drop (-> Int [a] [a]))
+(native range (-> Int Int [Int]))
+; These call their function once for each element, in order, so they take an
+; action, and act when it does: (map! hit! enemies).
+(native map (->? (->? a b) [a] [b]))
+(native map-indexed (->? (->? Int a b) [a] [b]))
+(native filter (->? (->? a Bool) [a] [a]))
+(native remove (->? (->? a Bool) [a] [a]))
+(native reduce (->? (->? b a b) b [a] b))
+(native sort (-> [comparable] [comparable]))
+; Calls its key and its order any number of times, so they take no action.
+(native sort-by (-> (-> a comparable) (-> comparable comparable Bool) [a] [a]))
+(native frequencies (-> [comparable] (Dict comparable Int)))
+
+; Buffers: a vector one name holds, so set and update change it in place.
+; freeze uses the buffer up and gives it as a vector, without a copy; to-vector
+; copies it, and only reads it (&).
+(native buffer/repeat (-> Int a (Buffer a)))
+(native buffer/from (-> [a] (Buffer a)))
+(native buffer/freeze (-> (Buffer a) [a]))
+(native buffer/to-vector (-> &(Buffer a) [a]))
+
+; Dictionaries: keys are comparable, entries come sorted by key.
+(native dict/empty (Dict comparable v))
+(native dict/insert (-> comparable v (Dict comparable v) (Dict comparable v)))
+(native dict/get (-> comparable (Dict comparable v) (Option v)))
+(native dict/count (-> (Dict k v) Int))
+(native dict/entries (-> (Dict k v) [{:key k :value v}]))
+
+;; Forms: code as data, for macros.
+(type FormView
+  (IntView Int) (FloatView Float) (BoolView Bool) (StringView String)
+  (SymbolView String) (KeywordView String)
+  (ListView [Form]) (VectorView [Form]) (MapView [Form]))
+(native form/view (-> Form FormView))
+(native form/symbol (-> String Form))
+(native form/string (-> String Form))
+(native form/int (-> Int Form))
+(native form/list (-> [Form] Form))
+(native form/vector (-> [Form] Form))
+; Keys and values in turn, as MapView gives them.
+(native form/map (-> [Form] Form))
+; A form the macro built, placed where a given form was written: errors found
+; in it point there.
+(native form/at (-> Form Form Form))
+(native gensym (-> String Form))
+
+;; Macros. A failing macro returns (Err text): the first line is the message,
+;; the next ones are notes. Helpers are named macro/... so user definitions do
+;; not replace them.
+
+;; (and a b c) → (if a (and b c) false): each stops at the first that decides.
+(macro and [a b & more] `(if ~a ~(if (empty? more) b `(and ~b ~@more)) false))
+(macro or [a b & more] `(if ~a true ~(if (empty? more) b `(or ~b ~@more))))
+(macro comment [& forms] `unit)
+
+;; (str a b c) → (string-append (to-string a) (string-append (to-string b) (to-string c)))
+(fn macro/str-parts [args]
+  (match (first args)
+    [None `""]
+    [(Some a) (if (= (count args) 1)
+                `(to-string ~a)
+                `(string-append (to-string ~a) ~(macro/str-parts (drop 1 args))))]))
+(macro str [& args] (macro/str-parts args))
+
+;; (concat a b c) → (vector/concat a (vector/concat b c))
+(fn macro/concat-parts [args]
+  (match (first args)
+    [None `[]]
+    [(Some a) (if (= (count args) 1) a `(vector/concat ~a ~(macro/concat-parts (drop 1 args))))]))
+(macro concat [& args] (macro/concat-parts args))
+
+;; (-> x (f a) g) → (g (f x a)); ->> puts x last instead.
+(fn macro/thread [x steps last?]
+  (reduce (fn [acc step]
+            (match (form/view step)
+              [(ListView items)
+               (match (first items)
+                 [(Some f) (form/list (if last?
+                                        (vector/concat (cons f (drop 1 items)) [acc])
+                                        (vector/concat [f acc] (drop 1 items))))]
+                 [None `(~step ~acc)])]
+              [_ `(~step ~acc)]))
+          x
+          steps))
+(macro -> [& parts]
+  (match (first parts)
+    [None (Err "-> needs a value to thread\nfor example: (-> value (f a))")]
+    [(Some x) (Ok (macro/thread x (drop 1 parts) false))]))
+(macro ->> [& parts]
+  (match (first parts)
+    [None (Err "->> needs a value to thread\nfor example: (->> value (f a))")]
+    [(Some x) (Ok (macro/thread x (drop 1 parts) true))]))
+
+;; (for [x xs] body) → (map (fn [x] body) xs)
+(macro for [& parts]
+  (let usage (Err "for needs one binding and a body\nfor example: (for [x xs] body)"))
+  (match parts
+    [[binding body] (match (form/view binding)
+                      [(VectorView [name coll]) (Ok `(map (fn [~name] ~body) ~coll))]
+                      [_ usage])]
+    [_ usage]))
+
+; Numbers and vectors
+(fn inc [n] (+ n 1))
+(fn dec [n] (- n 1))
+(fn sum [numbers] (reduce + 0 numbers))
+
+;; Tasks: work that may fail with a typed error, run only when the runtime runs it.
+(native task/succeed (-> a (Task e a)))
+(native task/fail (-> e (Task e a)))
+(native task/from-result (-> (Result e a) (Task e a)))
+; These call their function when the task runs, so they take an action, and
+; making the task changes nothing.
+(native task/map (-> (Task e a) (->? a b) (Task e b)))
+(native task/map-err (-> (Task e a) (->? e f) (Task f a)))
+(native task/and-then (-> (Task e a) (->? a (Task e b)) (Task e b)))
+(native task/recover (-> (Task e a) (->? e (Task f a)) (Task f a)))
+; Runs every task, one at a time, and gives their results in order, or the
+; first error.
+(native task/all (-> [(Task e a)] (Task e [a])))
+; Starts every task, so tasks waiting for requests wait together. Each runs
+; to the end, and it gives every task's outcome, in the tasks' order.
+(native task/concurrent (-> [(Task e a)] (Task x [(Result e a)])))
+; The outcome of the first task to end, success or failure; the others stop.
+; A call takes two or more, written out. Each starts when the one before
+; waits, so in a tie the first written wins.
+(native task/race (-> (Task e a) (Task e a) (Task e a)))
+; The same for a vector built while the program runs: (Some answer), or None at
+; once when it is empty.
+(native task/first-of (-> [(Task e a)] (Task e (Option a))))
+; later: starts the task and gives back the running task at once; when the
+; task ends, the handler gets its outcome, and runs as a task that cannot fail.
+(native macro/later (-> (Task e a) (->? (Result e a) (Task Never b)) (Task f Running)))
+; later without clauses: a task that cannot fail, whose success is dropped.
+(native macro/later-dropping (-> (Task Never a) (Task f Running)))
+; Stops a running task where it waits: it never goes on, and its later clauses
+; never run. Stopping one that has ended does nothing.
+(native stop! (->! Running Unit))
+; A running task that has ended, for a name to start with.
+(native task/ended Running)
+; The inverse of task/from-result: a task that cannot fail, its failure a value.
+(fn task/to-result [task]
+  (task/recover (task/map task Ok) (fn [e] (task/succeed (Err e)))))
+; Parallel work is pure code: these give what map and filter give, and a
+; native build runs their parts on every core, so they take no action.
+(native par/map (-> (-> a b) [a] [b]))
+(native par/filter (-> (-> a Bool) [a] [a]))
+; Combines in a tree that halves the vector, whatever the number of cores, so it
+; gives one result everywhere, though not always reduce's (adding Floats).
+(native par/reduce (-> (-> a a a) a [a] a))
+
+; Option
+(fn option/map [f o] (match o [(Some x) (Some (f x))] [None None]))
+(fn option/and-then [o f] (match o [(Some x) (f x)] [None None]))
+(fn option/or [o default] (match o [(Some x) x] [None default]))
+(fn option/some? [o] (match o [(Some _) true] [None false]))
+
+; Result
+(fn result/map [r f] (match r [(Ok x) (Ok (f x))] [(Err e) (Err e)]))
+(fn result/map-err [r f] (match r [(Ok x) (Ok x)] [(Err e) (Err (f e))]))
+(fn result/and-then [r f] (match r [(Ok x) (f x)] [(Err e) (Err e)]))
+(fn result/ok? [r] (match r [(Ok _) true] [(Err _) false]))
+(fn result/err? [r] (match r [(Ok _) false] [(Err _) true]))
+; Native, because building vectors one conj at a time copies them each time.
+(native result/partition (-> [(Result e a)] {:ok [a] :err [e]}))

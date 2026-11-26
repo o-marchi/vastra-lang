@@ -1,0 +1,6 @@
+(library
+ (name vastra_web)
+ (public_name vastra.web)
+ (libraries vastra js_of_ocaml zarith_stubs_js)
+ (preprocess
+  (pps js_of_ocaml-ppx)))

@@ -1,0 +1,26 @@
+(ns fetch-demo
+  (:require [vastra.http :as http]
+            [vastra.decode :as decode]
+            [vastra.html :as html :refer [html]]))
+
+(let person
+  (decode/map2 (fn [name age] {:name name :age age})
+               (decode/field "name" decode/string)
+               (decode/field "age" decode/int)))
+
+; Loads a person, and describes either the person or what went wrong.
+(fn load [url]
+  (-> (http/get-text url)
+      (task/map-err http/describe-error)
+      (task/and-then (fn [text] (task/from-result (decode/run person text))))
+      (task/map (fn [p] (str (:name p) " is " (:age p))))
+      (task/recover (fn [problem] (task/succeed (str "failed: " problem))))))
+
+(let lines ["loading"])
+
+; The answers come after the page has loaded: later sets the lines then.
+(later (task/all [(load "data.json") (load "missing.json") (load "bad.json")])
+  [(Ok loaded) (set! lines loaded)]
+  [(Err _) unit])
+
+(view "#app" (html/element "ul" [] (map (fn [line] (html [:li (html/text line)])) lines)))

@@ -1,0 +1,39 @@
+;; A search, for the browser checks: each letter typed stops the request
+;; still waiting, and starts another. The check holds the answers, so the
+;; first request is aborted while it waits, and only the last one's answer
+;; reaches the clauses.
+
+(ns search
+  (:require [vastra.http :as http]
+            [vastra.html :as html :refer [html]]))
+
+(type Msg (Typed String) ClearSearch)
+
+(let results [])
+(let loading false)
+(let answers 0)
+(let searching task/ended)
+
+(on (Typed text)
+  (stop! searching)                ; the old answer will never arrive
+  (set! loading true)
+  (set! searching
+    (later (http/get-text (str "answer.txt?q=" text))
+      [(Ok body)
+       (set! results [(str text ": " (string/trim body))])
+       (set! loading false)
+       (update! answers inc)]
+      [(Err _) (set! results []) (set! loading false)])))
+
+(on ClearSearch
+  (stop! searching)
+  (set! loading false)             ; nothing follows it, so the stopper resets
+  (set! results []))
+
+(view "#app"
+  (html [:div
+         [:input {:on-input Typed}]
+         [:button {:on-click ClearSearch} "clear"]
+         [:p {:class "results"} (html/text (string/join ", " results))]
+         [:p {:class "loading"} (html/text (str loading))]
+         [:p {:class "answers"} (html/text (str answers))]]))

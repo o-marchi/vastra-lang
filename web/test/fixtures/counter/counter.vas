@@ -1,0 +1,64 @@
+;; A page with state, messages, input that may be invalid and storage, for the
+;; browser checks: interpreted, compiled, with storage blocked, edited while it
+;; runs, and from serve's REPL.
+
+(ns counter
+  (:require [vastra.html :as html :refer [html]]
+            [vastra.storage :as storage]))
+
+(let storage-key "vastra-counter/count")
+
+(fn load-total []
+  (let stored @(storage/read storage-key)
+    [(Err _) 0])
+  (-> stored (option/and-then string/to-int) (option/or 0)))
+
+(fn save [n]
+  (let _ @(storage/write storage-key (str n))
+    [(Err _) unit])
+  unit)
+
+(let total @(load-total))
+(let step-text "1")
+
+(type Msg
+  Increment
+  Decrement
+  Reset
+  (StepTyped String))
+
+(fn parse-step [text]
+  (match (string/to-int (string/trim text))
+    [(Some n) (if (> n 0)
+                (Ok n)
+                (Err "The step must be greater than zero."))]
+    [None     (Err "The step must be a whole number.")]))
+
+(fn count-by! [op]
+  (let step (parse-step step-text)
+    [(Err _) unit])
+  (set! total (op total step))
+  @(save total))
+
+(on Increment @(count-by! +))
+(on Decrement @(count-by! -))
+(on Reset
+  (set! total 0)
+  @(save total))
+(on (StepTyped text)
+  (set! step-text text))
+
+(view "#app"
+  (let step (parse-step step-text))
+  (let invalid? (result/err? step))
+  (html
+    [:main
+     [:h1 "Counter"]
+     [:p {:class "count"} (html/text (str total))]
+     [:button {:on-click Decrement :disabled invalid?} "−"]
+     [:button {:on-click Reset} "Reset"]
+     [:button {:on-click Increment :disabled invalid?} "+"]
+     [:input {:value step-text :on-input StepTyped}]
+     (match step
+       [(Ok _)        html/nothing]
+       [(Err problem) (html [:p {:class "error"} (html/text problem)])])]))

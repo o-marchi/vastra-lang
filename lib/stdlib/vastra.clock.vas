@@ -1,0 +1,18 @@
+(ns vastra.clock "The clock, in seconds.")
+
+; The wall clock: seconds since 1970-01-01 UTC, with their fraction. It can
+; jump (a clock change, a sync), so it dates things but doesn't measure
+; durations.
+(native now (Task e Float))
+
+; The seconds since the program started (since the page loaded, in a page),
+; from a clock that never jumps or goes back: it measures durations.
+(native elapsed (Task e Float))
+
+; Waits that long, without holding up the rest of the program; zero or less
+; returns at once.
+(native sleep (-> Float (Task e Unit)))
+
+; (Some answer), or None when the time runs out first; the task then stops.
+(fn timeout [seconds task]
+  (task/race (task/map task Some) (task/map (sleep seconds) (fn [_] None))))

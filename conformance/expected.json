@@ -1,0 +1,3410 @@
+{
+  "a-!-added-to-a-call-that-cannot-act": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `map!` changes nothing here: write `map`\n --> a-!-added-to-a-call-that-cannot-act.vas:1:1\n  |\n1 | (map! inc [1 2 3])\n  | ^^^^^^^^^^^^^^^^^^\n  = a ! marks a call that changes the file's names\n  try: (map inc [1 2 3])\n",
+    "stdout": ""
+  },
+  "a-!-function-that-waits-is-a-task": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "score : Int\nhit-later! : (-> Int (Task a Unit))\nhits : [(Task a Unit)]\n0 : Int\n"
+  },
+  "a-body-is-lines": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "fill : (-> (vector number) number (vector number))\n[10 1 0] : [Int]\n2.0 : Float\n7 : Int\n"
+  },
+  "a-branch-line-that-changes-nothing": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: this line does nothing: its value is not used\n --> a-branch-line-that-changes-nothing.vas:2:3\n  |\n2 |   (if (> x 1) unit unit)\n  |   ^^^^^^^^^^^^^^^^^^^^^^\n  = a body's last form gives its value; the lines before it name values with let, and change them with set\n",
+    "stdout": ""
+  },
+  "a-buffer-given-back-is-kept-as-a-vector": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> [5 5] : [Int]\nvastra> [5 5 6] : [Int]\nvastra> [Int]\nvastra> vastra> \n"
+  },
+  "a-buffer-given-twice": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `s` is a buffer, and `buffer/freeze` used it up before this\n --> a-buffer-given-twice.vas:3:37\n  |\n3 |   [(buffer/freeze s) (buffer/freeze s)])\n  |                   -                 ^\n  |                   used up here\n  = a buffer changes in place, so one place holds it: buffer/freeze makes a vector to share\n",
+    "stdout": ""
+  },
+  "a-buffer-handed-on-read-and-used-on-each-path": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "[9 1 0] : [Int]\n[3 2 3] : [Int]\n[0 2 3] : [Int]\n[5 0] : [Int]\n"
+  },
+  "a-buffer-holds-no-buffer": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a vector cannot hold a buffer\n --> a-buffer-holds-no-buffer.vas:1:18\n  |\n1 | (buffer/repeat 2 (buffer/repeat 2 0))\n  |                  ^^^^^^^^^^^^^^^^^^^\n  = in argument 2 of `buffer/repeat`\n",
+    "stdout": ""
+  },
+  "a-buffer-is-used-once": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `screen` is a buffer, and `set` used it up before this\n --> a-buffer-is-used-once.vas:4:4\n  |\n3 |   (let after (set screen 0 9))\n  |                   ------ used up here\n4 |   [screen after])\n  |    ^^^^^^\n  = a buffer changes in place, so one place holds it: buffer/freeze makes a vector to share\n",
+    "stdout": ""
+  },
+  "a-buffer-read-after-its-use": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `s` is a buffer, and `set` used it up before this\n --> a-buffer-read-after-its-use.vas:4:8\n  |\n3 |   (let t (set s 0 1))\n  |               - used up here\n4 |   (get s 0))\n  |        ^\n  = a buffer changes in place, so one place holds it: buffer/freeze makes a vector to share\n",
+    "stdout": ""
+  },
+  "a-buffer-set-in-a-branch": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "mark : (-> number {:cells [number], :marks number1})\n{:cells [7 0 0], :marks 1} : {:cells [Int], :marks Int}\n{:cells [0 0 0], :marks 0} : {:cells [Int], :marks Int}\n"
+  },
+  "a-buffer-used-in-one-branch-is-used-after": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `s` is a buffer, and `set` used it up before this\n --> a-buffer-used-in-one-branch-is-used-after.vas:4:8\n  |\n3 |   (let t (if true (set s 0 1) s))\n  |                        - used up here\n4 |   (get s 0))\n  |        ^\n  = a buffer changes in place, so one place holds it: buffer/freeze makes a vector to share\n",
+    "stdout": ""
+  },
+  "a-call-given-an-action-shows-a-!": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `map` acts here because the function given does: write `map!`\n --> a-call-given-an-action-shows-a-!.vas:2:1\n  |\n2 | (map (fn [points] (set! score (+ score points))) [1 2 3])\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = a call that changes the file's names shows a !\n  try: (map! (fn [points] (set! score (+ score points))) [1 2 3])\n",
+    "stdout": ""
+  },
+  "a-call-of-an-unnamed-action": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this call changes the file's names, but shows no !\n --> a-call-of-an-unnamed-action.vas:4:1\n  |\n4 | ((:jump moves) 2)\n  | ^^^^^^^^^^^^^^^^^\n  = name the function first, with a !: (let jump! (:jump moves))\n",
+    "stdout": ""
+  },
+  "a-call-that-acts-shows-a-!": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `map` acts here because `hit!` does: write `map!`\n --> a-call-that-acts-shows-a-!.vas:3:1\n  |\n3 | (map hit! [1 2 3])\n  | ^^^^^^^^^^^^^^^^^^\n  = a call that changes the file's names shows a !\n  try: (map! hit! [1 2 3])\n",
+    "stdout": ""
+  },
+  "a-call-through-a-parameter-needs-no-!": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `apply-to!` changes nothing here: write `apply-to`\n --> a-call-through-a-parameter-needs-no-!.vas:2:17\n  |\n2 | (fn twice [f x] (apply-to! f (apply-to f x)))\n  |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = it acts only when the function it is given does, and the call that gives one shows the !\n  try: (fn twice [f x] (apply-to f (apply-to f x)))\n",
+    "stdout": ""
+  },
+  "a-change-nothing-reads": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: `x` is set here but never read after: this line does nothing\n --> a-change-nothing-reads.vas:2:3\n  |\n2 |   (set x 2)\n  |   ^^^^^^^^^\n  = a change is seen by the lines after it in its body\n",
+    "stdout": ""
+  },
+  "a-changing-names-type-must-be-known": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: the type of `loaded` is not fully known: (Result String _)\n --> a-changing-names-type-must-be-known.vas:1:6\n  |\n1 | (let loaded (Err \"loading\"))\n  |      ^^^^^^\n  = set! changes it, so it holds one type: give it a starting value fixing it\n",
+    "stdout": ""
+  },
+  "a-changing-number-is-an-int": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: expected Int, found Float\n --> a-changing-number-is-an-int.vas:2:9\n  |\n2 | (set! n 1.5)\n  |         ^^^\n  = `n` keeps its type: set! and update! cannot change it\n  = an Int and a Float don't mix: convert with to-float\n",
+    "stdout": ""
+  },
+  "a-clause-is-a-body": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "describe : (-> (Option number) String)\n[\"twice 8\" \"nothing\"] : [String]\nsign : (-> number String)\n\"-2 is below\" : String\nnext-of : (-> (Option number) number)\n2 : Int\ngrade : (-> number {:grade String, :seen number1})\n{:grade \"high\", :seen 1} : {:grade String, :seen Int}\nage : (-> String Int)\n20 : Int\n"
+  },
+  "a-clause-of-later-goes-in-brackets": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a clause of later goes in brackets: [pattern line ...]\n --> a-clause-of-later-goes-in-brackets.vas:3:5\n  |\n3 |     (Ok v) unit\n  |     ^^^^^^^^^^^\n  try: [(Ok v) unit]\n       [(Err why) unit])\n",
+    "stdout": ""
+  },
+  "a-clause-of-let-gives-the-bodys-value": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: expected Int, found String\n --> a-clause-of-let-gives-the-bodys-value.vas:3:11\n  |\n3 |     [None \"none\"])\n  |           ^^^^^^\n  = a clause of let gives what the rest of its body gives\n",
+    "stdout": ""
+  },
+  "a-clause-of-let-goes-in-brackets": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a clause of let goes in brackets: [pattern line ...]\n --> a-clause-of-let-goes-in-brackets.vas:3:5\n  |\n3 |     None 0)\n  |     ^^^^^^\n  try: [None 0])\n",
+    "stdout": ""
+  },
+  "a-clause-of-let-needs-its-lines": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a clause of let needs a pattern and its lines: [pattern line ...]\n --> a-clause-of-let-needs-its-lines.vas:3:5\n  |\n3 |     [None])\n  |     ^^^^^^\n",
+    "stdout": ""
+  },
+  "a-clause-of-let-takes-a-failure": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a clause of let takes a failure: (Err pattern) or None\n --> a-clause-of-let-takes-a-failure.vas:3:6\n  |\n3 |     [(Some x) 0])\n  |      ^^^^^^^^\n  = the name gets what succeeds; the clauses say what happens otherwise\n",
+    "stdout": ""
+  },
+  "a-clause-that-gives-a-value-changes-only-its-own-names": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: this clause changes `total`, which is not its own name\n --> a-clause-that-gives-a-value-changes-only-its-own-names.vas:4:10\n  |\n4 |          [(Some x) (set total x) total]\n  |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = a clause gives a value, and the change would end with it: name a new value with let instead\n",
+    "stdout": ""
+  },
+  "a-cond-in-html-ending-with-else-is-an-element": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a clause of cond goes in brackets: [test line ...]\n --> a-cond-in-html-ending-with-else-is-an-element.vas:3:39\n  |\n3 | (html [:p {:class (cond [(= n 1) \"a\"] [:else \"b\"])} \"x\"])\n  |                                       ^^^^^^^^^^^\n  = in this use of `html`\n",
+    "stdout": ""
+  },
+  "a-cond-in-html-ends-with-_": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module app\nn : Int\n(html/Element \"p\" [(html/Attribute \"class\" \"b\")] [(html/Text \"x\")]) : (html/Html a)\n"
+  },
+  "a-copy-keeps-its-type": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> person : {:name String, :age Int}\nvastra> before : {:name String, :age Int}\nvastra> report : (-> String)\nvastra> person : {:name String, :age String}\nvastra> \"before: {:name \\\"Bob\\\", :age 34}\" : String\nvastra> person : {:name String, :age String}\nvastra> vastra> \n"
+  },
+  "a-cycle-of-messages-without-a-wait": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `Ping`'s handler sends `Pong`, whose handler sends `Ping`, and would never stop\n --> a-cycle-of-messages-without-a-wait.vas:2:1\n  |\n2 | (on Ping (send! Pong))\n  | ^^^^^^^^^^^^^^^^^^^^^^\n  = a handler that waits first, with an @, is a retry, and is fine\n",
+    "stdout": ""
+  },
+  "a-cycle-through-a-!-function": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `Reset`'s handler sends `Reset`, and would never stop\n --> a-cycle-through-a-!-function.vas:3:1\n  |\n3 | (on Reset (again!))\n  | ^^^^^^^^^^^^^^^^^^^\n  = a handler that waits first, with an @, is a retry, and is fine\n",
+    "stdout": ""
+  },
+  "a-definition-holds-no-buffer": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a definition cannot hold a buffer: a buffer lives only while code runs\n --> a-definition-holds-no-buffer.vas:1:6\n  |\n1 | (let screen (buffer/repeat 3 0))\n  |      ^^^^^^\n  = buffer/freeze gives it as a vector\n",
+    "stdout": ""
+  },
+  "a-definitions-failed-task-says-where": {
+    "exit": 1,
+    "mode": "run",
+    "stderr": "runtime error: this task failed with \"no answer\", and nothing takes the failure\n --> stop.vas:2:13\n  |\n2 | (let answer @(load))\n  |             ^^^^^^^\n  = a let's clause takes it: (let text @(file/read-text path) [(Err why) ...])\n",
+    "stdout": ""
+  },
+  "a-dictionary-holds-no-buffer": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a dictionary cannot hold a buffer\n --> a-dictionary-holds-no-buffer.vas:1:16\n  |\n1 | (dict/insert 1 (buffer/repeat 2 0) dict/empty)\n  |                ^^^^^^^^^^^^^^^^^^^\n  = in argument 2 of `dict/insert`\n",
+    "stdout": ""
+  },
+  "a-disagreement-names-what-fixed-the-type": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: `add!` takes a String, and this is a number\n  | (add! 42)\n  |       ^^\n  = in argument 1 of `add!`\n  = `log` holds [String], fixed by (add! \"started\")\ntype error: `pick!` takes an (Option Int), and this is an (Option String)\n  | (pick! (Some \"one\"))\n  |        ^^^^^^^^^^^^\n  = in argument 1 of `pick!`\n  = Int does not match String\n  = `model` holds {:lines [_], :picked (Option Int)}, fixed by (pick! (Some 1))\n",
+    "stdout": "vastra> log : [?log]\nadd! : (->! ?log Unit)\nvastra> unit : Unit\nvastra> vastra> model : {:lines [?model], :picked (Option ?model1)}\npick! : (->! (Option ?model) Unit)\nvastra> unit : Unit\nvastra> vastra> vastra> \n"
+  },
+  "a-disagreement-names-where-the-type-was-fixed": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `add!` takes a String, and this is a number\n --> a-disagreement-names-where-the-type-was-fixed.vas:4:7\n  |\n4 | (add! 42)\n  |       ^^\n  = in argument 1 of `add!`\n  = `log` holds [String], fixed at a-disagreement-names-where-the-type-was-fixed.vas:3\n",
+    "stdout": ""
+  },
+  "a-failure-that-comes-first-wins-a-race": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "(Err \"failed first\")\n"
+  },
+  "a-file-has-one-message-type": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: expected Msg, found Other\n --> a-file-has-one-message-type.vas:6:1\n  |\n6 | (on Something (set! total 0))\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = a file's handlers and views share one type of message\n",
+    "stdout": ""
+  },
+  "a-function-calling-a-!-function-ends-in-!": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `twice` changes the file's names: name it `twice!`\n --> a-function-calling-a-!-function-ends-in-!.vas:4:3\n  |\n4 |   (hit! points)\n  |   ^^^^^^^^^^^^^\n  = what changes the program's state is marked with !\n",
+    "stdout": ""
+  },
+  "a-function-cannot-hold-a-buffer-from-outside": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a function cannot hold `screen` from outside, since it holds a buffer\n --> a-function-cannot-hold-a-buffer-from-outside.vas:3:21\n  |\n3 |   (map (fn [i] (set screen i 7)) [0 1 2]))\n  |                     ^^^^^^\n",
+    "stdout": ""
+  },
+  "a-function-changing-a-name-is-not-generic-in-it": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `add!` takes a String, and this is a number\n --> a-function-changing-a-name-is-not-generic-in-it.vas:3:19\n  |\n3 | [(add! \"a\") (add! 1)]\n  |        ---        ^ a number\n  |        a String\n  = in argument 1 of `add!`\n",
+    "stdout": ""
+  },
+  "a-function-given-a-buffer-uses-it-once": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `x` is a buffer, and a map used it up before this\n --> a-function-given-a-buffer-uses-it-once.vas:1:19\n  |\n1 | ((fn [x] {:a x :b x}) (buffer/repeat 2 0))\n  |              -    ^\n  |              used up here\n  = a buffer changes in place, so one place holds it: buffer/freeze makes a vector to share\n",
+    "stdout": ""
+  },
+  "a-function-made-inside-holds-no-buffer": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a function holds `x` from outside, at line 1, so it cannot be a buffer\n --> a-function-made-inside-holds-no-buffer.vas:2:8\n  |\n2 | (const (buffer/repeat 2 0))\n  |        ^^^^^^^^^^^^^^^^^^^\n  = in argument 1 of `const`\n",
+    "stdout": ""
+  },
+  "a-function-on-vectors-is-not-given-a-buffer": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `mark` takes a [number], and this is a (Buffer number)\n --> a-function-on-vectors-is-not-given-a-buffer.vas:4:7\n  |\n4 | (mark (buffer/repeat 3 0))\n  |       ^^^^^^^^^^^^^^^^^^^\n  = in argument 1 of `mark`\n",
+    "stdout": ""
+  },
+  "a-function-reads-or-takes-what-it-is-given": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "at : (-> &(vector Float) Int Float)\nclear : (-> (vector Float) Int (vector Float))\n{:x 1.0, :s [1.0 0.0 3.0]} : {:x Float, :s [Float]}\nsum-from : (-> &(vector number) Int number number)\nfill : (-> (vector Int) Int (vector Int))\n{:total 6, :b [1 2 3]} : {:total Int, :b [Int]}\n[0 1 2] : [Int]\n#<fn buffer/to-vector> : (-> &(Buffer a) [a])\n{:v [1 2 3], :b [9 2 3]} : {:v [Int], :b [Int]}\ntwice : (->? (->? a a) a a)\n[1 0] : [Int]\n"
+  },
+  "a-function-redefined-to-take-rechecks-its-callers": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: redefining `peek` breaks `g`\n  | (fn peek [v] (option/or (get (set v 1 0) 0) 0))\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = in `g`: `b` is a buffer, and `peek` used it up before this\n  = redefine `g` in the same submission to change both\n",
+    "stdout": "vastra> peek : (-> &(vector number) number)\nvastra> g : (-> (Buffer number) [number])\nvastra> vastra> vastra> \n"
+  },
+  "a-function-taking-functions-shares-no-name-with-its-!": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `apply-to` takes functions, so `(apply-to! ...)` could call either it or `apply-to!`\n --> a-function-taking-functions-shares-no-name-with-its-!.vas:2:5\n  |\n2 | (fn apply-to! [x] x)\n  |     ^^^^^^^^^\n  = a function that takes functions can't share its name, plus !, with another\n",
+    "stdout": ""
+  },
+  "a-function-that-changes-names-ends-in-!": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `hit` changes the file's names: name it `hit!`\n --> a-function-that-changes-names-ends-in-!.vas:3:3\n  |\n3 |   (set! score (+ score points)))\n  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = what changes the program's state is marked with !\n",
+    "stdout": ""
+  },
+  "a-function-that-stops-a-task-ends-in-!": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `cancel` changes the file's names: name it `cancel!`\n --> a-function-that-stops-a-task-ends-in-!.vas:1:22\n  |\n1 | (fn cancel [running] (stop! running))\n  |                      ^^^^^^^^^^^^^^^\n  = what changes the program's state is marked with !\n",
+    "stdout": ""
+  },
+  "a-function-that-takes-uses-a-buffer-up": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `s` is a buffer, and `clear` used it up before this\n --> a-function-that-takes-uses-a-buffer-up.vas:5:8\n  |\n4 |   (let t (clear s 1))\n  |                 - used up here\n5 |   (get s 0))\n  |        ^\n  = a buffer changes in place, so one place holds it: buffer/freeze makes a vector to share\n",
+    "stdout": ""
+  },
+  "a-function-that-writes-a-!-call-ends-in-!": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `hit-all` changes the file's names: name it `hit-all!`\n --> a-function-that-writes-a-!-call-ends-in-!.vas:3:22\n  |\n3 | (fn hit-all [points] (map! hit! points))\n  |                      ^^^^^^^^^^^^^^^^^^\n  = what changes the program's state is marked with !\n",
+    "stdout": ""
+  },
+  "a-function-value-given-the-name": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "near-all : (-> [Float] Float Float [Float])\n[1.0 15.0] : [Float]\n"
+  },
+  "a-function-value-holding-a-name": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `near?` holds `radius`, and would keep the old one\n --> a-function-value-holding-a-name.vas:3:3\n  |\n3 |   (set radius 20.0)\n  |   ^^^^^^^^^^^^^^^^^\n  = give `radius` to `near?` as a parameter instead\n",
+    "stdout": ""
+  },
+  "a-handler-cannot-fail": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a handler cannot fail, and this one can fail with file/Error\n --> a-handler-cannot-fail.vas:3:1\n  |\n3 | (on Save @(file/write-text \"notes.txt\" \"saved\"))\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = take each failure in a let's clause, as [(Err why) ...]\n",
+    "stdout": ""
+  },
+  "a-handler-ends-with-a-task-it-runs": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this handler ends with a task it doesn't run\n --> a-handler-ends-with-a-task-it-runs.vas:3:1\n  |\n3 | (on Hello (console/print \"hello\"))\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = a task runs where @ is written before it\n  try: (on Hello @(console/print \"hello\"))\n",
+    "stdout": ""
+  },
+  "a-handler-that-waits-first-is-a-retry": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "type Msg\non Retry\non Done\n"
+  },
+  "a-let-at-the-top-of-a-file-takes-no-clause": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a let's clause ends a function or a handler, and the top of a file is neither\n --> a-let-at-the-top-of-a-file-takes-no-clause.vas:1:1\n  |\n1 | (let n (string/to-int \"4\")\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^\n2 |   [None 0])\n  |   ^^^^^^^^^\n  = for example, in a function: (fn age [text] (let a (parse-age text) [(Err why) 0]) a)\n",
+    "stdout": ""
+  },
+  "a-let-must-take-every-failure": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this let does not handle every failure\n --> a-let-must-take-every-failure.vas:4:3\n  |\n4 |   (let m (if (> n 0) (Ok n) (Err \"negative\"))\n  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n5 |     [(Err \"zero\") 0])\n  |     ^^^^^^^^^^^^^^^^^\n  = missing: (Err _) (add a clause for it)\n",
+    "stdout": ""
+  },
+  "a-let-of-a-parameter": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: `count` is already named in this body\n --> a-let-of-a-parameter.vas:1:20\n  |\n1 | (fn f [count] (let count 2) count)\n  |                    ^^^^^\n  = to change it, write (set count value)\n",
+    "stdout": ""
+  },
+  "a-let-without-clauses-names-the-value-as-it-is": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "parse : (-> String (Result String Int))\n(Err \"not a number\") : (Result String Int)\n"
+  },
+  "a-lifted-@-cannot-hold-a-buffer-from-outside": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a function cannot hold `b` from outside, since it holds a buffer\n --> a-lifted-@-cannot-hold-a-buffer-from-outside.vas:1:63\n  |\n1 | (fn f [b] (+ @(task/succeed 1) (option/or (get (buffer/freeze b) 0) 0)))\n  |                                                               ^\n  = in this use of `@`\n",
+    "stdout": ""
+  },
+  "a-line-that-does-nothing": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: this line does nothing: its value is not used\n --> a-line-that-does-nothing.vas:1:9\n  |\n1 | (fn [x] 1 2)\n  |         ^\n  = a body's last form gives its value; the lines before it name values with let, and change them with set\n",
+    "stdout": ""
+  },
+  "a-line-whose-branches-only-act": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "score : Int\nbump-if! : (->! Int Int)\n3 : Int\n3 : Int\n"
+  },
+  "a-literal-in-a-changing-name-is-an-int": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: expected [Float], found [Int]\n  | (update! counts (fn [c] (conj c 2.5)))\n  |          ^^^^^^\n  = in argument 1\n  = Float does not match Int\n  = a Float and an Int don't mix: convert with to-float\n  = `counts` holds [Int], fixed by `bump!`\n",
+    "stdout": "vastra> counts : [?counts]\nbump! : (->! Unit)\nvastra> [Int]\nvastra> vastra> vastra> \n"
+  },
+  "a-literal-that-rules-out-a-type-changes-it": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: redefining `f` breaks `g`\n  | (fn f [x] (+ x 300))\n  | ^^^^^^^^^^^^^^^^^^^^\n  = in `g`: `f` needs a number type that holds 300\n  = redefine `g` in the same submission to change both\n",
+    "stdout": "vastra> f : (-> number number)\nvastra> g : (-> number U8)\nvastra> vastra> f : (-> number number)\nvastra> 5 : U8\nvastra> vastra> \n"
+  },
+  "a-local-function-calls-itself": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "digits : (-> integer [integer])\n[4 0 9 6] : [Int]\n"
+  },
+  "a-local-function-using-a-value-twice-is-not-given-a-buffer": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `x` is used twice, at line 1, so it cannot be a buffer\n --> a-local-function-using-a-value-twice-is-not-given-a-buffer.vas:1:35\n  |\n1 | (do (let dup (fn [x] [x x])) (dup (buffer/repeat 2 0)))\n  |                                   ^^^^^^^^^^^^^^^^^^^\n  = in argument 1 of `dup`\n",
+    "stdout": ""
+  },
+  "a-local-plus-is-called-as-written": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "\"123\" : String\n6 : Int\n"
+  },
+  "a-macro-cannot-change-names": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a macro cannot change the file's names\n --> a-macro-cannot-change-names.vas:1:18\n  |\n1 | (macro reset [x] (set! score 0) x)\n  |                  ^^^^^^^^^^^^^^\n  = a macro runs while code is read, before the program does\n",
+    "stdout": ""
+  },
+  "a-map-holding-a-buffer-is-used-once": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `screen` is a buffer, and `:color` used it up before this\n --> a-map-holding-a-buffer-is-used-once.vas:3:42\n  |\n3 |   {:color (:color screen) :depth (:depth screen)})\n  |                   ------                 ^^^^^^\n  |                   used up here\n  = a buffer changes in place, so one place holds it: buffer/freeze makes a vector to share\n",
+    "stdout": ""
+  },
+  "a-modules-own-plus-is-called-as-written": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module joined\n+ : (-> a b c String)\n\"123\" : String\n"
+  },
+  "a-name-changes-only-in-its-own-file": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `cart/items` changes only in its own file\n --> a-name-changes-only-in-its-own-file.vas:4:7\n  |\n4 | (set! cart/items [])\n  |       ^^^^^^^^^^\n  = it is defined at shop/cart.vas:2\n  = call one of that file's ! functions to change it\n",
+    "stdout": ""
+  },
+  "a-name-defined-again-keeps-what-its-uses-fixed": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> log : [?log]\nnote! : (->! ?log Unit)\nvastra> unit : Unit\nvastra> log : [String]\nvastra> [] : [String]\nvastra> log : [Int]\nvastra> [1] : [Int]\nvastra> vastra> \n"
+  },
+  "a-name-defined-twice-in-a-file": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: `width` is already defined, at line 1\n --> a-name-defined-twice-in-a-file.vas:2:5\n  |\n2 | (fn width [] 4)\n  |     ^^^^^\n  = a name has one definition in a file, or in one submission at the prompt\n",
+    "stdout": ""
+  },
+  "a-name-defined-twice-in-one-submission": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "name error: `a` is already defined, at line 1\n  | (let a 1) (let a 2)\n  |                ^\n  = a name has one definition in a file, or in one submission at the prompt\n",
+    "stdout": "vastra> vastra> a : Int\nvastra> 3 : Int\nvastra> vastra> \n"
+  },
+  "a-name-holding-an-action-ends-in-!": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `jump` holds a function that acts: name it `jump!`\n --> a-name-holding-an-action-ends-in-!.vas:4:6\n  |\n4 | (let jump (:jump moves))\n  |      ^^^^\n  = a call that changes the file's names shows a !\n  try: (let jump! (:jump moves))\n",
+    "stdout": ""
+  },
+  "a-name-no-use-fixes": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "model : {:lines [?model], :picked (Option ?model1)}\nclear! : (->! Unit)\nlines! : (-> Int)\n{:lines [], :picked None} : {:lines [?model], :picked (Option ?model1)}\n"
+  },
+  "a-name-set!-changes-keeps-its-keys": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: unexpected key :extra?\n  | (set! model :extra? 1)\n  | ^^^^^^^^^^^^^^^^^^^^^^\n  = `model` keeps its type: set! and update! cannot change it\n  = expected: {:count Int, :note? String}\n  = found:    {:count Int, :note? String, :extra? number}\n",
+    "stdout": "vastra> vastra> vastra> model : {:count Int, :note? String}\nvastra> unit : Unit\nvastra> {:count 0, :note? \"bye\"} : {:count Int, :note? String}\nvastra> unit : Unit\nvastra> {:count 1} : {:count Int, :note? String}\nvastra> vastra> ada : {:name String}\nvastra> None : (Option a)\nvastra> unit : Unit\nvastra> vastra> vastra> vastra> vastra> vastra> \n"
+  },
+  "a-named-fn-in-an-expression": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a named fn defines a function, on a line of its own\n --> a-named-fn-in-an-expression.vas:1:10\n  |\n1 | (map (fn square [x] (* x x)) [1 2])\n  |          ^^^^^^\n  = for a function value, leave out the name: (fn [x] ...)\n",
+    "stdout": ""
+  },
+  "a-par-let-binding-cannot-use-a-buffer-from-outside": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a par/let binding cannot use `b` from outside, since it holds a buffer\n --> a-par-let-binding-cannot-use-a-buffer-from-outside.vas:3:31\n  |\n3 |   (par/let [x (option/or (get b 0) 0)\n  |                               ^\n",
+    "stdout": ""
+  },
+  "a-par-let-body-is-one-expression": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a par/let body is one expression\n --> a-par-let-body-is-one-expression.vas:1:36\n  |\n1 | (par/let [a 1 b 2] (let c (+ a b)) c)\n  |                                    ^\n  = lines go in a do: (par/let [a (f x) b (g y)] (do (let c (+ a b)) (* c c)))\n",
+    "stdout": ""
+  },
+  "a-parameter-given-to-par/map-takes-no-action": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `each` takes a function (-> Int Unit), and this is a function (->! Int Unit)\n --> a-parameter-given-to-par_map-takes-no-action.vas:4:8\n  |\n4 | (each! hit! [1 2])\n  |        ^^^^\n  = in argument 1 of `each`\n  = a function that acts can't go where a plain one, ->, is taken\n",
+    "stdout": ""
+  },
+  "a-path-change-of-another-files-name": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `cart/items` changes only in its own file\n --> a-path-change-of-another-files-name.vas:3:19\n  |\n3 | (on Cheaper (set! cart/items 0 :price 1))\n  |                   ^^^^^^^^^^\n  = it is defined at shop/cart.vas:2\n  = call one of that file's ! functions to change it\n",
+    "stdout": ""
+  },
+  "a-path-into-a-parameter-takes-a-vector-or-a-buffer": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "at : (-> &(vector Float) Int Float)\nplot : (-> {:depth (vector Float), :color (vector1 a) | r} Int Float a {:depth (vector Float), :color (vector1 a) | r})\ncopy-cell : (-> &(vector number) (vector1 number) Int (vector1 number))\n2.0 : Float\n2.0 : Float\n{:depth [0.0 0.5], :color [0 7]} : {:depth [Float], :color [Int]}\n{:depth [0.0 0.5], :color [0 7]} : {:depth [Float], :color [Int]}\n[0 2] : [Int]\n#<fn> : (-> [number] [number] Bool)\n"
+  },
+  "a-plain-function-does-not-read-a-changing-name": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `score` changes in `hit!`, line 3: take it as a parameter\n --> a-plain-function-does-not-read-a-changing-name.vas:2:21\n  |\n2 | (fn doubled [] (* 2 score))\n  |                     ^^^^^\n  = `doubled` is a plain function, which sees no change; ! functions and handlers read the names that change\n",
+    "stdout": ""
+  },
+  "a-plain-function-does-not-read-a-modules-changing-name": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `scores/total` changes in `add!`, line 3: take it as a parameter\n --> a-plain-function-does-not-read-a-modules-changing-name.vas:2:19\n  |\n2 | (fn shown [] (str scores/total))\n  |                   ^^^^^^^^^^^^\n  = `shown` is a plain function, which sees no change; ! functions and handlers read the names that change\n",
+    "stdout": ""
+  },
+  "a-program-ends-when-its-top-level-tasks-have-run": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "the last line: the program ends, and the task it started stops\n"
+  },
+  "a-qualified-name-is-suggested-by-its-own-name": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: unknown name `string/repeat`\n --> a-qualified-name-is-suggested-by-its-own-name.vas:1:2\n  |\n1 | (string/repeat \"a\" 3)\n  |  ^^^^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "a-race-of-three-tasks": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "fast ended\nthe winner: fast\nb started\nthe winner: b\n"
+  },
+  "a-race-takes-two-or-more-tasks": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: `task/race` takes two or more arguments, but was given 1\n --> a-race-takes-two-or-more-tasks.vas:1:1\n  |\n1 | (task/race (task/succeed 1))\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "a-read-fixes-a-names-type": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: `add!` takes a String, and this is a number\n  | (add! 1)\n  |       ^\n  = in argument 1 of `add!`\n  = `log` holds [String], fixed by `shown!`\n",
+    "stdout": "vastra> log : [?log]\nadd! : (->! ?log Unit)\nshown! : (-> String)\nvastra> [String]\nvastra> vastra> vastra> \n"
+  },
+  "a-redefined-plus-is-called-as-written": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: `+` expects 2 arguments, but was given 3\n  | (+ 2 3 4)\n  | ^^^^^^^^^\n",
+    "stdout": "vastra> + : (-> number number number)\nvastra> 6 : Int\nvastra> vastra> vastra> \n"
+  },
+  "a-rejected-submission-fixes-no-type": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "name error: unknown name `undefined-name`\n  | (add! 1) (undefined-name)\n  |           ^^^^^^^^^^^^^^\n",
+    "stdout": "vastra> log : [?log]\nadd! : (->! ?log Unit)\nvastra> vastra> unit : Unit\nvastra> [\"a\"] : [String]\nvastra> vastra> \n"
+  },
+  "a-search-stops-the-answer-it-no-longer-wants": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "answered /search?q=va\n[\"results for /search?q=va\"] false\n[] false\n"
+  },
+  "a-second-let-of-a-name": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: `y` is already named in this body\n --> a-second-let-of-a-name.vas:3:8\n  |\n3 |   (let y 2)\n  |        ^\n  = to change it, write (set y value)\n",
+    "stdout": ""
+  },
+  "a-send-in-later-is-a-retry": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "type Msg\non Again\non Done\n"
+  },
+  "a-sleep-of-zero-or-less-returns-at-once": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "a sleep of zero returns at once\nso does a negative one\nthe message, handled at the first real wait\nafter a real sleep\n"
+  },
+  "a-stopwatch-ticks-until-paused": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "ticked: true, none after the pause: true, shown at a tick: true\n"
+  },
+  "a-task-function-takes-an-action": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "score : Int\nhit! : (->! Int Unit)\nlater-hit : (Task a Unit)\n0 : Int\n"
+  },
+  "a-task-holds-no-buffer": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a task cannot hold a buffer\n --> a-task-holds-no-buffer.vas:1:15\n  |\n1 | (task/succeed (buffer/repeat 2 0))\n  |               ^^^^^^^^^^^^^^^^^^^\n  = in argument 1 of `task/succeed`\n",
+    "stdout": ""
+  },
+  "a-task-on-a-line-without-at-does-nothing": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: this line does nothing: its value is not used\n --> a-task-on-a-line-without-at-does-nothing.vas:3:3\n  |\n3 |   (console/print \"hello\")\n  |   ^^^^^^^^^^^^^^^^^^^^^^^\n  = a body's last form gives its value; the lines before it name values with let, and change them with set\n  = a task on a line runs with @ before it: @(console/print \"hi\")\n",
+    "stdout": ""
+  },
+  "a-task-that-can-fail-needs-clauses-in-later": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this task can fail, and `later` has no clause for it\n --> a-task-that-can-fail-needs-clauses-in-later.vas:2:10\n  |\n2 |   (later (task/fail \"no answer\"))\n  |          ^^^^^^^^^^^^^^^^^^^^^^^\n  = later runs it on its own, so its clauses take each end: (later (http/get-text url) [(Ok text) ...] [(Err why) ...])\n  = Never does not match String\n",
+    "stdout": ""
+  },
+  "a-type-a-macro-writes-follows-the-same-rules": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: the type `Shape` changes only in its file\n  | (enum Shape Circle Square Triangle)\n  |       ^^^^^\n  = it is defined at shapes.vas:3\n",
+    "stdout": "vastra> macro enum\nvastra> type Mood\nvastra> mood : Mood\nvastra> type Mood\nvastra> mood : Mood\nvastra> Sleepy : Mood\nvastra> module app\nvastra> module shapes\nvastra> vastra> type Shape\nvastra> \n"
+  },
+  "a-type-holds-an-action": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "n : Int\ntype Move\nbump! : (->! Unit)\nm : Move\nunit : Unit\n1 : Int\n"
+  },
+  "a-type-the-prompt-defined-changes-there": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: redefining `Shape` breaks `area`\n  | (type Shape (Circle Float) (Square Float) (Triangle Float))\n  |       ^^^^^\n  = in `area`: this match does not handle every case\n  = redefine `area` in the same submission to change both\ntype error: the type `Shape` is already defined\n  | (type Shape (Circle Float)) (type Shape (Circle Float) (Square Float))\n  |                                   ^^^^^\n  = a type has one definition in a file, or in one submission at the prompt\n",
+    "stdout": "vastra> type Shape\nvastra> area : (-> Shape Float)\nvastra> label : (-> Shape String)\nvastra> vastra> type Shape\narea : (-> Shape Float)\nvastra> 1.0 : Float\nvastra> \"angled\" : String\nvastra> type Shape\nvastra> vastra> vastra> \n"
+  },
+  "a-types-plain-function-takes-no-action": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `Step` takes a function (-> Int Int), and this is a function (->! Int Int)\n --> a-types-plain-function-takes-no-action.vas:4:7\n  |\n4 | (Step (fn [x] (set! n x) x))\n  |       ^^^^^^^^^^^^^^^^^^^^^\n  = in argument 1 of `Step`\n  = a function that acts can't go where a plain one, ->, is taken\n",
+    "stdout": ""
+  },
+  "a-value-keeps-its-type": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> base : (-> number)\nvastra> total : Int\nvastra> base : (-> String)\nvastra> 2 : Int\nvastra> vastra> \n"
+  },
+  "a-value-keeps-the-version-of-its-type": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: this is a Shape made before `Shape` changed\n  | (area unit)\n  |       ^^^^\n  = in argument 1 of `area`\n  = a value keeps the version of its type it was made with\ntype error: this is a Shape made before `Shape` changed\n  | (area *1)\n  |       ^^\n  = in argument 1 of `area`\n  = a value keeps the version of its type it was made with\n",
+    "stdout": "vastra> type Shape\nvastra> area : (-> Shape Float)\nvastra> unit : Shape\nvastra> (Circle 2.0) : Shape\nvastra> type Shape\narea : (-> Shape Float)\nvastra> vastra> vastra> (Square 1.0) : Shape\nvastra> 1.0 : Float\nvastra> vastra> \n"
+  },
+  "a-vector-holds-no-buffer": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a vector cannot hold a buffer\n --> a-vector-holds-no-buffer.vas:2:7\n  |\n2 | (wrap (buffer/repeat 2 0))\n  |       ^^^^^^^^^^^^^^^^^^^\n  = in argument 1 of `wrap`\n",
+    "stdout": ""
+  },
+  "a-vector-or-buffer-used-twice-is-a-vector": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "mark : (-> [number] [[number]])\nkeep : (-> [a] (-> Int (Option a)))\n"
+  },
+  "a-view-calls-no-!-function": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a view only reads: it cannot change the file's names\n --> a-view-calls-no-!-function.vas:5:3\n  |\n5 |   (count!)\n  |   ^^^^^^^^\n  = it is drawn after every change, so a change in it would set itself off again; a button in it sends a message, and a handler makes the change\n",
+    "stdout": ""
+  },
+  "a-view-cannot-wait": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a view cannot wait\n --> a-view-cannot-wait.vas:2:40\n  |\n2 | (view \"#app\" (html [:p (html/text (str @clock/now))]))\n  |                                        ^^^^^^^^^^\n  = it is drawn after every change, and a wait would hold up the drawing\n",
+    "stdout": ""
+  },
+  "a-view-in-a-page-gives-html": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a view in a page gives html\n --> a-view-in-a-page-gives-html.vas:1:7\n  |\n1 | (view \"#app\" 42)\n  |       ^^^^^^\n  = require vastra.html\n",
+    "stdout": ""
+  },
+  "a-view-makes-no-call-that-acts": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a view only reads: it cannot change the file's names\n --> a-view-makes-no-call-that-acts.vas:5:3\n  |\n5 |   (map! count! [1 2])\n  |   ^^^^^^^^^^^^^^^^^^^\n  = it is drawn after every change, so a change in it would set itself off again; a button in it sends a message, and a handler makes the change\n",
+    "stdout": ""
+  },
+  "a-view-names-its-place": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a view's place is a selector, like \"#app\", or a window, not a value of type number\n --> a-view-names-its-place.vas:2:7\n  |\n2 | (view 42 (html [:p \"here\"]))\n  |       ^^\n",
+    "stdout": ""
+  },
+  "a-view-only-reads": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a view only reads: it cannot change the file's names\n --> a-view-only-reads.vas:4:3\n  |\n4 |   (set! shown (inc shown))\n  |   ^^^^^^^^^^^^^^^^^^^^^^^^\n  = it is drawn after every change, so a change in it would set itself off again; a button in it sends a message, and a handler makes the change\n",
+    "stdout": ""
+  },
+  "a-view-stops-nothing": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a view only reads: it cannot change the file's names\n --> a-view-stops-nothing.vas:3:18\n  |\n3 | (view \"#app\" (do (stop! running) (html [:p \"x\"])))\n  |                  ^^^^^^^^^^^^^^^\n  = it is drawn after every change, so a change in it would set itself off again; a button in it sends a message, and a handler makes the change\n",
+    "stdout": ""
+  },
+  "a-window-runs-frames-until-it-closes": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "frame 1\nframe 2\nframe 3\nclosing\n"
+  },
+  "actions-passed-as-values": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "score : Int\nlast : Int\nhit! : (->! Int Unit)\napply-to : (->? (->? a b) a b)\nunit : Unit\n4 : Int\n[unit unit unit] : [Unit]\n[unit unit unit] : [Unit]\n[15 3] : [Int]\ntwice : (-> (->? a a) (->? a a))\njump! : (->! Int Int)\njump-twice! : (->! Int Int)\n1 : Int\n17 : Int\nmoves : {:jump (->! Int Int)}\nmove! : (->! Int Int)\n2 : Int\n19 : Int\n"
+  },
+  "adt-define-and-match": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "type Shape\narea : (-> Shape Float)\n12.0 : Float\n6.0 : Float\n#<fn Circle> : (-> Float Shape)\n"
+  },
+  "adt-parameterized-recursive": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "type (Tree a)\ninsert : (-> comparable (Tree comparable) (Tree comparable))\n(Node Leaf 1 (Node (Node Leaf 2 Leaf) 3 Leaf)) : (Tree Int)\n"
+  },
+  "an-at-line-runs-the-task-and-goes-on": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "hello\nAna\n3\n"
+  },
+  "an-error-in-an-earlier-submission-points-there": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "runtime error: evaluation is nested too deeply (limit: 100000)\n --> repl:2:9\n  |\n2 |   (+ 1 (forever n)))\n  |         ^^^^^^^\n  = only calls in tail position can repeat without limit\n",
+    "stdout": "vastra>   ...> forever : (-> a number)\nvastra> vastra> vastra> \n"
+  },
+  "and-or-comment": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "false : Bool\ntrue : Bool\ntrue : Bool\nunit : Unit\n"
+  },
+  "and-or-need-two": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "syntax error: `and` expects 2 forms or more, but was given 1\n  | (and true)\n  | ^^^^^^^^^^\ntype error: `or` takes Bools, and this is a number\n  | (or false false 1)\n  |                 ^\n",
+    "stdout": "vastra> vastra> vastra> vastra> \n"
+  },
+  "and-or-take-more": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "false : Bool\ntrue : Bool\ntrue : Bool\nfalse : Bool\nendless : (-> a number)\ntrue : Bool\nfalse : Bool\n"
+  },
+  "another-file-calls-its-!-functions": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module app\nunit : Unit\nunit : Unit\n[\"tea\" \"cake\"] : [String]\nunit : Unit\n[] : [String]\n"
+  },
+  "apply-n-on-maps": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "apply-n : (->? (->? a a) number a a)\nbirthday : (-> {:name a, :age number | r} {:name a, :age number})\n{:name \"Ana\", :age 33} : {:name String, :age Int}\n"
+  },
+  "arity-of-builtin": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: `+` takes two or more arguments, but was given 1\n --> arity-of-builtin.vas:1:1\n  |\n1 | (+ 1)\n  | ^^^^^\n",
+    "stdout": ""
+  },
+  "arity-of-lambda": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this function expects 2 arguments, but was given 1\n --> arity-of-lambda.vas:1:1\n  |\n1 | ((fn [x y] x) 1)\n  | ^^^^^^^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "assoc-is-set": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "{:a 10, :b 2} : {:a Int, :b Int}\n{:users [{:name \"Bo\"}]} : {:users [{:name String}]}\n"
+  },
+  "await-at-the-top-level-binds-the-value": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> model : {:count Int}\ngrow! : (->! Unit)\nvastra> snapshot : {:count Int}\nvastra> unit : Unit\nvastra> {:count 2} : {:count Int}\nvastra> 7 : Int\nvastra> from-task : Int\nvastra> 41 : Int\nvastra> vastra> \n"
+  },
+  "await-definition-not-run-by-vastra-file": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "command error: `snapshot` runs a task to get its value, and `vastra FILE` runs no tasks\n --> await-definition-not-run-by-vastra-file.vas:1:15\n  |\n1 | (let snapshot @(task/succeed 1))\n  |               ^^^^^^^^^^^^^^^^^\n  = `vastra run` runs tasks, as does the REPL\n  try: vastra run await-definition-not-run-by-vastra-file.vas\n",
+    "stdout": ""
+  },
+  "await-in-a-change-in-a-program": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "count: 5\n"
+  },
+  "await-in-a-change-waits-before-it": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: at :count: expected Int, found (Task _ number)\n  | (update! model :count (fn [n] @(task/succeed 8)))\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = `model` keeps its type: set! and update! cannot change it\n",
+    "stdout": "vastra> model : {:count Int, :users [{:name String}]}\nreset! : (->! Unit)\nvastra> unit : Unit\nvastra> unit : Unit\nvastra> unit : Unit\nvastra> vastra> {:count 6, :users [{:name \"Bo!\"}]} : {:count Int, :users [{:name String}]}\nvastra> vastra> \n"
+  },
+  "await-in-a-function-gives-a-task": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> read : (-> (Task a number))\nvastra> 2 : Int\nvastra> label : (-> (Task a String))\nvastra> \"count: 2\" : String\nvastra> vastra> \n"
+  },
+  "await-in-a-macro": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: @ runs a task, and a macro's code cannot run tasks\n --> await-in-a-macro.vas:1:18\n  |\n1 | (macro twice [x] @x)\n  |                  ^^\n",
+    "stdout": ""
+  },
+  "await-in-pure-code-is-a-task": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `string-append` takes a String, and this is a (Task _ String)\n --> await-in-pure-code-is-a-task.vas:2:16\n  |\n2 | (string-append (label unit) \"!\")\n  |                ^^^^^^^^^^^^\n  = in argument 1 of `string-append`\n",
+    "stdout": ""
+  },
+  "await-needs-a-state-or-a-task": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: @ goes before a task, not a value of type number\n --> await-needs-a-state-or-a-task.vas:1:2\n  |\n1 | @5\n  |  ^\n",
+    "stdout": ""
+  },
+  "await-runs-in-order-and-only-the-chosen-branch": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "first\nsecond\nfirst then second\nchosen\nmatched\n"
+  },
+  "await-runs-tasks": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> model : {:count Int, :step-text String}\nvastra> other : Int\nvastra> 2 : Int\nvastra> 12 : Int\nvastra> \"a task's result\" : String\nvastra> 21 : Int\nvastra> 2 : Int\nvastra> (Task a number)\nvastra> vastra> \n"
+  },
+  "await-tasks-must-share-their-error": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: expected (Task String _), found (Task number number)\n --> await-tasks-must-share-their-error.vas:1:21\n  |\n1 | (+ @(task/fail \"x\") @(task/fail 1))\n  |                     ^^^^^^^^^^^^^^\n  = tasks awaited together with @ must fail with the same error type: task/map-err converts one\n  = String does not match number\n",
+    "stdout": ""
+  },
+  "big-integer-add": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "9223372036854775808 : Int\n"
+  },
+  "big-integer-multiply": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "18446744073709551614 : Int\n"
+  },
+  "big-integer-multiply-negative": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "9223372036854775808 : Int\n"
+  },
+  "big-integer-subtract": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "-9223372036854775809 : Int\n"
+  },
+  "bit-operations": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "240 : Int\n48 : U8\n4095 : I16\n-6 : Int\n250 : U8\n-6 : I8\nmask : (-> integer integer)\n52 : U16\n"
+  },
+  "browser-modules-need-the-browser": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: the module vastra.browser runs only on js, not on native\n --> browser-modules-need-the-browser.vas:1:19\n  |\n1 | (ns app (:require [vastra.browser :as browser]))\n  |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "buffer-step-of-the-wrong-kind": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a step into a buffer is an index (an Int), not a key like :first\n --> buffer-step-of-the-wrong-kind.vas:1:26\n  |\n1 | (set (buffer/repeat 2 0) :first 1)\n  |                          ^^^^^^\n",
+    "stdout": ""
+  },
+  "buffers-take-a-vectors-paths": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "[0 0 0] : [Int]\n[0 7 0] : [Int]\n[0 0 0 7] : [Int]\n[0 0 0] : [Int]\n[2 2 3] : [Int]\n(Some 2) : (Option Int)\nNone : (Option Int)\n{:depth [1.5 0.0], :color [0 0]} : {:depth [Float], :color [Int]}\n[1 2] : [Int]\n[1 2] : [Int]\n#<fn> : (-> Int (Buffer Float))\ntally : (-> [Int] [number])\n[1 0 2 0 0 3] : [Int]\n"
+  },
+  "c-double-conversions": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "xs : [Float]\n[-98765 -2 -1 0 0 0 1 2 1234] : [I32]\nfloor-int : (-> Float I32)\n[-98766 -3 -1 -1 0 0 1 2 1234] : [I32]\nclamp : (-> comparable comparable comparable comparable)\nchannel : (-> Float I32)\n[0 0 4096 8192 11585 16384 16384 16384] : [I32]\n"
+  },
+  "c-hash-and-random-numbers": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "hash : (-> number number1 U32)\n0 : U32\n3792824159 : U32\n133181471 : U32\n2321422717 : U32\n731167729 : U32\n2413582066 : U32\nnext-random : (-> integer {:value Float, :seed integer})\nrandoms : (-> number integer [{:value Float, :seed integer}])\n[{:value 6.29425048828125e-05, :seed 270369} {:value 0.015747427940368652, :seed 67634689} {:value 0.6164040565490723, :seed 2647435461} {:value 0.07161861658096313, :seed 307599695} {:value 0.5584883093833923, :seed 2398689233}] : [{:value Float, :seed U32}]\n"
+  },
+  "calling-a-non-function": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this is not a function; it has type number\n --> calling-a-non-function.vas:1:2\n  |\n1 | (1 2)\n  |  ^\n",
+    "stdout": ""
+  },
+  "calling-a-string": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this is not a function; it has type String\n --> calling-a-string.vas:1:2\n  |\n1 | (\"f\" 1)\n  |  ^^^\n",
+    "stdout": ""
+  },
+  "caret-is-the-cores-whatever-a-module-calls-par": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module app\n\"a map of 2\" : String\n[2 3] : [Int]\n"
+  },
+  "caret-is-the-parallel-version": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "#<fn par/map> : (-> (-> a b) [a] [b])\n[2 3 4] : [Int]\n[2 3] : [Int]\n6 : Int\n3 : Int\n"
+  },
+  "caret-must-be-followed-by-a-name": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "read error: `^` must be followed by a name\n --> caret-must-be-followed-by-a-name.vas:1:2\n  |\n1 | (^(fn [x] x) [1])\n  |  ^\n  = ^map is par/map, as in (^map f xs)\n",
+    "stdout": ""
+  },
+  "caret-name-without-a-parallel-version": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: `map-indexed` has no parallel version\n --> caret-name-without-a-parallel-version.vas:1:2\n  |\n1 | (^map-indexed (fn [i x] (+ i x)) [1 2])\n  |  ^^^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "cli-exit-ends-the-program": {
+    "exit": 3,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "the program ends at cli/exit, and the task it started stops\n"
+  },
+  "clock-elapsed-never-goes-back": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "in order: true\nfrom zero, and on after a sleep: true true\n"
+  },
+  "clock-needs-its-module": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: unknown name `clock/now`\n --> clock-needs-its-module.vas:1:1\n  |\n1 | clock/now\n  | ^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "clock-now-gives-the-time": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "seconds after 2023, before 2100: true\n"
+  },
+  "clock-now-is-a-task": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module clock\n#<task> : (Task a Float)\nreading : (Task a Float)\n"
+  },
+  "clock-now-is-not-a-function": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `clock/now` is a task, not a function\n --> clock-now-is-not-a-function.vas:2:2\n  |\n2 | (clock/now)\n  |  ^^^^^^^^^\n  = a task gives its value where @ runs it\n  try: @clock/now\n",
+    "stdout": ""
+  },
+  "clock-timeout-gives-some-or-none": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "in time ended\n(Some \"in time\")\nNone\nthe late one stopped when the time ran out\n"
+  },
+  "closures": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "adder : (-> number (-> number number))\n42 : Int\nadd-ten : (-> Int Int)\n15 : Int\n"
+  },
+  "code-that-writes-a-type-follows-it": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: redefining `Person` breaks `older`\n  | (type Person {:name String})\n  |       ^^^^^^\n  = in `older`: missing key :age\n  = redefine `older` in the same submission to change both\n",
+    "stdout": "vastra> vastra> vastra> vastra> type Person\nvastra> greet : (-> {:name String} String)\nvastra> type Person\nvastra> \"Hi Ada\" : String\nvastra> older : (-> {:name String, :age Int} Int)\nvastra> vastra> type Gender\nvastra> same : (-> Gender Gender)\nvastra> type Gender\nvastra> Other : Gender\nvastra> vastra> \n"
+  },
+  "comment-is-ignored": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "unit : Unit\n"
+  },
+  "comparable-and-equatable": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "true : Bool\n7 : Int\ntrue : Bool\ntrue : Bool\nfalse : Bool\n#<fn> : (-> comparable comparable comparable)\n#<fn> : (-> equatable equatable Bool)\n"
+  },
+  "comparison-on-records": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `<` compares numbers and Strings, and a map is neither\n --> comparison-on-records.vas:1:4\n  |\n1 | (< {:a 1} {:a 2})\n  |    ^^^^^^\n  = in argument 1 of `<`\n",
+    "stdout": ""
+  },
+  "comparisons": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "true : Bool\ntrue : Bool\nfalse : Bool\ntrue : Bool\nfalse : Bool\nfalse : Bool\n"
+  },
+  "cond-errors": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "syntax error: cond needs a [_ ...] clause at the end\n  | (cond [(< 1 2) \"yes\"])\n  | ^^^^^^^^^^^^^^^^^^^^^^\n  = there is no nil to give when no test holds\nsyntax error: `_` can only be the last test of a cond\n  | (cond [_ 1] [(< 1 2) 2])\n  |        ^\n  = for example: (cond [(< n 0) \"below\"] [_ \"not below\"])\nsyntax error: a clause of cond needs a test and its lines: [test line ...]\n  | (cond [(< 1 2) 1] [(> 1 2)])\n  |                   ^^^^^^^^^\nsyntax error: a clause of cond goes in brackets: [test line ...]\n  | (cond (< 1 2) 1 _ 2)\n  |       ^^^^^^^^^\n  try: (cond [(< 1 2) 1] [_ 2])\nsyntax error: a cond ends with [_ ...], not [:else ...]\n  | (cond [(< 1 2) 1] [:else 2])\n  |                    ^^^^^\n  = `_` takes what no test before it took, as in a match\n  try: (cond [(< 1 2) 1] [_ 2])\ntype error: a cond's test is a Bool, and this is a number\n  | (cond [1 2] [_ 3])\n  |        ^\ntype error: this result is a String, and the one before a number\n  | (cond [(< 1 2) 1] [_ \"one\"])\n  |                      ^^^^^\nsyntax error: `cond` is a special form and cannot be used as a value\n  | cond\n  | ^^^^\n",
+    "stdout": "vastra> vastra> vastra> vastra> vastra> vastra> vastra> vastra> vastra> vastra> \n"
+  },
+  "cond-gives-the-first-that-holds": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "status : (-> number number1)\n[500 404 200] : [Int]\n\"only\" : String\nsign : (-> number String)\n\"below\" : String\n\"a keyword elsewhere\" : String\n"
+  },
+  "constructor-arity": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `Rect` expects 2 arguments, but was given 1\n --> constructor-arity.vas:2:1\n  |\n2 | (Rect 1.0)\n  | ^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "constructor-holding-values-doesnt-decode": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `Circle` holds values, so JSON can't decode to `Shape`\n --> constructor-holding-values-doesnt-decode.vas:4:16\n  |\n4 |   (let shapes::[Shape] data\n  |                ^^^^^^^\n  = a constructor holding values is decoded with vastra.decode\n",
+    "stdout": ""
+  },
+  "constructor-without-a-word-doesnt-decode": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `Male` has no outside word, so JSON can't decode to `Gender`\n --> constructor-without-a-word-doesnt-decode.vas:4:17\n  |\n4 |   (let genders::[Gender] data\n  |                 ^^^^^^^^\n  = a constructor's word follows it: (type Gender Female \"female\" Male \"male\")\n",
+    "stdout": ""
+  },
+  "constructor-words-decode": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module people\ntype Gender\ntype Person\npeople : (-> String String)\n\"[{:name \\\"Ada\\\", :gender Female} {:name \\\"Edsger\\\", :gender Male}]\" : String\n\"in [1].gender: expected \\\"female\\\" or \\\"male\\\", found \\\"f\\\"\" : String\n\"in [0].gender: expected \\\"female\\\" or \\\"male\\\", found a number\" : String\ntrue : Bool\n"
+  },
+  "decoding-follows-the-outside-words": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> vastra> vastra> module people\nvastra> type Gender\nvastra> type Person\nvastra>   ...>   ...>   ...>   ...>   ...> genders : (-> String String)\nvastra>   ...>   ...>   ...>   ...>   ...> people : (-> String String)\nvastra> type Gender\nvastra> \"[Female Male]\" : String\nvastra> \"[{:name \\\"Ada\\\", :gender Female}]\" : String\nvastra> \"in [0].gender: expected \\\"f\\\" or \\\"m\\\", found \\\"female\\\"\" : String\nvastra> vastra> \n"
+  },
+  "deep-but-allowed-recursion": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "count-down : (-> number number1)\n0 : Int\n"
+  },
+  "deep-recursion-limit": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "runtime error: evaluation is nested too deeply (limit: 100000)\n --> deep-recursion-limit.vas:1:23\n  |\n1 | (fn forever [n] (+ 1 (forever n)))\n  |                       ^^^^^^^\n  = only calls in tail position can repeat without limit\n",
+    "stdout": ""
+  },
+  "deeper-occurs": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this would need a type that contains itself\n --> deeper-occurs.vas:1:12\n  |\n1 | (fn [f] (f (fn [y] (f y))))\n  |            ^^^^^^^^^^^^^^\n  = in argument 1 of `f`\n",
+    "stdout": ""
+  },
+  "definition-uses-previous-value": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> x : Int\nvastra> x : Int\nvastra> 2 : Int\nvastra> vastra> \n"
+  },
+  "dependent-still-fits-new-type": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> base : Int\nvastra> show-base : (-> String)\nvastra> base : String\nvastra> \"base is one\" : String\nvastra> vastra> \n"
+  },
+  "dependent-takes-the-new-type": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: redefining `helper` breaks `double`\n  | (fn helper [x] (str x))\n  | ^^^^^^^^^^^^^^^^^^^^^^^\n  = in `double`: `*` takes a number, and this is a String\n  = redefine `double` in the same submission to change both\n",
+    "stdout": "vastra> helper : (-> a a)\nvastra> wrap : (-> a a)\nvastra> helper : (-> number number)\nvastra> 3 : Int\nvastra> double : (-> number number)\nvastra> vastra> 8 : Int\nvastra> vastra> \n"
+  },
+  "dictionaries": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "{1 1, 2 1, 3 3} : (Dict Int Int)\n{\"a\" 1, \"b\" 2} : (Dict String Int)\n(Some 1) : (Option Int)\n2 : Int\n[{:key \"a\", :value 1} {:key \"b\", :value 2}] : [{:key String, :value Int}]\n"
+  },
+  "dir-marks-the-names-that-change": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> total : Int\nvastra> bump! : (->! Unit)\nvastra> unit : Unit\nvastra> width : Int\nvastra> total : Int  = 1\nbump! : (->! Unit)\nwidth : Int\nvastra> vastra> \n"
+  },
+  "docstrings": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "answer : Int\ntwice : (->? (->? a a) a a)\n42 : Int\n"
+  },
+  "empty-file": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": ""
+  },
+  "empty-list": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: an empty list () cannot be evaluated\n --> empty-list.vas:1:1\n  |\n1 | ()\n  | ^^\n",
+    "stdout": ""
+  },
+  "equality-on-functions": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `=` can't compare functions\n --> equality-on-functions.vas:1:4\n  |\n1 | (= inc dec)\n  |    ^^^\n  = in argument 1 of `=`\n",
+    "stdout": ""
+  },
+  "equality-on-records-with-functions": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `=` can't compare a map, since it holds a function\n --> equality-on-records-with-functions.vas:1:4\n  |\n1 | (= {:f inc} {:f inc})\n  |    ^^^^^^^^\n  = in argument 1 of `=`\n",
+    "stdout": ""
+  },
+  "es-modules-need-javascript": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: an ES module is imported only where JavaScript runs\n --> es-modules-need-javascript.vas:1:18\n  |\n1 | (ns app (:import [dayjs \"dayjs\"]))\n  |                  ^^^^^^^^^^^^^^^\n  = a module that imports one says (:target :js)\n",
+    "stdout": ""
+  },
+  "every-message-has-an-on": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: the file's handlers don't take every message\n --> every-message-has-an-on.vas:3:1\n  |\n3 | (on Inc (set! n (inc n)))\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^\n  = missing: Reset (add an on for it)\n",
+    "stdout": ""
+  },
+  "first-of-races-a-vector": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "fast ended\n(Some \"fast\")\nnone at once: None\nthe message, handled at the first real wait\n(Err \"failed first\")\n"
+  },
+  "fixed-width-edges-in-javascript": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "3410065408 : U32\n-2 : I32\n2147483647 : I32\nfalse : Bool\n[1 4000000000] : [U32]\n4294967295 : Int\n4294967295.0 : Float\n"
+  },
+  "fixed-width-float-edges-in-javascript": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "4294967295 : U32\n4294967295 : U32\n-2147483648 : I32\n-2147483648 : I32\n2147483647 : I32\n"
+  },
+  "fixed-width-integers": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "44 : U8\n253 : U8\n-25536 : I16\n65535 : U16\n-1 : I32\n4 : U8\n255 : U8\n-56 : I8\ntrue : Bool\ntrue : Bool\n7 : U16\n(Some -128) : (Option I8)\n(Some 2) : (Option I16)\nNone : (Option U8)\n\"max\" : String\n\"7 and -7\" : String\n-7 : Int\nhash-step : (-> number number number)\n3740915929 : U32\n"
+  },
+  "fixed-widths-clamp-a-float": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "#<fn> : (-> number U8)\n255 : U8\n44 : U8\n0 : U8\n253 : U8\n254 : U8\n-128 : I8\n-128 : I8\n2147483647 : I32\n0 : I32\n0 : U16\n0 : I16\n"
+  },
+  "floats-cannot-be-matched": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this pattern matches an integer, and the value matched is a Float\n --> floats-cannot-be-matched.vas:1:13\n  |\n1 | (match 1.5 [2 \"two\"] [_ \"other\"])\n  |             ^\n",
+    "stdout": ""
+  },
+  "fn-docstring": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "id : (-> a a)\n5 : Int\n"
+  },
+  "fn-docstring-only": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: fn expects a parameter vector, like [x]\n --> fn-docstring-only.vas:1:7\n  |\n1 | (fn f \"doc\")\n  |       ^^^^^\n  = for example: (fn [params] body)\n",
+    "stdout": ""
+  },
+  "fn-duplicate-params": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: the parameter `x` appears twice\n --> fn-duplicate-params.vas:1:8\n  |\n1 | (fn [x x] x)\n  |        ^\n",
+    "stdout": ""
+  },
+  "fn-named-no-body": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: fn needs a body\n --> fn-named-no-body.vas:1:1\n  |\n1 | (fn f [x])\n  | ^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "fn-named-no-params": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: fn needs a parameter vector and a body\n --> fn-named-no-params.vas:1:1\n  |\n1 | (fn f)\n  | ^^^^^^\n  = for example: (fn [params] body)\n",
+    "stdout": ""
+  },
+  "fn-param-not-symbol": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: expected a name (a symbol) here\n --> fn-param-not-symbol.vas:1:6\n  |\n1 | (fn [1] 1)\n  |      ^\n",
+    "stdout": ""
+  },
+  "fn-params-not-vector": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: fn expects a parameter vector, like [x]\n --> fn-params-not-vector.vas:1:7\n  |\n1 | (fn x x)\n  |       ^\n  = for example: (fn name [params] body)\n",
+    "stdout": ""
+  },
+  "fn-without-body": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: fn needs a body\n --> fn-without-body.vas:1:1\n  |\n1 | (fn [x])\n  | ^^^^^^^^\n",
+    "stdout": ""
+  },
+  "fn-without-params": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: fn needs a parameter vector and a body\n --> fn-without-params.vas:1:1\n  |\n1 | (fn)\n  | ^^^^\n  = for example: (fn [params] body)\n",
+    "stdout": ""
+  },
+  "for-cannot-hold-a-buffer-from-outside": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a function cannot hold `screen` from outside, since it holds a buffer\n --> for-cannot-hold-a-buffer-from-outside.vas:3:25\n  |\n3 |   (for [i [0 1 2]] (set screen i 7)))\n  |                         ^^^^^^\n  = in this use of `for`\n",
+    "stdout": ""
+  },
+  "for-two-bindings": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: for needs one binding and a body\n --> for-two-bindings.vas:1:1\n  |\n1 | (for [x [1] y [2]] x)\n  | ^^^^^^^^^^^^^^^^^^^^^\n  = for example: (for [x xs] body)\n",
+    "stdout": ""
+  },
+  "forgotten-question-mark-in-a-map": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: unexpected key :title\n --> forgotten-question-mark-in-a-map.vas:2:8\n  |\n2 | (greet {:name \"Edsger\" :title \"Prof.\"})\n  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = in argument 1 of `greet`\n  = expected: {:title? String, :name _ ...}\n  = found:    {:name String, :title String}\n  try: (greet {:name \"Edsger\" :title? \"Prof.\"})\n",
+    "stdout": ""
+  },
+  "forgotten-question-mark-where-read": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: unexpected key :title?\n --> forgotten-question-mark-where-read.vas:2:8\n  |\n2 | (shout {:title? \"Prof.\"})\n  |        ^^^^^^^^^^^^^^^^^\n  = in argument 1 of `shout`\n  = expected: {:title _ ...}\n  = found:    {:title? String}\n  try: (shout {:title \"Prof.\"})\n",
+    "stdout": ""
+  },
+  "functions-print-by-name": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "greet : (-> {:name a | r} String)\n#<fn greet> : (-> {:name a | r} String)\n#<fn +> : (-> Int Int Int)\n#<fn string-append> : (-> String String String)\n#<fn> : (-> a a)\n"
+  },
+  "generic-code-passes-a-buffer-on": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "pick : (-> Bool a a a)\n#<fn> : (-> a [a])\n[1 1] : [Int]\n[1 2 0] : [Int]\n[5] : [Int]\n"
+  },
+  "generic-code-using-a-value-twice-is-not-given-a-buffer": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `x` is used twice, at line 1, so it cannot be a buffer\n --> generic-code-using-a-value-twice-is-not-given-a-buffer.vas:2:7\n  |\n2 | (both (buffer/repeat 2 0))\n  |       ^^^^^^^^^^^^^^^^^^^\n  = in argument 1 of `both`\n",
+    "stdout": ""
+  },
+  "generic-functions-in-builds": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "double : (-> number number)\nquadruple : (-> number number)\n12 : Int\n6.0 : Float\n144 : U8\ndoubles : (-> [number] [number])\n[3.0 5.0] : [Float]\nzero : (-> number)\n0.5 : Float\nscaled : (-> number number)\n30 : Int\n30.0 : Float\nmix : (-> number number [number])\n[2 -128] : [I8]\nsum-to : (-> number number)\n5050 : Int\n209 : U8\n"
+  },
+  "get-along-paths": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "data : {:users [{:name String, :age Int}], :ages (Dict String Int), :owner {:name String, :address {:city String}}}\n\"Porto\" : String\n(Some \"Bo\") : (Option String)\n(Some 22) : (Option Int)\n(Some 3) : (Option Int)\n#<fn> : (-> &{:users (vector {:name a | r}) | s} (Option a))\n#<fn> : (-> {:owner {:address {:city a | r} | s} | t} a)\n"
+  },
+  "get-is-not-a-value": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: `get` is a special form and cannot be used as a value\n --> get-is-not-a-value.vas:1:6\n  |\n1 | (map get [[1]])\n  |      ^^^\n",
+    "stdout": ""
+  },
+  "get-map-key-not-a-keyword": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a map's key in a path is written as a keyword, like :name\n --> get-map-key-not-a-keyword.vas:1:13\n  |\n1 | (get {:a 1} \"a\")\n  |             ^^^\n",
+    "stdout": ""
+  },
+  "get-missing-steps-give-none": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "users : [{:name String}]\nNone : (Option String)\nNone : (Option String)\nNone : (Option Int)\n(Some None) : (Option (Option Int))\nNone : (Option (Option Int))\n"
+  },
+  "get-misspelt-key": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: missing key :usr\n --> get-misspelt-key.vas:1:28\n  |\n1 | (get {:user {:name \"Ana\"}} :usr :name)\n  |                            ^^^^\n  = this path goes through :usr, so the map needs it\n  = expected: {:usr _ ...}\n  = found:    {:user {:name String}}\n  try: (get {:user {:name \"Ana\"}} :user :name)\n",
+    "stdout": ""
+  },
+  "get-needs-a-path": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "syntax error: get needs what to read and a path\n  | (get table)\n  | ^^^^^^^^^^^\n  = without a path, the value is table itself\nsyntax error: get needs what to read and a path\n  | (get)\n  | ^^^^^\n  = for example: (get map :key 0)\n",
+    "stdout": "vastra> table : {:cards [Int]}\nvastra> vastra> vastra> vastra> \n"
+  },
+  "get-reads-a-name": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> table : {:cards [{:face-up Bool}]}\nvastra> (Some false) : (Option Bool)\nvastra> unit : Unit\nvastra> (Some true) : (Option Bool)\nvastra> None : (Option Bool)\nvastra> vastra> \n"
+  },
+  "get-step-of-the-wrong-kind": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a step into a vector is an index (an Int), not a key like :first\n --> get-step-of-the-wrong-kind.vas:1:14\n  |\n1 | (get [1 2 3] :first)\n  |              ^^^^^^\n",
+    "stdout": ""
+  },
+  "greet-define-and-call": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "greet : (-> {:name a | r} String)\n\"Hi Ana\" : String\n\"Hi Bo\" : String\n"
+  },
+  "greet-missing-key": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `greet` reads :name, and this map has no :name\n --> greet-missing-key.vas:2:8\n  |\n2 | (greet {:nmae \"Bo\"})\n  |        ^^^^^^^^^^^^\n  = in argument 1 of `greet`\n  = expected: {:name _ ...}\n  = found:    {:nmae String}\n  try: (greet {:name \"Bo\"})\n",
+    "stdout": ""
+  },
+  "greet-not-a-map": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `greet` takes a map {:name _ ...}, and this is a number\n --> greet-not-a-map.vas:2:8\n  |\n2 | (greet 42)\n  |        ^^\n  = in argument 1 of `greet`\n",
+    "stdout": ""
+  },
+  "greet-too-many-arguments": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `greet` expects 1 argument, but was given 2\n --> greet-too-many-arguments.vas:2:1\n  |\n2 | (greet {:name \"a\"} {:name \"b\"})\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "greet-typo-in-name": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: unknown name `gret`\n --> greet-typo-in-name.vas:2:2\n  |\n2 | (gret {:name \"Ana\"})\n  |  ^^^^\n  try: (greet {:name \"Ana\"})\n",
+    "stdout": ""
+  },
+  "greet-wrong-field-type": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "greet : (-> {:name a | r} String)\n\"Hi 42\" : String\n"
+  },
+  "grouped-redefinition": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> base : Int\nvastra> add-base : (-> Int Int)\nvastra> base : String\nadd-base : (-> a String)\nvastra> \"1!\" : String\nvastra> vastra> \n"
+  },
+  "handlers-and-views": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module app\ntype Msg\ntotal : Int\non Increment\non (Add n)\nview \"#app\"\n"
+  },
+  "hex-literals": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "255 : Int\n-16 : Int\n4278190080 : U32\n4278190080 : U32\n\"max\" : String\n'(+ 0xff -0x1a) : Form\n"
+  },
+  "hex-literals-are-whole-numbers": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: `+` takes a Float, and this is an integer\n  | (+ 0.5 0xff)\n  |    --- ^^^^ an integer\n  |    a Float\n  = in argument 2 of `+`\ntype error: 4278190080 doesn't fit in an I32\n  | (+ (to-i32 0) 0xff000000)\n  |               ^^^^^^^^^^\n  = in argument 2 of `+`\n  = an I32 holds -2147483648 to 2147483647\nread error: invalid number\n  | 0xg1\n  | ^^^^\n  = numbers are written like 42, -7, 1.5 or 0xff\ntype error: `bit/and` takes an integer, and this is a Float\n  | (bit/and 1.5 2)\n  |          ^^^\n  = in argument 1 of `bit/and`\ntype error: `bit/shift-left` takes an Int, and this is a U8\n  | (bit/shift-left (to-u8 1) (to-u8 2))\n  |                           ^^^^^^^^^\n  = in argument 2 of `bit/shift-left`\n  = an Int and a U8 don't mix: convert with to-int or to-u8\n",
+    "stdout": "vastra> vastra> vastra> vastra> vastra> vastra> vastra> \n"
+  },
+  "hex-takes-a-whole-number": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: `string/hex` takes an integer, and this is a Float\n  | (string/hex 1.5)\n  |             ^^^\n  = in argument 1 of `string/hex`\n",
+    "stdout": "vastra> vastra> vastra> \n"
+  },
+  "hiding-an-outer-name": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "twice : (-> number number)\n8 : Int\nf : (-> number number)\n12 : Int\n"
+  },
+  "higher-order-arity": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `call-with-two` calls this with 2 arguments, and it takes 1\n --> higher-order-arity.vas:2:16\n  |\n2 | (call-with-two (fn [x] x))\n  |                ^^^^^^^^^^\n  = in argument 1 of `call-with-two`\n",
+    "stdout": ""
+  },
+  "html-attribute-key-is-a-keyword-or-a-string": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: an attribute's key is a keyword or a string\n --> html-attribute-key-is-a-keyword-or-a-string.vas:3:14\n  |\n3 | (html [:div {name \"x\"}])\n  |              ^^^^\n  = :class names html/class; \"data-row\" is an attribute named as written\n",
+    "stdout": ""
+  },
+  "html-attributes-are-written-in-place": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a child of html is an element, a String, or a list of them; this has type {:class String}\n --> html-attributes-are-written-in-place.vas:3:13\n  |\n3 | (html [:div attrs \"x\"])\n  |             ^^^^^\n  = in this use of `html`\n  = an element's attributes are a map written in place, right after its tag\n",
+    "stdout": ""
+  },
+  "html-child-is-an-element-a-string-or-a-list": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a child of html is an element, a String, or a list of them; this has type Int\n --> html-child-is-an-element-a-string-or-a-list.vas:2:21\n  |\n2 | (html [:p \"moves: \" (count [1 2])])\n  |                     ^^^^^^^^^^^^^\n  = in this use of `html`\n",
+    "stdout": ""
+  },
+  "html-child-types": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: a child of html is an element, a String, or a list of them; this has type number\n  | (wrap 3)\n  |       ^\n  = in argument 1 of `wrap`\n",
+    "stdout": "vastra> module page\nvastra> (-> child [(html/Html a)])\nvastra> wrap : (-> child (html/Html a))\nvastra> (html/Element \"div\" [] [(html/Text \"text\")]) : (html/Html a)\nvastra> (html/Element \"div\" [] [(html/Element \"i\" [] [(html/Text \"a\")]) (html/Element \"i\" [] [(html/Text \"b\")])]) : (html/Html a)\nvastra> same : (-> String String (html/Html a))\nvastra> vastra> vastra> \n"
+  },
+  "html-children": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module page\nmoves : [[Int]]\nrows : Int\ncolumns : Int\n(html/Element \"main\" [] [(html/Element \"h1\" [] [(html/Text \"5 in a row\")]) (html/Element \"p\" [(html/Attribute \"class\" \"turn\")] [(html/Text \"Moves: 2\")]) (html/Element \"div\" [(html/Attribute \"class\" \"board\") (html/Attribute \"data-size\" \"15\")] [(html/Element \"div\" [(html/Attribute \"class\" \"row\")] [(html/Element \"div\" [(html/Attribute \"class\" \"cell first\")] []) (html/Element \"div\" [(html/Attribute \"class\" \"cell\")] [])]) (html/Element \"div\" [(html/Attribute \"class\" \"row\")] [(html/Element \"div\" [(html/Attribute \"class\" \"cell first\")] []) (html/Element \"div\" [(html/Attribute \"class\" \"cell\")] [])])])]) : (html/Html a)\nfruits : [String]\n(html/Element \"ul\" [] [(html/Element \"li\" [] [(html/Text \"apple\")]) (html/Element \"li\" [] [(html/Text \"pear\")])]) : (html/Html a)\nrow : (-> {:name child | r} (html/Html a))\n(html/Element \"ol\" [] [(html/Element \"li\" [] [(html/Text \"a\")]) (html/Element \"li\" [] [(html/Text \"b\")])]) : (html/Html a)\n(html/Element \"li\" [] [(html/Element \"b\" [] [(html/Text \"bold\")])]) : (html/Html a)\n(html/Element \"tr\" [] [(html/Element \"td\" [] [(html/Text \"00\")]) (html/Element \"td\" [] [(html/Text \"01\")]) (html/Element \"td\" [] [(html/Text \"10\")]) (html/Element \"td\" [] [(html/Text \"11\")])]) : (html/Html a)\ntype Stone\ncell : (-> Stone (html/Html a))\n(html/Element \"div\" [(html/Attribute \"class\" \"cell white\")] []) : (html/Html a)\n(html/Element \"my-widget\" [(html/Attribute \"variant\" \"primary\")] [(html/Text \"x\")]) : (html/Html a)\n(html/Element \"p\" [] [(html/Element \"b\" [] [(html/Text \"in a map\")])]) : (html/Html a)\n"
+  },
+  "html-children-share-messages": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `board` takes a (html/Html number), and this is a (html/Html String)\n --> html-children-share-messages.vas:3:14\n  |\n3 | (board (html [:b {:on-click \"x\"}]))\n  |              ^^^^^^^^^^^^^^^^^^^^\n  = in argument 1 of `board`\n  = number does not match String\n  = an element's children share its type of message\n",
+    "stdout": ""
+  },
+  "html-macro": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module page\n(html/Element \"p\" [] [(html/Text \"hello\")]) : (html/Html a)\n(html/Element \"button\" [(html/OnClick 1) (html/Flag \"disabled\" true) (html/Attribute \"class\" \"big\")] [(html/Text \"+\")]) : (html/Html Int)\n(html/Element \"ul\" [] [(html/Text \"computed\")]) : (html/Html a)\nitem : (-> String (html/Html a))\n(html/Element \"li\" [] [(html/Text \"x\")]) : (html/Html a)\n"
+  },
+  "html-misspelled-attribute": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: unknown name `html/on-clik`\n --> html-misspelled-attribute.vas:2:17\n  |\n2 | (html [:button {:on-clik 1} \"+\"])\n  |                 ^^^^^^^^\n  try: (html [:button {:on-click 1} \"+\"])\n",
+    "stdout": ""
+  },
+  "html-misspelled-class": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: unknown name `html/clas`\n --> html-misspelled-class.vas:2:14\n  |\n2 | (html [:div {:clas \"x\"}])\n  |              ^^^^^\n  try: (html [:div {:class \"x\"}])\n",
+    "stdout": ""
+  },
+  "html-pointer-events": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> module page\nvastra> (-> (-> {:x Float, :y Float, :time Float} a) (html/Attribute a))\nvastra> (html/Element \"div\" [(html/OnPointer \"down\" #<fn>)] []) : (html/Html Float)\nvastra> vastra> \n"
+  },
+  "html-pointer-has-no-such-key": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: missing key :button\n --> html-pointer-has-no-such-key.vas:2:48\n  |\n2 | (html [:div {:on-pointer-down (fn [p] (:button p))}])\n  |                                                ^\n  = (:button m) needs a map with the key :button\n  = expected: {:button _ ...}\n  = found:    {:x Float, :y Float, :time Float}\n",
+    "stdout": ""
+  },
+  "html-pointer-misspelled-attribute": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: unknown name `html/on-pointer-dwon`\n --> html-pointer-misspelled-attribute.vas:2:14\n  |\n2 | (html [:div {:on-pointer-dwon (fn [p] (:x p))}])\n  |              ^^^^^^^^^^^^^^^^\n  try: (html [:div {:on-pointer-down (fn [p] (:x p))}])\n",
+    "stdout": ""
+  },
+  "html-style-and-src": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module page\n(html/Element \"img\" [(html/Attribute \"src\" \"cards/the_moon.png\") (html/Attribute \"style\" \"--tilt: 3.0; width: 171px\")] []) : (html/Html a)\n"
+  },
+  "html-style-is-text": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: expected String, found number\n --> html-style-is-text.vas:2:19\n  |\n2 | (html [:p {:style 3} \"x\"])\n  |                   ^\n  = in this use of `html`\n",
+    "stdout": ""
+  },
+  "if-branches-differ": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this branch gives a String, and the other a number\n --> if-branches-differ.vas:1:12\n  |\n1 | (if true 1 \"one\")\n  |            ^^^^^\n",
+    "stdout": ""
+  },
+  "if-branches-different-maps": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: unexpected key :b\n --> if-branches-different-maps.vas:1:17\n  |\n1 | (if true {:a 1} {:a 1 :b 2})\n  |                 ^^^^^^^^^^^\n  = both branches of an if must have the same type\n  = expected: {:a number}\n  = found:    {:a number, :b number}\n",
+    "stdout": ""
+  },
+  "if-branches-maps-with-different-key": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: missing key :a\n --> if-branches-maps-with-different-key.vas:1:17\n  |\n1 | (if true {:a 1} {:b 1})\n  |                 ^^^^^^\n  = both branches of an if must have the same type\n  = expected: {:a number}\n  = found:    {:b number}\n",
+    "stdout": ""
+  },
+  "if-condition-not-bool": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: an if's condition is a Bool, and this is a number\n --> if-condition-not-bool.vas:1:5\n  |\n1 | (if 1 2 3)\n  |     ^\n",
+    "stdout": ""
+  },
+  "if-without-else": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: if needs an else branch\n --> if-without-else.vas:1:1\n  |\n1 | (if true 1)\n  | ^^^^^^^^^^^\n  = there is no nil, so both branches must produce a value\n",
+    "stdout": ""
+  },
+  "if-wrong-shape": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: if expects a condition, a then branch and an else branch\n --> if-wrong-shape.vas:1:1\n  |\n1 | (if)\n  | ^^^^\n  = for example: (if condition then else)\n",
+    "stdout": ""
+  },
+  "in-a-tie-the-first-written-wins": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "first started\nthe winner: first\na ended\nthe winner: a\n"
+  },
+  "inferred-function-types": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "#<fn> : (-> a b a)\n#<fn> : (->? (->? a a) a a)\n#<fn> : (-> {:x number, :y number | r} number)\n#<fn> : (-> (->? a b) (->? c a) (->? c b))\n#<fn> : (-> Bool a a a)\n#<fn> : (-> number)\n#<fn> : (-> {:a a | r} {:a a, :b a})\n"
+  },
+  "integer-constraint": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "half : (-> integer (Option integer))\n(Some 4) : (Option Int)\nzero? : (-> integer Bool)\ntrue : Bool\nsign : (-> integer String)\n\"minus one\" : String\n"
+  },
+  "integer-edge-arithmetic": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "-9223372036854775807 : Int\n-9223372036854775807 : Int\n9223372030926249001 : Int\n"
+  },
+  "json-and-decoders": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module d\n(Ok (json/JObject {\"age\" (json/JNumber 30.0), \"name\" (json/JString \"Ana\"), \"pet\" json/JNull, \"tags\" (json/JArray [(json/JString \"a\") (json/JString \"b\")])})) : (Result String json/Json)\n(Err \"expected a JSON value at character 7\") : (Result String json/Json)\nperson : (-> json/Json (Result String {:name String, :age Int, :pet (Option String)}))\n(Ok {:name \"Ana\", :age 30, :pet None}) : (Result String {:name String, :age Int, :pet (Option String)})\n(Err \"in field \\\"age\\\": expected a whole number, found a string\") : (Result String {:name String, :age Int, :pet (Option String)})\n(Err \"missing field \\\"age\\\"\") : (Result String {:name String, :age Int, :pet (Option String)})\n(Ok [1 2 3]) : (Result String [Int])\n(Err \"expected a whole number, found a number\") : (Result String [Int])\n(Err \"expected a JSON value at character 1\") : (Result String String)\n"
+  },
+  "json-decodes-only-to-a-type-fully-known": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `[{:name String | r}]` is not fully known, so JSON can't be decoded to it\n --> json-decodes-only-to-a-type-fully-known.vas:3:16\n  |\n3 |   (let people::[{:name String | r}] data\n  |                ^^^^^^^^^^^^^^^^^^^^\n  = a lowercase name, or | r in a map, could be anything: there is nothing to check the data against\n",
+    "stdout": ""
+  },
+  "json-decoding-needs-an-err-clause-not-none": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: decoding JSON needs an (Err why) clause\n --> json-decoding-needs-an-err-clause-not-none.vas:3:8\n  |\n3 |   (let ages::[Int] data\n  |        ^^^^\n  = data from outside can always be wrong\n",
+    "stdout": ""
+  },
+  "json-doesnt-decode-to-a-dict": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: JSON doesn't decode to (Dict String Int)\n --> json-doesnt-decode-to-a-dict.vas:3:16\n  |\n3 |   (let counts::(Dict String Int) data\n  |                ^^^^^^^^^^^^^^^^^\n  = a written type decodes JSON to strings, numbers, booleans, vectors, maps, Options, Json, and types whose constructors have outside words\n",
+    "stdout": ""
+  },
+  "json-is-decoded-by-a-let-with-an-err-clause": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a Json value is decoded by a let of its own, with an (Err why) clause\n --> json-is-decoded-by-a-let-with-an-err-clause.vas:3:20\n  |\n3 |   (let ages::[Int] data)\n  |                    ^^^^\n  = data from outside can always be wrong: (let people::[Person] data [(Err why) ...])\n",
+    "stdout": ""
+  },
+  "json-is-decoded-on-a-let-of-its-own": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a Json value is decoded by a let of its own, with an (Err why) clause\n --> json-is-decoded-on-a-let-of-its-own.vas:3:8\n  |\n3 |   (let ages::[Int] (json/parse text)\n  |        ^^^^\n  = data from outside can always be wrong: (let people::[Person] data [(Err why) ...])\n",
+    "stdout": ""
+  },
+  "json-unicode-escapes": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module j\n(Ok (json/JString \"é 😀\")) : (Result String json/Json)\n(Err \"invalid \\\\u escape at character 4\") : (Result String json/Json)\n(Err \"invalid \\\\u escape at character 4\") : (Result String json/Json)\n(Err \"invalid \\\\u escape at character 4\") : (Result String json/Json)\n(Err \"invalid \\\\u escape at character 4\") : (Result String json/Json)\n"
+  },
+  "key-and-key-with-question-mark-in-one-map": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: unexpected key :title?\n --> key-and-key-with-question-mark-in-one-map.vas:1:49\n  |\n1 | (fn both [person] (str (:title? person) (:title person)))\n  |                                                 ^^^^^^\n  = (:title m) needs a map with the key :title\n  = expected: {:title _ ...}\n  = found:    {:title? _ ...}\n",
+    "stdout": ""
+  },
+  "keys-that-may-be-missing": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "greet : (-> {:title? String, :name a | r} String)\n#<fn greet> : (-> {:title? String, :name a | r} String)\n\" Ada\" : String\n\"Prof. Edsger\" : String\n{:title? \"Prof.\"} : {:title? String}\n[None (Some \"x\")] : [(Option String)]\nfalse : Bool\ntrue : Bool\n"
+  },
+  "keyword-alone": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": ":name : (-> {:name a | r} a)\n"
+  },
+  "keyword-functions": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": ":name : (-> {:name a | r} a)\n\"Ana\" : String\n[1 2] : [Int]\n#<fn> : (-> [{:name a | r}] [a])\n"
+  },
+  "lambda-parameters-are-monomorphic": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `f` takes a Bool, and this is a number\n --> lambda-parameters-are-monomorphic.vas:1:25\n  |\n1 | (fn [f] (if (f true) (f 1) 2))\n  |                         ^\n  = in argument 1 of `f`\n",
+    "stdout": ""
+  },
+  "late-binding-reaches-functions": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> base : Int\nvastra> add-base : (-> Int Int)\nvastra> base : Int\nvastra> 101 : Int\nvastra> vastra> \n"
+  },
+  "later-gives-the-running-task": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "start : (-> (Task a Running))\n#<running> : Running\n"
+  },
+  "later-starts-a-task-and-goes-on": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "failed: no answer\nwent on\n"
+  },
+  "later-without-clauses-takes-a-task-that-cannot-fail": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "start : (-> (Task a Unit))\n"
+  },
+  "let-in-an-expression": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: let names a value on a line of a body, and gives no value\n --> let-in-an-expression.vas:1:7\n  |\n1 | (+ 1 (let y 1))\n  |       ^^^\n  = an expression that needs names is a (do ...): (do (let x 2) (* x x))\n",
+    "stdout": ""
+  },
+  "let-in-the-last-line": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: let names a value on a line of a body, and gives no value\n --> let-in-the-last-line.vas:1:12\n  |\n1 | (fn f [x] (let y x))\n  |            ^^^\n  = an expression that needs names is a (do ...): (do (let x 2) (* x x))\n",
+    "stdout": ""
+  },
+  "let-macro-name": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: `str` cannot be used as a name: it is a macro\n --> let-macro-name.vas:1:6\n  |\n1 | (let str 1)\n  |      ^^^\n",
+    "stdout": ""
+  },
+  "let-names-a-value-to-the-end-of-its-body": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "width : Int\narea : (-> number number)\n8 : Int\n16 : Int\n"
+  },
+  "let-polymorphism": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "1 : Int\n"
+  },
+  "let-special-form-name": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: `if` cannot be used as a name: it is a special form\n --> let-special-form-name.vas:1:6\n  |\n1 | (let if 1)\n  |      ^^\n",
+    "stdout": ""
+  },
+  "let-takes-a-failure": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "twice-first : (-> [number] number)\n[10 0] : [Int]\nadd : (-> (Result a number) (Result a number) (Result a number))\n(Ok 3) : (Result a Int)\n(Err \"stop\") : (Result String Int)\n"
+  },
+  "let-takes-a-tasks-failure": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "first\ncannot read it: file not found\n"
+  },
+  "let-with-clauses-takes-_": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module t\nsave : (-> String (Task a Unit))\ntwice : (-> (Option a) number)\n[2 0] : [Int]\n"
+  },
+  "let-without-anything": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: let needs a name and a value\n --> let-without-anything.vas:1:1\n  |\n1 | (let)\n  | ^^^^^\n  = for example: (let name value)\n",
+    "stdout": ""
+  },
+  "let-wrong-shape": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: let needs a name and a value\n --> let-wrong-shape.vas:1:1\n  |\n1 | (let x)\n  | ^^^^^^^\n  = for example: (let name value)\n",
+    "stdout": ""
+  },
+  "lexical-scope": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "11 : Int\n"
+  },
+  "literals-at-the-edges": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "255 : U8\n-128 : I8\n4294967295 : U32\n-2147483648 : I32\n"
+  },
+  "literals-must-fit": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: 4294967296 doesn't fit in a U32\n  | (+ (to-u32 1) 4294967296)\n  |               ^^^^^^^^^^\n  = in argument 2 of `+`\n  = a U32 holds 0 to 4294967295\ntype error: -129 doesn't fit in an I8\n  | (+ (to-i8 1) -129)\n  |              ^^^^\n  = in argument 2 of `+`\n  = an I8 holds -128 to 127\ntype error: 300 doesn't fit in a U8\n  | [(to-u8 1) 300]\n  |            ^^^\n  = all elements of a vector must have the same type\n  = a U8 holds 0 to 255\ntype error: 300 doesn't fit in a U8\n  | (match (to-u8 1) [300 \"big\"] [_ \"small\"])\n  |                   ^^^\n  = a pattern must match the type of the value being matched\n  = a U8 holds 0 to 255\ntype error: 300 doesn't fit in a U8\n  | (do (let n 300) (+ n (to-u8 1)))\n  |                      ^^^^^^^^^\n  = in argument 2 of `+`\n  = a U8 holds 0 to 255\ntype error: `add-big` needs a number type that holds 300\n  | (add-big (to-u8 1))\n  |          ^^^^^^^^^\n  = in argument 1 of `add-big`\n  = a U8 holds 0 to 255\ntype error: `add-bigger` needs a number type that holds 300\n  | (add-bigger (to-i8 1))\n  |             ^^^^^^^^^\n  = in argument 1 of `add-bigger`\n  = an I8 holds -128 to 127\n",
+    "stdout": "vastra> vastra> vastra> vastra> vastra> vastra> add-big : (-> number number)\nvastra> vastra> 301 : U16\nvastra> add-bigger : (-> number number)\nvastra> vastra> vastra> \n"
+  },
+  "literals-take-the-type-they-meet": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "3.0 : Float\n3 : Int\n3.0 : Float\n0.5 : Float\n0 : Int\n2.5 : Float\n[2.5 3.5] : [Float]\n1.5 : Float\n[2.0 3.0] : [Float]\nfib : (-> number number)\n55 : Int\n55.0 : Float\nadder : (-> (-> number number))\n3.5 : Float\n#<fn> : (-> number number)\n"
+  },
+  "local-name-with-slash": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: `a/b` cannot be used as a local name: local names cannot contain /\n --> local-name-with-slash.vas:1:10\n  |\n1 | (do (let a/b 1) a/b)\n  |          ^^^\n",
+    "stdout": ""
+  },
+  "macro-as-value": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: `str` is a macro and cannot be used as a value\n --> macro-as-value.vas:1:1\n  |\n1 | str\n  | ^^^\n  = call it directly, as in (str ...)\n",
+    "stdout": ""
+  },
+  "macro-expansion-type-error-points-at-user-code": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: expected number, found String\n --> macro-expansion-type-error-points-at-user-code.vas:2:8\n  |\n2 | (twice \"a\")\n  |        ^^^\n  = in this use of `twice`\n",
+    "stdout": ""
+  },
+  "macro-form-at-places-a-built-form": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: expected number, found String\n  | (twice \"a\")\n  |        ^^^\n  = in this use of `twice`\ntype error: expected number, found String\n  | (twice-at-the-use \"a\")\n  | ^^^^^^^^^^^^^^^^^^^^^^\n  = in this use of `twice-at-the-use`\n",
+    "stdout": "vastra> macro twice\nvastra> 42 : Int\nvastra> vastra> macro twice-at-the-use\nvastra> vastra> vastra> \n"
+  },
+  "macro-gensym": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "macro swap-pair\n{:a \"y\", :b \"x\"} : {:a String, :b String}\n{:a 2, :b 1} : {:a Int, :b Int}\n"
+  },
+  "macro-is-not-a-value": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: `unless` is a macro and cannot be used as a value\n --> macro-is-not-a-value.vas:2:1\n  |\n2 | unless\n  | ^^^^^^\n  = call it directly, as in (unless ...)\n",
+    "stdout": ""
+  },
+  "macro-must-return-form": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a macro must return a Form or a (Result String Form), not number\n --> macro-must-return-form.vas:1:16\n  |\n1 | (macro bad [x] 42)\n  |                ^^\n",
+    "stdout": ""
+  },
+  "macro-redefinition": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> macro twice\nvastra> 4 : Int\nvastra> macro twice\nvastra> 6 : Int\nvastra> \n"
+  },
+  "macro-rejects-input": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: only-symbols needs a symbol\n --> macro-rejects-input.vas:5:1\n  |\n5 | (only-symbols 42)\n  | ^^^^^^^^^^^^^^^^^\n  = for example: (only-symbols x)\n",
+    "stdout": ""
+  },
+  "macro-rest-and-recursion": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "macro my-and\ntrue : Bool\nfalse : Bool\ntrue : Bool\n"
+  },
+  "macro-simple": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "macro unless\n\"no\" : String\nsign : (-> number String)\n\"negative\" : String\n"
+  },
+  "macro-type-error-in-body": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `form/symbol` takes a String, and this is a Form\n --> macro-type-error-in-body.vas:1:29\n  |\n1 | (macro bad [x] (form/symbol x))\n  |                             ^\n  = in argument 1 of `form/symbol`\n",
+    "stdout": ""
+  },
+  "macro-wrong-arity": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: `unless` expects 3 forms, but was given 2\n --> macro-wrong-arity.vas:2:1\n  |\n2 | (unless true 1)\n  | ^^^^^^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "map-duplicate-key": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: duplicate key :a\n --> map-duplicate-key.vas:1:7\n  |\n1 | {:a 1 :a 2}\n  |       ^^\n",
+    "stdout": ""
+  },
+  "map-given-stop!-shows-a-!": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `map` acts here because `stop!` does: write `map!`\n --> map-given-stop!-shows-a-!.vas:1:1\n  |\n1 | (map stop! [task/ended])\n  | ^^^^^^^^^^^^^^^^^^^^^^^^\n  = a call that changes the file's names shows a !\n  try: (map! stop! [task/ended])\n",
+    "stdout": ""
+  },
+  "map-key-on-non-map": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: expected {:age _ ...}, found number\n --> map-key-on-non-map.vas:1:7\n  |\n1 | (:age 5)\n  |       ^\n  = (:age m) needs a map with the key :age\n",
+    "stdout": ""
+  },
+  "map-keyword-access-arity": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: (:a m) takes exactly one map\n --> map-keyword-access-arity.vas:1:1\n  |\n1 | (:a {:a 1} {:a 2})\n  | ^^^^^^^^^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "map-missing-key": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: missing key :age\n --> map-missing-key.vas:1:7\n  |\n1 | (:age {:name 1})\n  |       ^^^^^^^^^\n  = (:age m) needs a map with the key :age\n  = expected: {:age _ ...}\n  = found:    {:name number}\n",
+    "stdout": ""
+  },
+  "map-non-keyword-key": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: map keys must be keywords, like :name\n --> map-non-keyword-key.vas:1:2\n  |\n1 | {\"a\" 1}\n  |  ^^^\n  = for other kinds of keys, use a Dict: (dict/insert key value dict/empty)\n",
+    "stdout": ""
+  },
+  "map-written-out-gains-no-key": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: unexpected key :name\n --> map-written-out-gains-no-key.vas:1:23\n  |\n1 | (fn names [] [{:id 1} {:id 2 :name \"Ada\"}])\n  |                       ^^^^^^^^^^^^^^^^^^^\n  = all elements of a vector must have the same type\n  = expected: {:id number}\n  = found:    {:id number, :name String}\n",
+    "stdout": ""
+  },
+  "map-written-out-misses-a-key": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: missing key :name\n --> map-written-out-misses-a-key.vas:1:35\n  |\n1 | (fn names [] [{:id 1 :name \"Ada\"} {:id 2}])\n  |                                   ^^^^^^^\n  = all elements of a vector must have the same type\n  = expected: {:id number, :name String}\n  = found:    {:id number}\n",
+    "stdout": ""
+  },
+  "maps": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "{:name \"Ana\", :age 30} : {:name String, :age Int}\n{} : {}\n\"Lisbon\" : String\nmake-person : (-> a b {:name a, :age b})\n{:name \"Caio\", :age 12} : {:name String, :age Int}\n"
+  },
+  "match-clause-types-differ": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this result is a String, and the one before a number\n --> match-clause-types-differ.vas:1:36\n  |\n1 | (match (Some 1) [(Some x) x] [None \"none\"])\n  |                               ---- ^^^^^^ a String\n  |                               a number\n",
+    "stdout": ""
+  },
+  "match-clause-without-brackets": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a clause of match goes in brackets: [pattern line ...]\n --> match-clause-without-brackets.vas:1:10\n  |\n1 | (match 1 1 \"one\" _ \"other\")\n  |          ^^^^^^^\n  try: (match 1 [1 \"one\"] [_ \"other\"])\n",
+    "stdout": ""
+  },
+  "match-clause-without-lines": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a clause of match needs a pattern and its lines: [pattern line ...]\n --> match-clause-without-lines.vas:1:10\n  |\n1 | (match 1 [1] [_ 0])\n  |          ^^^\n",
+    "stdout": ""
+  },
+  "match-clauses-without-brackets-after-one-with": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a clause of match goes in brackets: [pattern line ...]\n --> match-clauses-without-brackets-after-one-with.vas:5:5\n  |\n5 |     B 1\n  |     ^^^\n  try: [B 1]\n       [C (+ 1\n            1)]))\n",
+    "stdout": ""
+  },
+  "match-constructor-arity": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `Some` has 1 field, but the pattern gives 2\n --> match-constructor-arity.vas:1:18\n  |\n1 | (match (Some 1) [(Some a b) a] [None 0])\n  |                  ^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "match-duplicate-name-in-pattern": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: the name `x` appears twice\n --> match-duplicate-name-in-pattern.vas:1:18\n  |\n1 | (match [1 2] [[x x] x] [_ 0])\n  |                  ^\n",
+    "stdout": ""
+  },
+  "match-float-pattern": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: floats cannot be matched exactly\n --> match-float-pattern.vas:1:13\n  |\n1 | (match 1.5 [1.5 true] [_ false])\n  |             ^^^\n  = compare them with < or > instead\n",
+    "stdout": ""
+  },
+  "match-literals-and-strings": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "sound : (-> String String)\n\"meow\" : String\n\"...\" : String\n"
+  },
+  "match-missing-bool": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this match does not handle every case\n --> match-missing-bool.vas:1:11\n  |\n1 | (fn f [b] (match b [true 1]))\n  |           ^^^^^^^^^^^^^^^^^^\n  = missing: false (add a clause for it, or end with a _ clause)\n",
+    "stdout": ""
+  },
+  "match-missing-constructor": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this match does not handle every case\n --> match-missing-constructor.vas:1:11\n  |\n1 | (fn f [o] (match o [(Some x) x]))\n  |           ^^^^^^^^^^^^^^^^^^^^^^\n  = missing: None (add a clause for it, or end with a _ clause)\n",
+    "stdout": ""
+  },
+  "match-missing-literal-catch-all": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this match does not handle every case\n --> match-missing-literal-catch-all.vas:1:11\n  |\n1 | (fn f [n] (match n [0 \"zero\"] [1 \"one\"]))\n  |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = missing: _ (add a clause for it, or end with a _ clause)\n",
+    "stdout": ""
+  },
+  "match-missing-nested": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this match does not handle every case\n --> match-missing-nested.vas:1:11\n  |\n1 | (fn f [r] (match r [(Ok (Some x)) x] [(Ok None) 0]))\n  |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = missing: (Err _) (add a clause for it, or end with a _ clause)\n",
+    "stdout": ""
+  },
+  "match-missing-vector": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this match does not handle every case\n --> match-missing-vector.vas:1:11\n  |\n1 | (fn f [v] (match v [[] 0] [[x] x]))\n  |           ^^^^^^^^^^^^^^^^^^^^^^^^\n  = missing: _ (add a clause for it, or end with a _ clause)\n",
+    "stdout": ""
+  },
+  "match-pattern-type-mismatch": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this pattern matches an (Option _), and the value matched is a number\n --> match-pattern-type-mismatch.vas:1:11\n  |\n1 | (match 5 [(Some x) x] [None 0])\n  |           ^^^^^^^^\n",
+    "stdout": ""
+  },
+  "match-redundant-clause": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this clause can never match\n --> match-redundant-clause.vas:1:27\n  |\n1 | (fn f [o] (match o [_ 0] [(Some x) x]))\n  |                           ^^^^^^^^\n  = the clauses before it already match every value it would\n",
+    "stdout": ""
+  },
+  "match-redundant-duplicate": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this clause can never match\n --> match-redundant-duplicate.vas:1:40\n  |\n1 | (fn f [b] (match b [true 1] [false 2] [true 3]))\n  |                                        ^^^^\n  = the clauses before it already match every value it would\n",
+    "stdout": ""
+  },
+  "match-unknown-constructor": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: unknown constructor `Sme`\n --> match-unknown-constructor.vas:1:18\n  |\n1 | (match (Some 1) [(Sme x) x] [None 0])\n  |                  ^^^^^^^\n  try: (match (Some 1) [(Some x) x] [None 0])\n",
+    "stdout": ""
+  },
+  "min-and-max-ignore-nan": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "1.0 : Float\n1.0 : Float\n1.0 : Float\n1.0 : Float\nNaN : Float\nNaN : Float\n-0.0 : Float\n-0.0 : Float\n0.0 : Float\n0.0 : Float\n-Infinity : Float\n3.0 : Float\n3 : Int\n\"a\" : String\n"
+  },
+  "minus-negates": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "-0.0 : Float\n0.0 : Float\n-2.5 : Float\n-5 : Int\n123456789012345678901234567890 : Int\n-128 : I8\n255 : U8\nNaN : Float\n-Infinity : Float\n[-1 -2 -3] : [Int]\nnegated : (-> number number)\n-7 : I16\n"
+  },
+  "missing-steps-leave-the-value-unaltered": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "users : [{:name String}]\n[{:name \"Ana\"} {:name \"Bo\"}] : [{:name String}]\n[{:name \"Ana\"} {:name \"Bo\"}] : [{:name String}]\n[{:name \"Ana\"} {:name \"Bo\"}] : [{:name String}]\n[{:name \"Ana\"} {:name \"Bo\"}] : [{:name String}]\npeople : (Dict String {:age Int})\n{\"Ana\" {:age 22}} : (Dict String {:age Int})\n{\"Ana\" {:age 22}} : (Dict String {:age Int})\n"
+  },
+  "module-declares-another-name": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: util/text.vas declares itself as something.else\n --> module-declares-another-name.vas:1:19\n  |\n1 | (ns app (:require [util.text :as text]))\n  |                   ^^^^^^^^^^^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "module-error-shows-its-file": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `+` takes a number, and this is a String\n --> broken/mod.vas:2:19\n  |\n2 | (fn oops [x] (+ x \"one\"))\n  |                 - ^^^^^ a String\n  |                 a number\n  = in argument 2 of `+`\n",
+    "stdout": ""
+  },
+  "module-macros": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module app\n\"ran\" : String\n"
+  },
+  "module-missing": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: cannot find the module no.such.module\n --> module-missing.vas:1:19\n  |\n1 | (ns app (:require [no.such.module :as x]))\n  |                   ^^^^^^^^^^^^^^^^^^^^^^\n  = looked in the standard library and for no/such/module.vas\n",
+    "stdout": ""
+  },
+  "module-private-names-need-the-alias": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: unknown name `shout`\n --> module-private-names-need-the-alias.vas:2:2\n  |\n2 | (shout \"hi\")\n  |  ^^^^^\n",
+    "stdout": ""
+  },
+  "module-refer-unknown": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: the module util.text has no `whisper`\n --> module-refer-unknown.vas:1:19\n  |\n1 | (ns app (:require [util.text :refer [whisper]]))\n  |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "module-require-alias": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module app\n\"hi!\" : String\n[\"a!\" \"b!\"] : [String]\n"
+  },
+  "module-require-refer": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module app\n9.0 : Float\n"
+  },
+  "module-types-are-qualified": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module app\n3.0 : Float\n#<fn> : (-> shapes/Shape Float)\n2.0 : Float\n"
+  },
+  "modules-that-require-each-other": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: p.a and p.b require each other\n --> p/b.vas:1:19\n  |\n1 | (ns p.b (:require [p.a :as a]))\n  |                   ^^^^^^^^^^^\n  = files that require each other, even through others, can't run\n",
+    "stdout": ""
+  },
+  "name-of-is-polymorphic": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "name-of : (-> {:name a | r} a)\n\"Rex\" : String\n42 : Int\n"
+  },
+  "named-map-type-cannot-hold-itself": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: unknown type `Tree`\n --> named-map-type-cannot-hold-itself.vas:1:31\n  |\n1 | (type Tree {:value Int :kids [Tree]})\n  |                               ^^^^\n",
+    "stdout": ""
+  },
+  "named-map-type-means-exactly-its-keys": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: missing key :age\n --> named-map-type-means-exactly-its-keys.vas:2:17\n  |\n2 | (let bo::Person {:name \"Bo\"})\n  |                 ^^^^^^^^^^^^\n  = as written: `bo::Person`\n  = expected: {:name String, :age Int}\n  = found:    {:name String}\n",
+    "stdout": ""
+  },
+  "names-as-typed-and-in-output": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module app\n(Square 2.0) : shapes/Shape\n(shapes/Circle 1.0) : shapes/Shape\n(Ok vastra.json/JNull) : (Result String vastra.json/Json)\n\"(Circle 1.0)\" : String\n\"[(Square 2.0) (Circle 1.0)]\" : String\n\"JNull\" : String\n"
+  },
+  "names-in-a-program": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "clicks: 2\n"
+  },
+  "names-in-errors-inside-a-module": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: redefining `f` breaks `g`\n  | (fn f [x] (str x))\n  | ^^^^^^^^^^^^^^^^^^\n  = in `g`: `+` takes a number, and this is a String\n  = redefine `g` in the same submission to change both\ntype error: `g` takes a number, and this is a String\n  | (g \"a\")\n  |    ^^^\n  = in argument 1 of `g`\n",
+    "stdout": "vastra> module m\nf : (-> number number)\ng : (-> number number)\nvastra> vastra> vastra> vastra> \n"
+  },
+  "native-modules-run-natively": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module app\n12 : Int\n"
+  },
+  "native-not-allowed": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: native declarations are only allowed in the prelude\n --> native-not-allowed.vas:1:1\n  |\n1 | (native hack (-> Int Int))\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "never-is-in-the-prelude": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "#<fn> : (-> (Task a b) (Task a b))\ncan-fail : (Task String a)\nhandled : (Task a Int)\n"
+  },
+  "nil-as-binding": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: `nil` cannot be used as a name: there is no nil in this language\n --> nil-as-binding.vas:1:10\n  |\n1 | (do (let nil 1) 2)\n  |          ^^^\n",
+    "stdout": ""
+  },
+  "not-equal": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "true : Bool\nfalse : Bool\nfalse : Bool\n[1 3] : [Int]\n#<fn not=> : (-> equatable equatable Bool)\n"
+  },
+  "not-equal-takes-two-of-a-type": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: `not=` takes a number, and this is a String\n  | (not= 1 \"one\")\n  |       - ^^^^^ a String\n  |       a number\n  = in argument 2 of `not=`\ntype error: `not=` expects 2 arguments, but was given 3\n  | (not= 1 2 3)\n  | ^^^^^^^^^^^^\n",
+    "stdout": "vastra> vastra> vastra> vastra> \n"
+  },
+  "ns-qualifies-definitions": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module shop\ntax : Float\nprice : (-> Float Float)\n12.0 : Float\n"
+  },
+  "number-mixed-types": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `+` takes a Float, and this is an Int\n --> number-mixed-types.vas:1:8\n  |\n1 | (+ 1.5 (count [1 2]))\n  |    --- ^^^^^^^^^^^^^ an Int\n  |    a Float\n  = in argument 2 of `+`\n  = a Float and an Int don't mix: convert with to-float\n",
+    "stdout": ""
+  },
+  "number-on-string": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `*` takes a number, and this is a String\n --> number-on-string.vas:1:4\n  |\n1 | (* \"a\" 2)\n  |    ^^^\n  = in argument 1 of `*`\n",
+    "stdout": ""
+  },
+  "number-types-dont-mix": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: `+` takes a U8, and this is a U32\n  | (+ (to-u8 1) (to-u32 2))\n  |    --------- ^^^^^^^^^^ a U32\n  |    a U8\n  = in argument 2 of `+`\n  = a U8 and a U32 don't mix: convert with to-u8 or to-u32\ntype error: `+` takes an Int, and this is a Float\n  | (+ (count [1]) 1.5)\n  |    ----------- ^^^ a Float\n  |    an Int\n  = in argument 2 of `+`\n  = an Int and a Float don't mix: convert with to-float\ntype error: `+` takes a U8, and this is a Float\n  | (+ (to-u8 1) 2.5)\n  |    --------- ^^^ a Float\n  |    a U8\n  = in argument 2 of `+`\n  = a U8 and a Float don't mix: convert with to-float\ntype error: `=` takes a [U8], and this is a [U32]\n  | (= [(to-u8 1)] [(to-u32 1)])\n  |    ----------- ^^^^^^^^^^^^ a [U32]\n  |    a [U8]\n  = in argument 2 of `=`\n  = U8 does not match U32\n  = a U8 and a U32 don't mix: convert with to-u8 or to-u32\n",
+    "stdout": "vastra> vastra> vastra> vastra> vastra> vastra> \n"
+  },
+  "numbers": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "3 : Int\n3.75 : Float\n9.5 : Float\n3.5 : Float\nInfinity : Float\nNaN : Float\n(Some 3) : (Option Int)\nNone : (Option Int)\n(Some 2) : (Option Int)\nNone : (Option Int)\n3.0 : Float\n3.0 : Float\n\"3.14\" : String\n#<fn> : (-> number number)\n"
+  },
+  "numbers-in-hex": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "\"ff\" : String\n\"0\" : String\n\"-ff\" : String\n\"deadbeef\" : String\n\"10000000000000000000000000\" : String\n\"000000ff\" : String\n\"ff000000\" : String\n\"0000\" : String\n\"0a\" : String\n\"ff\" : String\n\"fffe\" : String\n\"80000000\" : String\n#<fn> : (-> integer String)\n"
+  },
+  "occurs-in-map": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: (:a m) takes exactly one map\n --> occurs-in-map.vas:1:9\n  |\n1 | (fn [m] (:a m m))\n  |         ^^^^^^^^\n",
+    "stdout": ""
+  },
+  "occurs-through-row": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: (:a m) takes exactly one map\n --> occurs-through-row.vas:1:9\n  |\n1 | (fn [x] (:a x x))\n  |         ^^^^^^^^\n",
+    "stdout": ""
+  },
+  "only-comments": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": ""
+  },
+  "only-functions-are-generic": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: `*` takes a Float, and this is an Int\n  | (* 1.5 two)\n  |    --- ^^^ an Int\n  |    a Float\n  = in argument 2 of `*`\n  = a Float and an Int don't mix: convert with to-float\n",
+    "stdout": "vastra> two : Int\nvastra> 2 : Int\nvastra> vastra> vastra> \n"
+  },
+  "open-parts-fixed-by-uses": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> log : [?log]\nnote! : (->! ?log Unit)\nvastra> [?log]\nvastra> unit : Unit\nvastra> [String]\nvastra> choice : (Option ?choice)\nchoose! : (->! ?choice Unit)\nvastra> unit : Unit\nvastra> model : {:lines [?model], :picked (Option ?model1)}\npick! : (->! ?model Unit)\nadd! : (->! ?model Unit)\nvastra> {:lines [], :picked None} : {:lines [?model], :picked (Option ?model1)}\nvastra> unit : Unit\nvastra> unit : Unit\nvastra> {:lines [\"a\"], :picked (Some 1.5)} : {:lines [String], :picked (Option Float)}\nvastra> vastra> \n"
+  },
+  "open-parts-fixed-by-uses-in-a-file": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "log : [?log]\nadd! : (->! ?log Unit)\nstarted! : (->! Unit)\n[] : [String]\nmodel : {:lines [?model], :seen (Dict ?model1 ?model2), :picked (Option ?model3)}\npick! : (->! ?model Unit)\nseen! : (-> (Option ?model))\ntwice! : (->! Unit)\n{:lines [], :seen {}, :picked None} : {:lines [?model], :seen (Dict String ?model1), :picked (Option Float)}\n"
+  },
+  "operators-need-their-arguments": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "syntax error: `+` takes two or more arguments, but was given 1\n  | (+ 1)\n  | ^^^^^\nsyntax error: `*` takes two or more arguments, but was given 0\n  | (*)\n  | ^^^\nsyntax error: `-` takes one or more arguments, but was given 0\n  | (-)\n  | ^^^\nsyntax error: `min` takes two or more arguments, but was given 1\n  | (min 1)\n  | ^^^^^^^\ntype error: expected number, found String\n  | (+ 1 2 3 \"a\")\n  |          ^^^\n  = in this use of `+`\ntype error: expected number, found String\n  | (- \"a\")\n  |    ^^^\n  = in this use of `-`\ntype error: expected Float, found Int\n  | (+ 1.5 2 (count [1]))\n  |          ^^^^^^^^^^^\n  = in this use of `+`\n  = a Float and an Int don't mix: convert with to-float\ntype error: 300 doesn't fit in a U8\n  | (+ (to-u8 1) 2 300)\n  |                ^^^\n  = in this use of `+`\n  = a U8 holds 0 to 255\n",
+    "stdout": "vastra> vastra> vastra> vastra> vastra> vastra> vastra> vastra> vastra> vastra> \n"
+  },
+  "operators-take-more-arguments": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "10 : Int\n7 : Int\n24 : Int\n2.0 : Float\n0.6000000000000001 : Float\n0.6 : Float\n1 : Int\n2.5 : Float\n1 : U8\n123456789012345678901234567892 : Int\n6 : Int\n9 : Int\n"
+  },
+  "option-and-result-functions": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "(Some 2) : (Option Int)\n(Some 12) : (Option Int)\n5 : Int\n(Ok 3) : (Result a Int)\n(Err 1) : (Result Int a)\n{:ok [1 2], :err [\"a\"]} : {:ok [Int], :err [String]}\n"
+  },
+  "other-functions-take-vectors": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `count` takes a [_], and this is a (Buffer number)\n --> other-functions-take-vectors.vas:1:8\n  |\n1 | (count (buffer/repeat 2 0))\n  |        ^^^^^^^^^^^^^^^^^^^\n  = in argument 1 of `count`\n",
+    "stdout": ""
+  },
+  "outside-words-are-unique": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: the outside word `f` appears twice\n --> outside-words-are-unique.vas:1:25\n  |\n1 | (type Gender Female \"f\" Male \"f\")\n  |                         ^^^^\n",
+    "stdout": ""
+  },
+  "par-filter-needs-a-bool": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `par/filter` takes a function (-> number Bool), and this is a function (-> number number)\n --> par-filter-needs-a-bool.vas:1:13\n  |\n1 | (par/filter inc [1 2 3])\n  |             ^^^\n  = in argument 1 of `par/filter`\n  = Bool does not match number\n",
+    "stdout": ""
+  },
+  "par-let-and-tasks": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> 5 : Int\nvastra> 2 : Int\nvastra> vastra> \n"
+  },
+  "par-let-binding-names-are-unique": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: the binding `a` appears twice\n --> par-let-binding-names-are-unique.vas:1:15\n  |\n1 | (par/let [a 1 a 2] a)\n  |               ^\n",
+    "stdout": ""
+  },
+  "par-let-bindings-cannot-use-each-other": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: `b` cannot use `a`: the bindings of par/let run together\n --> par-let-bindings-cannot-use-each-other.vas:1:17\n  |\n1 | (par/let [a 1 b (+ a 1)] b)\n  |                 ^^^^^^^\n  = to use it, bind `a` in a let around the par/let\n",
+    "stdout": ""
+  },
+  "par-let-bindings-cannot-wait-for-a-task": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a binding of par/let cannot wait for a task: the bindings run together\n --> par-let-bindings-cannot-wait-for-a-task.vas:1:13\n  |\n1 | (par/let [a @(task/succeed 2) b 2] (+ a b))\n  |             ^^^^^^^^^^^^^^^^^\n  = wait for it in a let around the par/let\n",
+    "stdout": ""
+  },
+  "par-let-runs-its-bindings-together": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "fib : (-> number number)\n\"fib 20: 6765\" : String\nboth : (-> number number)\n1597 : Int\n[2 0] : [Int]\n[2 5] : [Int]\n{:n 1, :s \"a\"} : {:n Int, :s String}\n"
+  },
+  "par-map-and-filter-give-what-map-and-filter-give": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "#<fn par/map> : (-> (-> a b) [a] [b])\n[2 3 4] : [Int]\n[2 3] : [Int]\n[\"0\" \"1\" \"2\" \"3\" \"4\" \"5\" \"6\" \"7\" \"8\" \"9\" \"10\" \"11\" \"12\" \"13\" \"14\" \"15\" \"16\" \"17\" \"18\" \"19\"] : [String]\n[] : [Int]\ntrue : Bool\ntrue : Bool\n[[2 3] [4] []] : [[Int]]\n"
+  },
+  "par-reduce-combines-two-of-a-kind": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `par/reduce` takes a [String], and this is a [number]\n --> par-reduce-combines-two-of-a-kind.vas:1:43\n  |\n1 | (par/reduce (fn [text n] (str text n)) \"\" [1 2 3])\n  |                                           ^^^^^^^\n  = in argument 3 of `par/reduce`\n  = String does not match number\n",
+    "stdout": ""
+  },
+  "par-reduce-halves-the-vector": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "#<fn par/reduce> : (-> (-> a a a) a [a] a)\n4999950000 : Int\n0 : Int\n7 : Int\n\"((a b) (c (d e)))\" : String\n0.0 : Float\n1.0 : Float\n12.090146129863427 : Float\n"
+  },
+  "par/map-takes-no-action": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `par/map` takes a function (-> Int Unit), and this is a function (->! Int Unit)\n --> par_map-takes-no-action.vas:3:11\n  |\n3 | (par/map! hit! [1 2 3])\n  |           ^^^^\n  = in argument 1 of `par/map`\n  = a function that acts can't go where a plain one, ->, is taken\n",
+    "stdout": ""
+  },
+  "paths-through-keys-that-may-be-missing": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "(Some 2.0) : (Option Float)\nNone : (Option a)\n{:id 1, :note? \"x\"} : {:id Int, :note? String}\n{:id 1, :note? \"y\"} : {:id Int, :note? String}\n{:id 1} : {:id Int, :count? Int}\n{:id 1, :count? 2} : {:id Int, :count? Int}\n{:id 1} : {:id Int, :window? {:scale Float | r}}\n{:window? {:scale 2.0}} : {:window? {:scale Float}}\n"
+  },
+  "polymorphic-identity": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "identity : (-> a a)\n1 : Int\n\"a\" : String\ntrue : Bool\n#<fn identity> : (-> a a)\n"
+  },
+  "program-missing-file": {
+    "exit": 1,
+    "mode": "run",
+    "stderr": "cannot read nowhere.vas: No such file or directory\n",
+    "stdout": ""
+  },
+  "program-prints-and-exits": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "Hello, Ana!\n"
+  },
+  "program-reads-and-writes-files": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "copied: some text\n\n\n"
+  },
+  "program-stops-on-a-file-it-cannot-read": {
+    "exit": 1,
+    "mode": "run",
+    "stderr": "file not found\n",
+    "stdout": ""
+  },
+  "program-unhandled-task-failure": {
+    "exit": 1,
+    "mode": "run",
+    "stderr": "runtime error: this task failed with \"nobody handled this\", and nothing takes the failure\n --> fail.vas:1:1\n  |\n1 | (task/fail \"nobody handled this\")\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = a let's clause takes it: (let text @(file/read-text path) [(Err why) ...])\n",
+    "stdout": ""
+  },
+  "program-usage-error-exit-status": {
+    "exit": 1,
+    "mode": "run",
+    "stderr": "usage: hello NAME\n",
+    "stdout": ""
+  },
+  "program-without-tasks-prints-nothing": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": ""
+  },
+  "quot-takes-whole-numbers": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `quot` takes an integer, and this is a Float\n --> quot-takes-whole-numbers.vas:1:7\n  |\n1 | (quot 7.5 2)\n  |       ^^^\n  = in argument 1 of `quot`\n",
+    "stdout": ""
+  },
+  "quote-and-quasiquote": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "'(+ 1 2) : Form\n'x : Form\n'(list (a b) (a b) (a b)) : Form\n'[1 two {:k v}] : Form\n(ListView ['f 'a]) : FormView\n(SymbolView \"name\") : FormView\n"
+  },
+  "race-and-first-of-types": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> #<fn task/race> : (-> (Task a b) (Task a b) (Task a b))\nvastra> #<fn task/first-of> : (-> [(Task a b)] (Task a (Option b)))\nvastra> vastra> \n"
+  },
+  "range-counts-from-zero": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "[0 1 2] : [Int]\n[1 2 3] : [Int]\n[] : [Int]\n[] : [Int]\nfrom : (-> Int Int [Int])\n[2 3 4] : [Int]\n[[0] [0 1] [0 1 2]] : [[Int]]\n"
+  },
+  "range-takes-one-or-two-arguments": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "syntax error: `range` takes one or two arguments, but was given 0\n  | (range)\n  | ^^^^^^^\nsyntax error: `range` takes one or two arguments, but was given 3\n  | (range 1 2 3)\n  | ^^^^^^^^^^^^^\ntype error: expected Int, found String\n  | (range \"a\")\n  |        ^^^\n  = in this use of `range`\ntype error: `map` calls this with 1 argument, and it takes 2\n  | (map range [1 2])\n  |      ^^^^^\n  = in argument 1 of `map`\n",
+    "stdout": "vastra> vastra> vastra> vastra> vastra> range : (-> number number)\nvastra> 10 : Int\nvastra> vastra> \n"
+  },
+  "read-a-number-has-no-exponent": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "read error: a number is written without an exponent\n --> read-a-number-has-no-exponent.vas:1:6\n  |\n1 | (* 2 1e300)\n  |      ^^^^^\n  = for example: 1500.0, not 1.5e3\n",
+    "stdout": ""
+  },
+  "read-big-integer": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "99999999999999999999 : Int\n"
+  },
+  "read-commas-and-comments": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "{:a 1, :b 2} : {:a Int, :b Int}\n[1 2 3] : [Int]\n"
+  },
+  "read-empty-keyword": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "read error: a `:` must be followed by a name\n --> read-empty-keyword.vas:1:1\n  |\n1 | : a\n  | ^\n",
+    "stdout": ""
+  },
+  "read-error-on-second-line": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "read error: this `(` is never closed\n --> read-error-on-second-line.vas:2:1\n  |\n2 | (+ x \"y\"\n  | ^\n",
+    "stdout": ""
+  },
+  "read-float": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "1.5 : Float\n"
+  },
+  "read-integer-beyond-64-bits": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "9223372036854775808 : Int\n"
+  },
+  "read-invalid-escape": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "read error: unknown escape `\\q`\n --> read-invalid-escape.vas:1:3\n  |\n1 | \"a\\qb\"\n  |   ^^\n  = supported escapes are \\\" \\\\ \\n \\t\n",
+    "stdout": ""
+  },
+  "read-invalid-escape-unicode": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "read error: unknown escape `\\é`\n --> read-invalid-escape-unicode.vas:1:3\n  |\n1 | \"a\\éb\"\n  |   ^^\n  = supported escapes are \\\" \\\\ \\n \\t\n",
+    "stdout": ""
+  },
+  "read-invalid-number": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "read error: invalid number\n --> read-invalid-number.vas:1:1\n  |\n1 | 12abc\n  | ^^^^^\n  = numbers are written like 42, -7, 1.5 or 0xff\n",
+    "stdout": ""
+  },
+  "read-mismatched": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "read error: expected `)` but found `]`\n --> read-mismatched.vas:1:6\n  |\n1 | [1 (2]\n  |      ^\n",
+    "stdout": ""
+  },
+  "read-odd-map": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "read error: a map needs an even number of forms (key/value pairs)\n --> read-odd-map.vas:1:1\n  |\n1 | {:a}\n  | ^^^^\n",
+    "stdout": ""
+  },
+  "read-unclosed": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "read error: this `(` is never closed\n --> read-unclosed.vas:1:1\n  |\n1 | (greet\n  | ^\n",
+    "stdout": ""
+  },
+  "read-unclosed-inner": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "read error: this `[` is never closed\n --> read-unclosed-inner.vas:1:4\n  |\n1 | (a [b\n  |    ^\n",
+    "stdout": ""
+  },
+  "read-unexpected-closing": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "read error: unexpected `)` with nothing to close\n --> read-unexpected-closing.vas:1:3\n  |\n1 | 1 )\n  |   ^\n",
+    "stdout": ""
+  },
+  "read-unterminated-string": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "read error: this string is never closed\n --> read-unterminated-string.vas:1:3\n  |\n1 | x \"abc\n  |   ^^^^\n",
+    "stdout": ""
+  },
+  "recursion": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "factorial : (-> number number)\n3628800 : Int\n2432902008176640000 : Int\nfib : (-> number number)\n610 : Int\n"
+  },
+  "recursion-type-mismatch": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: expected (-> _ Bool), found (-> _ number)\n --> recursion-type-mismatch.vas:1:5\n  |\n1 | (fn f [x] (if (f x) 1 2))\n  |     ^\n  = `f` is used recursively with a different type\n  = Bool does not match number\n",
+    "stdout": ""
+  },
+  "redefining-a-builtin-checks-the-prelude": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: redefining `+` breaks `sum`\n  | (let + (fn [a b] (str a b)))\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = in `sum`: `reduce` takes a String, and this is a number\n  = redefine `sum` in the same submission to change both\n",
+    "stdout": "vastra> vastra> 2 : Int\nvastra> vastra> \n"
+  },
+  "redefinition-suspends-dependents": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "name error: `add-base` cannot be used here: it depends on `base`, which was just redefined with a new type\n  | (let base \"text\") (add-base 1)\n  |                    ^^^^^^^^\n  = redefine `add-base` in this submission too, or use it in the next one\n",
+    "stdout": "vastra> base : Int\nvastra> add-base : (-> Int Int)\nvastra> vastra> 10 : Int\nvastra> vastra> \n"
+  },
+  "repl-atomic-submission": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "name error: unknown name `undefined-name`\n  | (let x 1) (undefined-name)\n  |            ^^^^^^^^^^^^^^\nname error: unknown name `x`\n  | x\n  | ^\n",
+    "stdout": "vastra> vastra> vastra> vastra> \n"
+  },
+  "repl-blank-lines": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> 3 : Int\nvastra> vastra> vastra> 7 : Int\nvastra> vastra> \n"
+  },
+  "repl-commands": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "no definition named `nothing-here`\ntype error: `+` takes a number, and this is a String\n  | (+ 1 \"x\")\n  |    - ^^^ a String\n  |    a number\n  = in argument 2 of `+`\nunknown command :what (try :help)\n",
+    "stdout": "vastra> twice : (->? (->? a a) a a)\nvastra> number\nvastra> (-> a a)\nvastra> twice : (->? (->? a a) a a)\n  Applies f twice.\nvastra> + : (-> number number number)\nvastra> vastra> vastra> :name : (-> {:name a | r} a)\nvastra> vastra> vastra> \n"
+  },
+  "repl-dir": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> model : {:count Int}\nbump! : (->! Unit)\nvastra> double : (-> {:count number | r} {:count number | r})\nvastra> type Color\nvastra> macro unless\nvastra> model : {:count Int}  = {:count 2}\nbump! : (->! Unit)\ndouble : (-> {:count number | r} {:count number | r})\nColor : a type\nunless : a macro\nvastra> option/and-then : (->? (Option a) (->? a (Option b)) (Option b))\noption/map : (->? (->? a b) (Option a) (Option b))\noption/or : (-> (Option a) a a)\noption/some? : (-> (Option a) Bool)\nvastra> task/map : (-> (Task a b) (->? b c) (Task a c))\ntask/map-err : (-> (Task a b) (->? a c) (Task c b))\nvastra> vastra> \n"
+  },
+  "repl-doc-inside-a-module": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> module m\nf : (-> a a)\nvastra> f : (-> a a)\n  Gives back its argument.\nvastra> m/f : (-> a a)\n  Gives back its argument.\nvastra> vastra> \n"
+  },
+  "repl-error-then-recovery": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: `greet` reads :name, and this map has no :name\n  | (greet {:nmae \"Bo\"})\n  |        ^^^^^^^^^^^^\n  = in argument 1 of `greet`\n  = expected: {:name _ ...}\n  = found:    {:nmae String}\n  try: (greet {:name \"Bo\"})\n",
+    "stdout": "vastra> greet : (-> {:name a | r} String)\nvastra> vastra> \"Hi Bo\" : String\nvastra> vastra> \n"
+  },
+  "repl-failed-submission-keeps-functions": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "name error: unknown name `undefined-name`\n  | (fn render [m] (* m 2)) (undefined-name)\n  |                          ^^^^^^^^^^^^^^\n",
+    "stdout": "vastra> render : (-> number number)\nvastra> handlers : [(-> Int Int)]\nvastra> call-first : (->? [(->? a number)] a number)\nvastra> vastra> 42 : Int\nvastra> vastra> \n"
+  },
+  "repl-greet-across-lines": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra>   ...> greet : (-> {:name a | r} String)\nvastra> \"Hi Ana\" : String\nvastra> vastra> \n"
+  },
+  "repl-last-results": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: `+` takes a number, and this is a String\n  | (+ 1 \"a\")\n  |    - ^^^ a String\n  |    a number\n  = in argument 2 of `+`\n",
+    "stdout": "vastra> 3 : Int\nvastra> 30 : Int\nvastra> \"text\" : String\nvastra> 3 : Int\nvastra> x : Int\nvastra> 3 : Int\nvastra> vastra> 3 : Int\nvastra> first-result : (-> Int)\nvastra> \"now a string\" : String\nvastra> 3 : Int\nvastra> 3 : Int\nvastra> vastra> \n"
+  },
+  "repl-multiple-forms-per-line": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> a : Int\nb : Int\n3 : Int\nvastra> vastra> vastra> vastra> vastra> vastra> \n"
+  },
+  "repl-new-type-not-seen-by-old-values": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> helper : (-> number number)\nvastra> render : (-> number number)\nvastra> handlers : [(-> Int Int)]\nvastra> call-first : (->? [(->? a number)] a number)\nvastra> helper : (-> a number)\nvastra> 7 : Int\nvastra> 42 : Int\nvastra> vastra> \n"
+  },
+  "repl-quit-stops": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> 3 : Int\nvastra> "
+  },
+  "repl-redefinition": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: redefining `base` breaks `add-base`\n  | (let base \"text\")\n  | ^^^^^^^^^^^^^^^^^\n  = in `add-base`: `+` takes a number, and this is a String\n  = redefine `add-base` in the same submission to change both\n",
+    "stdout": "vastra> base : Int\nadd-base : (-> Int Int)\nvastra> vastra> 11 : Int\nvastra> vastra> \n"
+  },
+  "repl-redefinition-never-mixes-types": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> helper : (-> number number)\nvastra> render : (-> number number)\nvastra> handlers : [(-> Int Int)]\nvastra> call-first : (->? [(->? a number)] a number)\nvastra> helper : (-> String Int)\nrender : (-> number Int)\nvastra> 42 : Int\nvastra> vastra> \n"
+  },
+  "repl-redefinition-reaches-stored-functions": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> render : (-> number number)\nvastra> handlers : [(-> Int Int)]\nvastra> call-first : (->? [(->? a number)] a number)\nvastra> 42 : Int\nvastra> render : (-> number number)\nvastra> 82 : Int\nvastra> [#<fn render>] : [(-> Int Int)]\nvastra> vastra> \n"
+  },
+  "repl-same-module-twice": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: redefining `Shape` breaks `area`\n  | (type Shape (Circle Float))\n  |       ^^^^^\n  = in `area`: unknown constructor `Square`\n  = redefine `area` in the same submission to change both\n",
+    "stdout": "vastra> module shapes\ntype Shape\narea : (-> Shape Float)\nunit-square : Shape\nvastra> module shapes\ntype Shape\narea : (-> Shape Float)\nunit-square : Shape\nvastra> 1.0 : Float\nvastra> vastra> vastra> \n"
+  },
+  "repl-save-writes-copies-as-values": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> person : {:name String, :age Int}\nbirthday! : (->! Unit)\nvastra> unit : Unit\nvastra> before : {:name String, :age Int}\nvastra> age : Int\nvastra> total : Int\nvastra> {:name \"Bob\", :age 35} : {:name String, :age Int}\nvastra> last : {:name String, :age Int}\nvastra> #<fn> : (-> a a)\nvastra> same : (-> a a)\nvastra> (let person {:name \"Bob\" :age 34})\n\n(let last {:name \"Bob\", :age 35})\n\n(let same *1)\n\n(fn birthday! [] (update! person :age inc))\n\n(let before \"Bob, before the change.\" {:name \"Bob\", :age 35})\n\n(let age 35)\n\n(let total (+ age 1))\nsaved this session's definitions to /dev/stdout\nvastra> vastra> \n"
+  },
+  "repl-unfinished-form-at-eof": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "read error: this `(` is never closed\n  | (fn greet [person]\n  | ^\n",
+    "stdout": "vastra>   ...>   ...> \n"
+  },
+  "rounding-chooses-the-direction": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "3.0 : Float\n2.0 : Float\n3.0 : Float\n-2.0 : Float\n-3.0 : Float\n-0.0 : Float\n-0.0 : Float\nNaN : Float\n-Infinity : Float\n"
+  },
+  "rounding-takes-a-float": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `floor` takes a Float, and this is an Int\n --> rounding-takes-a-float.vas:1:8\n  |\n1 | (floor (count [1 2]))\n  |        ^^^^^^^^^^^^^\n  = in argument 1 of `floor`\n  = a Float and an Int don't mix: convert with to-float\n",
+    "stdout": ""
+  },
+  "row-unification": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "both : (-> a a a)\n{:x 1, :y 2} : {:x Int, :y Int}\n"
+  },
+  "row-unification-open": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "#<fn> : (-> {:x number} {:x number})\n#<fn> : (-> {:x number, :y number} number)\n"
+  },
+  "self-application": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this would need a type that contains itself\n --> self-application.vas:1:10\n  |\n1 | (fn [x] (x x))\n  |          ^\n  = `x` is called as a function here\n",
+    "stdout": ""
+  },
+  "send!-delivers-after-the-handler": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "n is 1\n"
+  },
+  "send!-takes-the-files-messages": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: expected Msg, found String\n --> send!-takes-the-files-messages.vas:3:8\n  |\n3 | (send! \"Inc\")\n  |        ^^^^^\n  = a file's handlers and views share one type of message\n",
+    "stdout": ""
+  },
+  "set!-adds-no-key": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: missing key :email\n --> set!-adds-no-key.vas:2:14\n  |\n2 | (set! person :email \"bo@example.com\")\n  |              ^^^^^^\n  = this path goes through :email, so the map needs it\n  = expected: {:email _ ...}\n  = found:    {:name String}\n",
+    "stdout": ""
+  },
+  "set!-at-the-prompt": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "name error: unknown name `undefined-name`\n  | (set! score 1) (undefined-name)\n  |                 ^^^^^^^^^^^^^^\ntype error: set! cannot change `nothing-yet`: its type, [_], is not fully known\n  | (set! nothing-yet [1])\n  |       ^^^^^^^^^^^\n  = a name set! changes holds one type, which its let can say: (let log::[String] [])\n",
+    "stdout": "vastra> score : Int\nvastra> unit : Unit\nvastra> unit : Unit\nvastra> 42 : Int\nvastra> vastra> 42 : Int\nvastra> nothing-yet : [a]\nvastra> vastra> vastra> \n"
+  },
+  "set!-changes-a-files-name": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "score : Int\nlog : [?log]\nhit! : (->! Int Unit)\nnote! : (->! ?log Int)\nunit : Unit\nunit : Unit\n7 : Int\n1 : Int\n[\"started\"] : [String]\nunit : Unit\n0 : Int\n"
+  },
+  "set!-changes-along-paths": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: missing key :cuont\n  | (update! model :cuont inc)\n  |                ^^^^^^\n  = this path goes through :cuont, so the map needs it\n  = expected: {:cuont _ ...}\n  = found:    {:count Int, :ages (Dict String Int), :users [{:name String}]}\n  try: (update! model :count inc)\nsyntax error: set! changes one of the file's names: (set! name ...)\n  | (set! model)\n  | ^^^^^^^^^^^^\n  = for example: (set! count 0)\n",
+    "stdout": "vastra> model : {:count Int, :ages (Dict String Int), :users [{:name String}]}\nvastra> unit : Unit\nvastra> unit : Unit\nvastra> unit : Unit\nvastra> unit : Unit\nvastra> unit : Unit\nvastra> {:count 5, :ages {\"Ana\" 23, \"Cleo\" 40}, :users [{:name \"Ana Maria\"} {:name \"Bo\"}]} : {:count Int, :ages (Dict String Int), :users [{:name String}]}\nvastra> vastra> vastra> {:count 5, :ages {\"Ana\" 23, \"Cleo\" 40}, :users [{:name \"Ana Maria\"} {:name \"Bo\"}]} : {:count Int, :ages (Dict String Int), :users [{:name String}]}\nvastra> vastra> \n"
+  },
+  "set!-keeps-a-names-type": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: expected Int, found String\n --> set!-keeps-a-names-type.vas:2:13\n  |\n2 | (set! score \"high\")\n  |             ^^^^^^\n  = `score` keeps its type: set! and update! cannot change it\n",
+    "stdout": ""
+  },
+  "set!-on-a-functions-own-name": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: set! changes the file's names, and `score` is this function's own\n --> set!-on-a-functions-own-name.vas:1:24\n  |\n1 | (fn hit! [score] (set! score 2) score)\n  |                        ^^^^^\n  = change it with (set score ...)\n",
+    "stdout": ""
+  },
+  "set!-rejects-what-would-not-compile": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: expected Int, found String\n  | (set! counter \"five\")\n  |               ^^^^^^\n  = `counter` keeps its type: set! and update! cannot change it\ntype error: expected Int, found String\n  | (update! counter (fn [n] (str n)))\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = `counter` keeps its type: set! and update! cannot change it\n",
+    "stdout": "vastra> counter : Int\nvastra> vastra> vastra> 0 : Int\nvastra> vastra> \n"
+  },
+  "set-adds-no-key": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: missing key :email\n --> set-adds-no-key.vas:3:10\n  |\n3 |   (set p :email \"bo@example.com\")\n  |          ^^^^^^\n  = this path goes through :email, so the map needs it\n  = expected: {:email _ ...}\n  = found:    {:name String}\n",
+    "stdout": ""
+  },
+  "set-adds-the-last-step": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "{:a 1, :b 2} : {:a Int, :b Int}\n{:user {:name \"Ana\", :email \"ana@x.y\"}} : {:user {:name String, :email String}}\n{:users [{:name \"Ana\"} {:name \"Bo\"}]} : {:users [{:name String}]}\n{\"Ana\" 22, \"Bo\" 30} : (Dict String Int)\n"
+  },
+  "set-and-update": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "{:a 10, :b 2} : {:a Int, :b Int}\n{:a \"now a string\", :b 2} : {:a String, :b Int}\n{:count 2} : {:count Int}\n#<fn> : (-> {:count a | r} {:count number | r})\n#<fn> : (-> {:count number | r} {:count number | r})\n"
+  },
+  "set-and-update-along-paths": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "data : {:users [{:name String, :age Int}], :ages (Dict String Int)}\n{:users [{:name \"Ana\", :age 22} {:name \"Angela\", :age 30}], :ages {\"Ana\" 22}} : {:users [{:name String, :age Int}], :ages (Dict String Int)}\n{:users [{:name \"Ana\", :age 23} {:name \"Bo\", :age 30}], :ages {\"Ana\" 22}} : {:users [{:name String, :age Int}], :ages (Dict String Int)}\n{:users [{:name \"Ana\", :age 22} {:name \"Bo\", :age 30}], :ages {\"Ana\" 23}} : {:users [{:name String, :age Int}], :ages (Dict String Int)}\n{:users [{:name \"Ana\", :age 22} {:name \"Bo\", :age 30}], :ages {\"Ana\" 23}} : {:users [{:name String, :age Int}], :ages (Dict String Int)}\nrename : (-> (vector {:name a | r}) Int a (vector {:name a | r}))\n[{:name \"Ana Maria\", :age 22} {:name \"Bo\", :age 30}] : [{:name String, :age Int}]\n"
+  },
+  "set-as-a-line-needs-a-name": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: set as a line changes a name: (set name ...)\n --> set-as-a-line-needs-a-name.vas:2:3\n  |\n2 |   (set (:a m) 2)\n  |   ^^^^^^^^^^^^^^\n  = for example: (set count 0)\n",
+    "stdout": ""
+  },
+  "set-at-the-top-level-is-an-expression": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "person : {:name String, :age Int}\n{:name \"Bo\", :age 36} : {:name String, :age Int}\n{:name \"Bo\", :age 35} : {:name String, :age Int}\n"
+  },
+  "set-changes-the-functions-own-names": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: set changes this function's own names, and `width` is the file's\n --> set-changes-the-functions-own-names.vas:3:8\n  |\n3 |   (set width 20)\n  |        ^^^^^\n  = a ! function changes the file's names, with set!\n",
+    "stdout": ""
+  },
+  "set-in-a-branch": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "clamp : (-> comparable comparable comparable comparable)\n10 : Int\n0 : Int\norder : (-> comparable comparable [comparable])\n[2 5] : [Int]\ngrade : (-> number String)\n[\"high\" \"middle\" \"low\"] : [String]\nfirst-or : (-> [a] a a)\n[7 0] : [Int]\n"
+  },
+  "set-in-a-do-that-gives-a-value": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: this do changes `x`, which is not its own name\n --> set-in-a-do-that-gives-a-value.vas:2:10\n  |\n2 |   (let y (do (set x 2) (* x 3)))\n  |          ^^^^^^^^^^^^^^^^^^^^^^\n  = a do gives a value, and the change would end with it: name a new value with let instead\n",
+    "stdout": ""
+  },
+  "set-in-generic-code-needs-the-key": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "#<fn> : (-> {:a number, :b a | r} {:a number, :b number1 | r})\nreset : (-> {:count a | r} {:count number | r})\n{:count 0, :step \"1\"} : {:count Int, :step String}\n"
+  },
+  "set-index-of-the-wrong-type": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: expected Int, found String\n --> set-index-of-the-wrong-type.vas:1:14\n  |\n1 | (set [1 2 3] \"zero\" 10)\n  |              ^^^^^^\n  = this step is a vector's index (an Int) or a dictionary's key\n",
+    "stdout": ""
+  },
+  "set-inside-a-vector-keeps-the-type": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: at :age: expected number, found String\n --> set-inside-a-vector-keeps-the-type.vas:1:24\n  |\n1 | (set [{:age 1}] 0 :age \"old\")\n  |                        ^^^^^\n  = a change inside a vector or a dictionary keeps its elements' type\n",
+    "stdout": ""
+  },
+  "set-keeps-a-names-type": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: expected number, found String\n --> set-keeps-a-names-type.vas:3:10\n  |\n3 |   (set x \"a\")\n  |          ^^^\n  = `x` keeps its type: set and update cannot change it\n",
+    "stdout": ""
+  },
+  "set-misspelt-key-before-the-last-step": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: missing key :usr\n --> set-misspelt-key-before-the-last-step.vas:1:28\n  |\n1 | (set {:user {:name \"Ana\"}} :usr :name \"Bo\")\n  |                            ^^^^\n  = this path goes through :usr, so the map needs it\n  = expected: {:usr _ ...}\n  = found:    {:user {:name String}}\n  try: (set {:user {:name \"Ana\"}} :user :name \"Bo\")\n",
+    "stdout": ""
+  },
+  "set-needs-a-path": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: set needs what to change, a path and the new value\n --> set-needs-a-path.vas:1:1\n  |\n1 | (set {:a 1} :a)\n  | ^^^^^^^^^^^^^^^\n  = for example: (set map :key value)\n",
+    "stdout": ""
+  },
+  "set-non-keyword": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a map's key in a path is written as a keyword, like :name\n --> set-non-keyword.vas:1:13\n  |\n1 | (set {:a 1} \"a\" 2)\n  |             ^^^\n",
+    "stdout": ""
+  },
+  "set-on-a-name-of-the-function-around": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: set cannot change `x`: it is named outside this function\n --> set-on-a-name-of-the-function-around.vas:2:21\n  |\n2 |   (fn inner [] (set x 2) x)\n  |                     ^\n  = a function changes only its own names: its parameters and lets\n",
+    "stdout": ""
+  },
+  "set-step-of-the-wrong-kind": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a step into a vector is an index (an Int), not a key like :first\n --> set-step-of-the-wrong-kind.vas:1:14\n  |\n1 | (set [1 2 3] :first 10)\n  |              ^^^^^^\n",
+    "stdout": ""
+  },
+  "shadowing-builtin": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "+ : (-> number number number)\n7 : Int\n"
+  },
+  "shifts-by-any-amount": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "128 : U8\n0 : U8\n1 : U8\n-2147483648 : I32\n0 : U32\n-16 : I8\n-1 : I8\n15 : U32\n2147483648 : U32\n-4 : I32\n1267650600228229401496703205376 : Int\n-4 : Int\n20 : Int\n-1 : Int\n"
+  },
+  "short-fn-hash-needs-a-paren": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "read error: `#` must be followed by `(`\n --> short-fn-hash-needs-a-paren.vas:1:1\n  |\n1 | #{1 2}\n  | ^\n  = the only reader form starting with # is #(...), a small function like #(+ % 1)\n",
+    "stdout": ""
+  },
+  "short-fn-in-a-macro": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "macro the-form\n'(fn [%1] (+ %1 1)) : Form\nmacro apply-twice\n18 : Int\n"
+  },
+  "short-fn-inside-short-fn": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "read error: `#(...)` inside `#(...)`: write the outer one with `fn`\n --> short-fn-inside-short-fn.vas:1:12\n  |\n1 | (map #(map #(+ % 1) %) [[1]])\n  |            ^^\n",
+    "stdout": ""
+  },
+  "short-fn-parameters-only-inside": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "read error: `%` is a parameter of `#(...)` only\n  | (let % 1)\n  |      ^\nread error: `%2` is a parameter of `#(...)` only\n  | (+ %2 1)\n  |    ^^\nread error: `%1` is a parameter of `#(...)` only\n  | (fn [%1] %1)\n  |      ^^\n",
+    "stdout": "vastra> vastra> vastra> vastra> vastra> \n"
+  },
+  "short-fn-percent-is-the-first-parameter": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "twice : (-> number number)\n8 : Int\n[2 4 6] : [Int]\n"
+  },
+  "short-fn-takes-up-to-the-highest-parameter": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "second-as-text : (-> a b String)\n\"b\" : String\n[\"0. Bo\" \"1. Ana\"] : [String]\n"
+  },
+  "short-fn-with-await-gives-a-task": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> read-count : (-> (Task a number))\nvastra> 3 : Int\nvastra> vastra> \n"
+  },
+  "short-fn-without-parameters": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "hello : (-> String)\n\"hi\" : String\n"
+  },
+  "sleeps-finish-in-time-order": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "at once\nfast\nslow\n"
+  },
+  "sort-by-takes-no-action": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `sort-by` takes a function (-> _ _), and this is a function (->! _ _)\n --> sort-by-takes-no-action.vas:2:10\n  |\n2 | (sort-by (fn [x] (set! score (inc score)) x) < [3 1 2])\n  |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = in argument 1 of `sort-by`\n  = a function that acts can't go where a plain one, ->, is taken\n",
+    "stdout": ""
+  },
+  "special-form-as-value": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: `if` is a special form and cannot be used as a value\n --> special-form-as-value.vas:1:1\n  |\n1 | if\n  | ^^\n",
+    "stdout": ""
+  },
+  "sqrt-takes-a-float": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: `sqrt` takes a Float, and this is an Int\n  | (sqrt (count [1 2 3 4]))\n  |       ^^^^^^^^^^^^^^^^^\n  = in argument 1 of `sqrt`\n  = a Float and an Int don't mix: convert with to-float\ntype error: `abs` takes a number, and this is a String\n  | (abs \"three\")\n  |      ^^^^^^^\n  = in argument 1 of `abs`\n",
+    "stdout": "vastra> vastra> vastra> vastra> \n"
+  },
+  "square-roots-and-absolute-values": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "1.4142135623730951 : Float\n2.0 : Float\n-0.0 : Float\nNaN : Float\nInfinity : Float\ndistance : (-> Float Float Float)\n5.0 : Float\n3 : Int\n2.5 : Float\n0.0 : Float\nNaN : Float\n123456789012345678901234567890 : Int\n5 : I8\n-128 : I8\n-2147483648 : I32\n200 : U8\n4000000000 : U32\n#<fn> : (-> number number)\n"
+  },
+  "stop!-stops-a-task-where-it-waits": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "stopped while it waits: [\"before its wait\"]\nstopping one that ended, or task/ended, does nothing: [\"before its wait\" \"a task that ended\"]\n"
+  },
+  "stopping-a-race-or-concurrent-stops-every-task-in-it": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "concurrent: a task started inside with later goes on\nrace: a task started inside with later goes on\nfirst-of: a task started inside with later goes on\n"
+  },
+  "storage-needs-the-browser": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: the module vastra.storage runs only on js, not on native\n --> storage-needs-the-browser.vas:1:19\n  |\n1 | (ns app (:require [vastra.storage :as storage]))\n  |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "str-accepts-any-value": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "\"Age: 30, ratio 0.5, tags [\\\"a\\\" \\\"b\\\"], (Some 1), {:k 1}\" : String\n"
+  },
+  "str-requires-strings": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "\"Age: 30\" : String\n"
+  },
+  "str-variants": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "\"\" : String\n\"a\" : String\n\"ab\" : String\n\"abcd\" : String\n"
+  },
+  "string-field-required": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: at :name: expected String, found number\n --> string-field-required.vas:2:8\n  |\n2 | (shout {:name 42})\n  |        ^^^^^^^^^^\n  = in argument 1 of `shout`\n",
+    "stdout": ""
+  },
+  "strings": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "3 : Int\n[\"a\" \"b\" \"\" \"c\"] : [String]\n[\"one\" \"two\"] : [String]\n\"a-b\" : String\n\"hi\" : String\ntrue : Bool\n(Some -12) : (Option Int)\nNone : (Option Int)\n\"  7\" : String\n\"ab  \" : String\n\"\\\"quoted\\\"\" : String\n\"raw\" : String\n"
+  },
+  "tab-in-source": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `+` takes a number, and this is a String\n --> tab-in-source.vas:1:6\n  |\n1 | (+\t1\t\"x\")\n  |    - ^^^ a String\n  |    a number\n  = in argument 2 of `+`\n",
+    "stdout": ""
+  },
+  "tail-calls-do-not-grow": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "count-down : (-> number String)\n\"done\" : String\nloop-sum : (-> integer integer integer)\n5000050000 : Int\n"
+  },
+  "task-all-changes-names-in-order": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "in order: true\n"
+  },
+  "task-all-runs-tasks-one-at-a-time": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "counter: 100000\n"
+  },
+  "task-concurrent-many-tasks-that-finish-at-once": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "counter: 100000\n"
+  },
+  "task-concurrent-runs-every-task-to-the-end": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> seen : [String]\nnote! : (-> String (Task a Unit))\nvastra> [(Ok unit) (Err \"b\") (Ok unit)] : [(Result String Unit)]\nvastra> [\"start\" \"a\" \"c\"] : [String]\nvastra> [(Ok 1) (Ok 2) (Ok 3)] : [(Result a Int)]\nvastra> [] : [(Result a b)]\nvastra> [(Ok 1) (Err \"first\") (Err \"second\")] : [(Result String Int)]\nvastra> vastra> \n"
+  },
+  "task-concurrent-tasks-share-their-error-type": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this element is a (Task number _), and the one before a (Task String _)\n --> task-concurrent-tasks-share-their-error-type.vas:1:38\n  |\n1 | (task/concurrent [(task/fail \"text\") (task/fail 42)])\n  |                   ------------------ ^^^^^^^^^^^^^^ a (Task number _)\n  |                   a (Task String _)\n  = String does not match number\n",
+    "stdout": ""
+  },
+  "task-error-types-must-agree": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: expected (Task String _), found (Task number _)\n --> task-error-types-must-agree.vas:1:5\n  |\n1 | (do (let a @(task/fail \"text\")) (let b @(task/fail 42)) a)\n  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = tasks awaited together with @ must fail with the same error type: task/map-err converts one\n  = String does not match number\n",
+    "stdout": ""
+  },
+  "task-to-result-gives-a-result-not-the-value": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `+` takes a number, and this is a (Result _ number)\n --> task-to-result-gives-a-result-not-the-value.vas:1:6\n  |\n1 | (+ 1 @(task/to-result (task/succeed 1)))\n  |    - ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ a (Result _ number)\n  |    a number\n  = in argument 2 of `+`\n",
+    "stdout": ""
+  },
+  "task-to-result-in-a-program": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "(Ok 1) (Err \"b\")\n"
+  },
+  "task-to-result-turns-a-failure-into-a-value": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> (Ok 1) : (Result a Int)\nvastra> (Err \"b\") : (Result String a)\nvastra> #<fn task/to-result> : (-> (Task a b) (Task c (Result a b)))\nvastra> vastra> \n"
+  },
+  "task-type-errors": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: expected (Task _ _), found number\n --> task-type-errors.vas:2:41\n  |\n2 | (task/and-then (task/succeed 1) (fn [x] (+ x 1)))\n  |                                         ^^^^^^^\n  = what this function gives back, as argument 2 of `task/and-then`\n",
+    "stdout": ""
+  },
+  "tasks-are-values-in-file-mode": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "#<task> : (Task a Int)\n#<task> : (Task a Int)\n#<fn> : (-> (Task a number) (Task a number))\n"
+  },
+  "tasks-run-in-the-repl": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> module repl-session\nvastra> 41 : Int\nvastra> 42 : Int\nvastra> printed by a task\nunit : Unit\nvastra> task failed: \"boom\"\nvastra> \"recovered from boom\" : String\nvastra> 3 : Int\nvastra> first\nsecond\n\"done\" : String\nvastra> vastra> \n"
+  },
+  "the-clauses-of-later-cannot-fail": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: expected (Task Never _), found (Task file/Error Unit)\n --> the-clauses-of-later-cannot-fail.vas:3:3\n  |\n3 |   (later (task/succeed \"text\")\n  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n...\n5 |     [(Err why) unit])\n  |     ^^^^^^^^^^^^^^^^^\n  = the clauses of later run on their own, so they cannot fail: handle each failure in them\n  = Never does not match file/Error\n",
+    "stdout": ""
+  },
+  "the-faster-task-wins-a-race": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "fast ended\nthe winner: fast\nthe slow one stopped at its wait: its next line never ran\n"
+  },
+  "the-first-on-that-matches-takes-the-message": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this on can never run\n --> the-first-on-that-matches-takes-the-message.vas:5:5\n  |\n5 | (on Inc (set! n 2))\n  |     ^^^\n  = an on before it already takes every message it would\n",
+    "stdout": ""
+  },
+  "the-prompt-changes-another-files-name": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> module app\nvastra> unit : Unit\nvastra> [\"from the prompt\"] : [String]\nvastra> empty! : (->! Unit)\nvastra> unit : Unit\nvastra> [] : [String]\nvastra> \n"
+  },
+  "the-prompt-changes-no-type-a-file-defines": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: the type `Shape` changes only in its file\n  | (type Shape (Circle Float) (Square Float) (Triangle Float))\n  |       ^^^^^\n  = it is defined at shapes.vas:3\ntype error: the type of `tally` changes only in its file\n  | (let tally {:circles 0 :squares \"none\"})\n  |      ^^^^^\n  = it is defined at shapes.vas:5\n",
+    "stdout": "vastra> module app\nvastra> module shapes\nvastra> vastra> type Shape\nvastra> vastra> unit : Unit\nvastra> tally : {:circles Int, :squares Int}\nvastra> {:circles 0, :squares 0} : {:circles Int, :squares Int}\nvastra> \n"
+  },
+  "the-results-of-later-share-a-type": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this result is a String, and the one before a number\n --> the-results-of-later-share-a-type.vas:3:14\n  |\n3 |   [(Err why) why])\n  |              ^^^\n",
+    "stdout": ""
+  },
+  "there-is-no-nil": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: there is no `nil` in this language\n --> there-is-no-nil.vas:1:1\n  |\n1 | nil\n  | ^^^\n  = use Option for a value that may be missing: None or (Some value)\n",
+    "stdout": ""
+  },
+  "threading-and-for": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "2 : Int\n[3 4] : [Int]\n[10 20 30] : [Int]\n[1 2 3 4] : [Int]\n[] : [a]\n"
+  },
+  "to-float-takes-whole-numbers": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `to-float` takes an integer, and this is a Float\n --> to-float-takes-whole-numbers.vas:1:11\n  |\n1 | (to-float 1.5)\n  |           ^^^\n  = in argument 1 of `to-float`\n",
+    "stdout": ""
+  },
+  "to-int-drops-the-fraction": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "#<fn> : (-> number Int)\n2 : Int\n-2 : Int\n0 : Int\n-3 : Int\n123456789012 : Int\npower : (-> Float Int Float)\n1267650600228229401496703205376 : Int\ntrue : Bool\n0 : Int\n0 : Int\n0 : Int\n200 : Int\n"
+  },
+  "top-level-tasks-that-sleep-run-in-order": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "a task started with later goes on while the first waits\nfirst, after its sleep\nsecond\na definition waits for its task\nthird: a definition waits for its task\n"
+  },
+  "transitive-suspension": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "type error: redefining `unit-price` breaks `price`\n  | (let unit-price \"ten\")\n  | ^^^^^^^^^^^^^^^^^^^^^^\n  = in `price`: `*` takes a number, and this is a String\n  = redefine `price` in the same submission to change both\n",
+    "stdout": "vastra> unit-price : Int\nvastra> price : (-> Int Int)\nvastra> total : (-> [Int] Int)\nvastra> vastra> 30 : Int\nvastra> vastra> \n"
+  },
+  "triangles-drawn-into-buffers": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "width : Int\nheight : Int\nedge : (-> {:sx number, :sy number | r} {:sx number, :sy number | s} number number number)\nplot : (-> {:depth (vector Float), :color (vector1 a) | r} Int Float a {:depth (vector Float), :color (vector1 a) | r})\nrow : (-> {:depth (vector Float), :color (vector1 a) | r} {:v0 {:iz Float, :sy Float | s}, :v1 {:iz Float, :sy Float | t}, :v2 {:iz Float, :sy Float | u}, :per Float, :color a | v} Int Int Float Float Float Float {:depth (vector Float), :color (vector1 a) | r})\nrows : (-> {:depth (vector Float), :color (vector1 a) | r} {:v0 {:iz Float, :sy Float, :sx Float | s}, :v1 {:iz Float, :sy Float, :sx Float | t}, :v2 {:iz Float, :sy Float, :sx Float | u}, :per Float, :color a | v} Int Float Float Float {:depth (vector Float), :color (vector1 a) | r})\nfill : (-> {:depth (vector Float), :color (vector1 a) | r} {:sx Float, :sy Float, :iz Float | s} {:sx Float, :sy Float, :iz Float | t} {:sx Float, :sy Float, :iz Float | u} a {:depth (vector Float), :color (vector1 a) | r})\nv : (-> a b c {:sx a, :sy b, :iz c})\ndraw : (-> [{:a {:sx Float, :sy Float, :iz Float | r}, :b {:sx Float, :sy Float, :iz Float | s}, :c {:sx Float, :sy Float, :iz Float | t}, :color number | u}] {:depth (Buffer Float), :color (Buffer number)})\n\"0100022220000000\\n0011122222000000\\n0011222222233000\\n0011222222331000\\n0012222223122000\\n0011111111222220\\n0001111122222222\\n0021112222222222\\n0001100000000000\\n0000000000000000\\n32739482\\n\" : String\n"
+  },
+  "type-constructor-taken": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: the constructor `Some` is already defined\n --> type-constructor-taken.vas:1:18\n  |\n1 | (type Answer Yes (Some Int))\n  |                  ^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "type-duplicate-constructor": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: the constructor `Red` appears twice\n --> type-duplicate-constructor.vas:1:17\n  |\n1 | (type Color Red Red)\n  |                 ^^^\n",
+    "stdout": ""
+  },
+  "type-error-inside-a-vector-shows-where": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: at :cards: expected [{… :offset {:x Float, …}}], found [{… :offset {:x String, …}}]\n --> type-error-inside-a-vector-shows-where.vas:2:13\n  |\n2 | (set! table {:deals 0 :cards [{:card 1 :offset {:x \"far\" :y 0.0}}]})\n  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = `table` keeps its type: set! and update! cannot change it\n",
+    "stdout": ""
+  },
+  "type-error-names-the-path": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: at :feel :sway: expected Float, found String\n --> type-error-names-the-path.vas:2:1\n  |\n2 | (set! table :feel :sway \"high\")\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = `table` keeps its type: set! and update! cannot change it\n",
+    "stdout": ""
+  },
+  "type-lowercase-name": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a type name must start with an uppercase letter\n --> type-lowercase-name.vas:1:7\n  |\n1 | (type color Red)\n  |       ^^^^^\n  = for example: (type Shape ...)\n",
+    "stdout": ""
+  },
+  "type-names-a-map-type": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "type Person\nada : {:name String, :age Int}\nolder : (-> {:name String, :age Int} {:name String, :age Int})\n{:name \"Ada\", :age 37} : {:name String, :age Int}\ntype (Pair a)\ntwo : {:first Int, :second Int}\n"
+  },
+  "type-not-top-level": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: type is only allowed at the top level\n --> type-not-top-level.vas:1:13\n  |\n1 | (do (let x (type T A)) x)\n  |             ^^^^\n",
+    "stdout": ""
+  },
+  "type-redefined": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: the type `Color` is already defined\n --> type-redefined.vas:2:7\n  |\n2 | (type Color Blue)\n  |       ^^^^^\n  = a type has one definition in a file, or in one submission at the prompt\n",
+    "stdout": ""
+  },
+  "type-unknown-type": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: unknown type `Strng`\n --> type-unknown-type.vas:1:16\n  |\n1 | (type Box (Box Strng))\n  |                ^^^^^\n  try: (type Box (Box String))\n",
+    "stdout": ""
+  },
+  "type-unknown-variable": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: unknown type variable `a`\n --> type-unknown-variable.vas:1:16\n  |\n1 | (type Box (Box a))\n  |                ^\n  = declare it as a parameter: (type (Box ... a) ...)\n",
+    "stdout": ""
+  },
+  "type-wrong-arity": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `Option` expects 1 type argument, but was given 2\n --> type-wrong-arity.vas:1:16\n  |\n1 | (type Box (Box (Option Int Int)))\n  |                ^^^^^^^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "types-at-the-prompt": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "",
+    "stdout": "vastra> scale : (-> number number)\nvastra> (-> number number)\nvastra> number\nvastra> 6 : Int\nvastra> vastra> \n"
+  },
+  "types-holding-functions-are-not-equatable": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `=` can't compare a Handler, since it holds a function\n --> types-holding-functions-are-not-equatable.vas:2:4\n  |\n2 | (= (Handler inc) (Handler inc))\n  |    ^^^^^^^^^^^^^\n  = in argument 1 of `=`\n",
+    "stdout": ""
+  },
+  "types-without-constructors": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "type Token\n#<fn> : (-> a a)\n#<fn> : (-> a (Task b a))\n"
+  },
+  "unicode-spans-in-errors": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `+` takes a number, and this is a String\n --> unicode-spans-in-errors.vas:2:4\n  |\n2 | (+ café 1)\n  |    ^^^^\n  = in argument 1 of `+`\n",
+    "stdout": ""
+  },
+  "unknown-alias-lists-its-names": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: unknown name `html`\n --> unknown-alias-lists-its-names.vas:2:2\n  |\n2 | (html 1)\n  |  ^^^^\n  = names starting with html/: html/aria-label, html/checked, html/child, html/class, html/disabled, html/element, html/href, html/html-pairs, and 16 more\n",
+    "stdout": ""
+  },
+  "unknown-name": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: unknown name `undefined-thing`\n --> unknown-name.vas:1:2\n  |\n1 | (undefined-thing 1)\n  |  ^^^^^^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "unknown-name-lists-eight-of-its-group": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: unknown name `string`\n --> unknown-name-lists-eight-of-its-group.vas:1:2\n  |\n1 | (string 1)\n  |  ^^^^^^\n  = names starting with string/: string/blank?, string/fixed, string/hex, string/join, string/length, string/lines, string/pad-left, string/pad-right, and 3 more\n",
+    "stdout": ""
+  },
+  "unknown-name-lists-its-group": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: unknown name `buffer`\n --> unknown-name-lists-its-group.vas:1:2\n  |\n1 | (buffer)\n  |  ^^^^^^\n  = names starting with buffer/: buffer/freeze, buffer/from, buffer/repeat, buffer/to-vector\n",
+    "stdout": ""
+  },
+  "unknown-name-suggests-local": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "name error: unknown name `countr`\n --> unknown-name-suggests-local.vas:1:24\n  |\n1 | (do (let counter 1) (+ countr 1))\n  |                        ^^^^^^\n  try: (do (let counter 1) (+ counter 1))\n",
+    "stdout": ""
+  },
+  "unquote-outside-quasiquote": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: ~ and ~@ are only allowed inside a quasiquote\n --> unquote-outside-quasiquote.vas:1:6\n  |\n1 | (+ 1 ~x)\n  |      ^^\n  = for example: `(if ~condition ~then-branch ~else-branch)\n",
+    "stdout": ""
+  },
+  "unquote-wrong-type": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: expected Form, found number\n --> unquote-wrong-type.vas:1:8\n  |\n1 | `(+ 1 ~42)\n  |        ^^\n  = ~ inserts a Form, and ~@ inserts a [Form]\n",
+    "stdout": ""
+  },
+  "update!-of-another-files-name": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `cart/items` changes only in its own file\n --> update!-of-another-files-name.vas:2:24\n  |\n2 | (fn empty! [] (update! cart/items (fn [_] [])))\n  |                        ^^^^^^^^^^\n  = it is defined at shop/cart.vas:2\n  = call one of that file's ! functions to change it\n",
+    "stdout": ""
+  },
+  "update-missing-key": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: missing key :age\n --> update-missing-key.vas:1:23\n  |\n1 | (update {:name \"Ana\"} :age inc)\n  |                       ^^^^\n  = this path goes through :age, so the map needs it\n  = expected: {:age _ ...}\n  = found:    {:name String}\n",
+    "stdout": ""
+  },
+  "update-wrong-function": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `update` takes a function (-> number _), and this is a function (-> String String)\n --> update-wrong-function.vas:1:27\n  |\n1 | (update {:count 1} :count (fn [s] (string-append s \"!\")))\n  |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  = in argument 3 of `update`\n  = number does not match String\n",
+    "stdout": ""
+  },
+  "uppercase-binding": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: `Answer` cannot be used as a name: names starting with an uppercase letter are for types and constructors\n --> uppercase-binding.vas:1:6\n  |\n1 | (let Answer 42)\n  |      ^^^^^^\n  = start the name with a lowercase letter\n",
+    "stdout": ""
+  },
+  "values": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "42 : Int\n-17 : Int\n0 : Int\n9223372036854775807 : Int\n-9223372036854775808 : Int\ntrue : Bool\nfalse : Bool\n\"text\" : String\n\"\" : String\n\"say \\\"hi\\\"\\n\\tand \\\\ bye\" : String\n\"olá 👋\" : String\n"
+  },
+  "vector-mixed-elements": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: this element is a String, and the one before a number\n --> vector-mixed-elements.vas:1:4\n  |\n1 | [1 \"two\"]\n  |  - ^^^^^ a String\n  |  a number\n",
+    "stdout": ""
+  },
+  "vector-type-holds-one-type": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a vector's type has one type in it, as in [Int]\n --> vector-type-holds-one-type.vas:1:12\n  |\n1 | (let pair::[Int String] [])\n  |            ^^^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "vector-type-is-written-in-brackets": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a vector's type is written [String]\n --> vector-type-is-written-in-brackets.vas:1:11\n  |\n1 | (let log::(Vector String) [])\n  |           ^^^^^^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "vector-value": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "[1 2 3] : [Int]\n"
+  },
+  "vectors": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "[] : [a]\n[1 2 3] : [Int]\n3 : Int\n[1 2 3] : [Int]\n[0 1 2] : [Int]\n(Some 20) : (Option Int)\nNone : (Option Int)\n[1 2] : [Int]\n[3] : [Int]\n[0 1 2 3] : [Int]\n[2 3 4] : [Int]\n[0 5 10] : [Int]\n[2 3] : [Int]\n[1] : [Int]\n6 : Int\n[1 2 3] : [Int]\n[{:age 1} {:age 3}] : [{:age Int}]\n6 : Int\ntrue : Bool\n"
+  },
+  "view-only-at-top-level": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: view is only allowed at the top level\n --> view-only-at-top-level.vas:1:15\n  |\n1 | (fn reset [] (view \"#app\" 1))\n  |               ^^^^\n",
+    "stdout": ""
+  },
+  "what-a-function-promises-about-the-functions-it-takes": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "#<fn map> : (->? (->? a b) [a] [b])\n#<fn reduce> : (->? (->? a b a) a [b] a)\n#<fn par/map> : (-> (-> a b) [a] [b])\n#<fn sort-by> : (-> (-> a comparable) (-> comparable comparable Bool) [a] [a])\n#<fn task/map> : (-> (Task a b) (->? b c) (Task a c))\n#<fn stop!> : (->! Running Unit)\n"
+  },
+  "why-gives-the-last-errors-long-form": {
+    "exit": 0,
+    "mode": "repl",
+    "stderr": "no error yet\ntype error: `+` takes a number, and this is a String\n  | (+ 1 \"a\")\n  |    - ^^^ a String\n  |    a number\n  = in argument 2 of `+`\ntype error: `clock/now` is a task, not a function\n  | (clock/now)\n  |  ^^^^^^^^^\n  = a task gives its value where @ runs it\n  try: @clock/now\n",
+    "stdout": "vastra> vastra> vastra> Every value has one type, which the checker works out before the program\nruns: a function takes the types its body reads, both branches of an\nif give the same type, and so do a vector's elements and a match's results.\nA mistake that would stop the program later is refused where it is written.\n\n  (fn double [x] (* 2 x))\n  (double \"two\")                    ; refused: * takes numbers\n  (double 2)\n  (if ok 1 \"one\")                   ; refused: a number or a String?\n  (if ok 1 0)\nvastra> module clock\nvastra> vastra> A task is a value that describes work, such as reading a file or the clock.\n@ runs it where it is written and gives its result, and the lines after it\nwait for it. Called, or left alone on a line, it does nothing.\n\n  (clock/now)                        ; refused: a task, not a function\n  @clock/now                         ; the time\n  (console/print \"hi\")               ; on a line: does nothing\n  @(console/print \"hi\")              ; prints\nvastra> vastra> \n"
+  },
+  "window-events-cannot-be-sent": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: a window's events come only from the window\n --> window-events-cannot-be-sent.vas:3:8\n  |\n3 | (send! (window/Press window/Tab))\n  |        ^^^^^^^^^^^^^^^^^^^^^^^^^\n  = send! sends the file's own messages\n",
+    "stdout": ""
+  },
+  "window-events-need-no-on-each": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module app\non (window/Press window/Escape)\n"
+  },
+  "written-map-type-means-exactly-its-keys": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: unexpected key :born\n --> written-map-type-means-exactly-its-keys.vas:1:28\n  |\n1 | (let named::{:name String} {:name \"Ada\" :born 1815})\n  |                            ^^^^^^^^^^^^^^^^^^^^^^^^\n  = as written: `named::{:name String}`\n  = expected: {:name String}\n  = found:    {:name String, :born number}\n",
+    "stdout": ""
+  },
+  "written-type-decodes-json": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module people\ndecode : (-> String String)\n\"[{:name \\\"Ada\\\", :age 36, :pet? (Some \\\"cat\\\")} {:name \\\"Bo\\\", :age 3, :pet? None} {:name \\\"Cy\\\", :age 9}]\" : String\n\"in [0].age: expected a whole number, found a number\" : String\n\"in [0]: missing field \\\"age\\\"\" : String\n\"in [0].name: expected a string, found an array\" : String\n\"expected an array, found an object\" : String\n\"not JSON: expected ] at character 3\" : String\nread : (-> String String)\n\"{:x 1.0, :y 2.5, :tags [], :raw (JObject {\\\"any\\\" (JArray [(JBool true) JNull])}), :on true}\" : String\n\"in tags[1]: expected a string, found a number\" : String\n\"in on: expected a boolean, found \\\"yes\\\"\" : String\n"
+  },
+  "written-type-decodes-keys-that-may-be-missing": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module notes\ndecode : (-> String String)\n\"[\\\"milk\\\" \\\"-\\\"]\" : String\n\"in [0].note: expected a string, found null\" : String\n\"in [0]: missing field \\\"due\\\"\" : String\n"
+  },
+  "written-type-disagrees-with-the-value": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: expected Int, found String\n --> written-type-disagrees-with-the-value.vas:1:17\n  |\n1 | (let count::Int \"three\")\n  |                 ^^^^^^^\n  = as written: `count::Int`\n",
+    "stdout": ""
+  },
+  "written-type-follows-without-a-space": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "read error: `::` must be followed by a type, with no space\n --> written-type-follows-without-a-space.vas:1:10\n  |\n1 | (let seed:: U32 1)\n  |          ^^\n  = for example: (let seed::U32 1)\n",
+    "stdout": ""
+  },
+  "written-type-holds-the-literal": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: 300 doesn't fit in a U8\n --> written-type-holds-the-literal.vas:1:16\n  |\n1 | (let level::U8 300)\n  |                ^^^\n  = as written: `level::U8`\n  = a U8 holds 0 to 255\n",
+    "stdout": ""
+  },
+  "written-type-not-in-an-expression": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a type is written only on a let's name or a function's parameter\n --> written-type-not-in-an-expression.vas:1:6\n  |\n1 | (str count::Int)\n  |      ^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "written-type-not-on-a-function-name": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "syntax error: a type is written only on a let's name or a function's parameter\n --> written-type-not-on-a-function-name.vas:1:5\n  |\n1 | (fn title::String [p] (:name p))\n  |     ^^^^^^^^^^^^^\n",
+    "stdout": ""
+  },
+  "written-type-of-a-name-with-clauses": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: expected Float, found Int\n --> written-type-of-a-name-with-clauses.vas:1:20\n  |\n1 | (fn parse [s] (let n::Float (string/to-int s) [None 0.0]) n)\n  |                    ^\n  = as written: `n::Float`\n  = a Float and an Int don't mix: convert with to-float\n",
+    "stdout": ""
+  },
+  "written-type-of-a-parameter-checks-the-body": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `+` takes a number, and this is a String\n --> written-type-of-a-parameter-checks-the-body.vas:1:24\n  |\n1 | (fn add [x::String] (+ x 1))\n  |                        ^\n  = in argument 1 of `+`\n",
+    "stdout": ""
+  },
+  "written-types-on-lets-and-parameters": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "seed : U32\nclamp : (-> Float Float Float Float)\n3.0 : Float\nnext : (-> Int Int)\nparse : (-> String Int)\n12 : Int\ntwice : (-> (-> Int Int) Int Int)\n3 : Int\nnamed : {:name String, :born Int}\n3 : Int\n'(fn shout [p::{:name String}] p) : Form\n"
+  },
+  "written-vector-types": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "log : [String]\ngrid : [[Int]]\ntype Bag\n(Bag [1 2]) : Bag\ntotal : (-> [Int] Int)\n6 : Int\n"
+  },
+  "wrong-argument-type": {
+    "exit": 1,
+    "mode": "file",
+    "stderr": "type error: `+` takes a number, and this is a String\n --> wrong-argument-type.vas:1:6\n  |\n1 | (+ 1 \"two\")\n  |    - ^^^^^ a String\n  |    a number\n  = in argument 2 of `+`\n",
+    "stdout": ""
+  },
+  "zero-argument-functions": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "hello : (-> String)\n\"hello\" : String\n"
+  }
+}

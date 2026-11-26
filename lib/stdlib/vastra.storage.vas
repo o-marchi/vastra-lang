@@ -1,0 +1,30 @@
+(ns vastra.storage
+  "The browser's localStorage, as safe tasks."
+  (:target :js)
+  (:require [vastra.js :as js]))
+
+(type Error
+  Unavailable              ; storage is disabled (private browsing, settings)
+  QuotaExceeded            ; the browser refused to store more
+  (Unexpected String))     ; anything else, with the JavaScript message
+
+(fn error [problem]
+  (match problem
+    [(js/Thrown "SecurityError" _) Unavailable]
+    [(js/Thrown "QuotaExceededError" _) QuotaExceeded]
+    [_ (Unexpected (js/describe-error problem))]))
+
+(fn read
+  "The text stored under key, or None."
+  [key]
+  (let storage @(js/global "localStorage") [(Err why) @(task/fail (error why))])
+  (let stored::(Option String) @(js/method storage "getItem" [key])
+    [(Err why) @(task/fail (error why))])
+  stored)
+
+(fn write
+  "Stores text under key."
+  [key value]
+  (let storage @(js/global "localStorage") [(Err why) @(task/fail (error why))])
+  (let _ @(js/method storage "setItem" [key value]) [(Err why) @(task/fail (error why))])
+  unit)

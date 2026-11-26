@@ -1,0 +1,15 @@
+;; A page's program in several files, for the browser checks: the cart
+;; is a file of its own beside the page, and the view follows its names.
+
+(ns main
+  (:require [shop.cart :as cart] [vastra.html :as html :refer [html]]))
+
+(type Msg Buy Empty)
+(on Buy (cart/add! {:name "tea" :price 3}))
+(on Empty (cart/clear!))
+
+(view "#app"
+  (html [:div
+         [:p {:id "total"} (html/text (str "total " (cart/total cart/items)))]
+         [:button {:on-click Buy} "Buy"]
+         [:button {:on-click Empty} "Empty"]]))

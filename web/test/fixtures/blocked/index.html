@@ -1,0 +1,13 @@
+<!doctype html>
+<!-- The counter in a browser that blocks storage. -->
+<html><head><meta charset="utf-8">
+<script>
+  Object.defineProperty(window, "localStorage", {
+    get() { throw new DOMException("storage is blocked", "SecurityError"); }
+  });
+</script>
+<script src="vastra.js" defer></script>
+</head><body>
+<div id="app"></div>
+<script type="text/vastra" src="/fixtures/counter/counter.vas"></script>
+</body></html>

@@ -1,0 +1,7 @@
+; vastra.window, apart from the vastra library: vastra.js links that one,
+; and must not link SDL.
+
+(library
+ (name vastra_window)
+ (public_name vastra.window)
+ (libraries vastra tsdl))

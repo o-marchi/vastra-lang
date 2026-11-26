@@ -1,0 +1,10 @@
+;; A recording keeps each name the program changes by its own name: two
+;; files that change an `items` are refused, as how to tell them apart is not
+;; decided.
+
+(ns recording
+  (:require [shop.cart :as cart] [vastra.browser :as browser]))
+
+(let items 0)
+(fn more! [] (set! items (inc items)))
+(fn stop! [] @browser/stop)

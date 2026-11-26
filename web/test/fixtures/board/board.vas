@@ -1,0 +1,26 @@
+;; html, for the browser checks: a board drawn by a for inside a for, text
+;; computed in an if, attributes named as written, and a custom element whose
+;; children a map gives. Pressing a cell adds a move.
+
+(ns board
+  (:require [vastra.html :as html :refer [html]]))
+
+(type Msg (Play Int Int))
+
+(let rows 3)
+(let columns 3)
+(let moves [])
+
+(on (Play row column)
+  (set! moves (conj moves (str row "," column))))
+
+(view "#app"
+  (html [:main
+         [:p {:class "moves"} (str "Moves: " (count moves))]
+         [:div {:class "board" "data-size" (str rows)}
+          (for [row (range 0 rows)]
+            (for [column (range 0 columns)]
+              [:button {:class "cell" "data-at" (str row "," column)
+                        :on-click (Play row column)}
+               (if (= column 0) "first" "")]))]
+         [:move-log (map (fn [m] [:i m]) moves)]]))

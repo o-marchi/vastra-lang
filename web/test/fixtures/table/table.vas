@@ -1,0 +1,61 @@
+;; A page whose state nests maps in a vector and holds values of its own types,
+;; for the browser checks: changed along paths from the prompt, turned over
+;; with real mouse input that is recorded and replayed, and its types changed
+;; by saving while it runs.
+
+(ns table
+  (:require [vastra.html :as html :refer [html]]
+            [vastra.browser :as browser]))
+
+(type Back Woven Stars Checks)
+
+(fn back-class [back]
+  (match back
+    [Woven  "woven"]
+    [Stars  "stars"]
+    [Checks "checks"]))
+
+(type Drag
+  Resting
+  (Holding Int))
+
+(let initial
+  {:message "Press a card."
+   :cards   [{:name "one" :face-up false}
+             {:name "two" :face-up false}
+             {:name "three" :face-up false}]
+   :drag    Resting
+   :back    Woven
+   :feel    {:sway 4.0}})
+
+(type Msg
+  (CardPressed Int Float Float)
+  (PointerMoved Float Float)
+  (PointerReleased Float Float))
+
+(fn handle [msg table]
+  (match msg
+    [(CardPressed i _ _) (set table :drag (Holding i))]
+    [(PointerMoved _ _) table]
+    [(PointerReleased _ _)
+     (match (:drag table)
+       [(Holding i) (-> table (update :cards i :face-up not) (set :drag Resting))]
+       [Resting     table])]))
+
+(let table initial)
+(on msg (set! table (handle msg table)))
+
+(fn card-view [i card]
+  (html
+    [:div {:class (if (:face-up card) "card face-up" "card")
+           :on-pointer-down (fn [p] (CardPressed i (:x p) (:y p)))
+           :on-pointer-move (fn [p] (PointerMoved (:x p) (:y p)))
+           :on-pointer-up   (fn [p] (PointerReleased (:x p) (:y p)))}
+     (html/text (:name card))]))
+
+(view "#app"
+  (html
+    [:main {:class (str "table " (back-class (:back table)))
+            :style (str "--sway: " (:sway (:feel table)))}
+     [:p {:class "message"} (html/text (:message table))]
+     (html/element "div" [] (map-indexed card-view (:cards table)))]))

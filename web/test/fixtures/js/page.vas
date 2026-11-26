@@ -1,0 +1,44 @@
+;; JavaScript reached from a page, for the browser checks: a module
+;; beside the page, a package in node_modules, and a button the page's own
+;; HTML holds, whose clicks a callback counts, and one whose clicks don't fit
+;; what its callback takes.
+
+(ns page
+  (:require [vastra.js :as js] [vastra.html :as html :refer [html]])
+  (:import [greet "greeter"] [shapes "./shapes.mjs"]))
+
+(let greeting "")
+(let area 0)
+(let clicks 0)
+(let problem "")
+
+(fn clicked! [] (set! clicks (inc clicks)))
+(fn detailed! [event] (set! problem (:detail event)))
+
+(fn problem! [why] (set! greeting (js/describe-error why)))
+
+(fn start! []
+  (let hello::String @(js/call greet ["page"]) [(Err why) (problem! why)])
+  (let a::Int @(js/method shapes "area" [3 4]) [(Err why) (problem! why)])
+  (let document @(js/global "document") [(Err why) (problem! why)])
+  (let button @(js/method document "getElementById" ["plain"])
+    [(Err why) (problem! why)])
+  (let _ @(js/method button "addEventListener" ["click" (js/callback clicked! [])])
+    [(Err why) (problem! why)])
+  (let misfit @(js/method document "getElementById" ["misfit"])
+    [(Err why) (problem! why)])
+  (let detail
+    (js/callback detailed! [event::{:detail String}] [(Err why) (set! problem why)]))
+  (let _ @(js/method misfit "addEventListener" ["click" detail])
+    [(Err why) (problem! why)])
+  (set! greeting hello)
+  (set! area a))
+
+(later (start!))
+
+(view "#app"
+  (html [:div
+         [:p {:id "greeting"} (html/text greeting)]
+         [:p {:id "area"} (html/text (str "area " area))]
+         [:p {:id "clicks"} (html/text (str "clicks " clicks))]
+         [:p {:id "problem"} (html/text problem)]]))

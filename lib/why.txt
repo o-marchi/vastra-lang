@@ -1,0 +1,519 @@
+The long form of each rule an error states: what `:why` shows at the
+prompt for the last error. A section starts with "## " and the key the error
+names; its text is the rule, its reason from its decision, and the code
+before and after.
+
+## bang
+A call that can change the file's names shows a !, and one that can't
+doesn't. The file's names are the program's state, so a reader sees every
+change to it where it happens, without opening the functions it calls.
+
+  (fn hit [points] (set! score (+ score points)))    ; refused
+  (fn hit! [points] (set! score (+ score points)))   ; named with its !
+
+A function that acts only through a function it is given keeps its plain
+name, and a call that gives it one that acts shows the !:
+
+  (map hit! [1 2 3])                                 ; refused
+  (map! hit! [1 2 3])
+
+## buffer-used-up
+A buffer is a vector that one name holds, so set and update change it in
+place instead of copying it: once they have used the name, nothing can still
+see the old value, and no one can tell. A second use would see it
+changed, so it is refused where it comes.
+
+  (let after (set screen 0 9))
+  [screen after]                     ; refused: set used screen up
+  [after]                            ; what set gave back
+  (buffer/freeze screen)             ; or a vector, which any number can hold
+
+## task-run-by-at
+A task is a value that describes work, such as reading a file or the clock.
+@ runs it where it is written and gives its result, and the lines after it
+wait for it. Called, or left alone on a line, it does nothing.
+
+  (clock/now)                        ; refused: a task, not a function
+  @clock/now                         ; the time
+  (console/print "hi")               ; on a line: does nothing
+  @(console/print "hi")              ; prints
+
+## brackets
+Every ( [ and { is closed by its own ) ] and }. Code is data written as
+lists, vectors and maps, so where a form ends is where its closer is,
+and a missing or extra one changes what everything after it means.
+
+  (fn area [w h] (* w h)            ; refused: the ( is never closed
+  (fn area [w h] (* w h))
+  (fn area [w h] (* w h]))          ; refused: ] where ) closes
+  (fn area [w h] (* w h))
+
+## strings
+A string runs from " to the next " that no \ comes before, and only \" \\
+\n and \t are escapes. Another escape would mean something in one
+language and something else in the next, so it is refused instead of kept.
+
+  "say \"hi\"                       ; refused: never closed
+  "say \"hi\""
+  "C:\path"                         ; refused: \p is no escape
+  "C:\\path"
+
+## numbers
+A number is written as digits: 42, -7, 1.5, or 0xff in hex. A literal takes
+the type it meets, so it is written the same whatever type it
+becomes, without an exponent or a suffix.
+
+  1.5e3                             ; refused: an exponent
+  1500.0
+  1.2.3                             ; refused: not a number
+  1.2
+
+## number-fits
+A literal must fit the type it becomes: a U8 holds 0 to 255, an I32 a
+little over two billion either way. A value that doesn't fit would
+wrap around without a sign, so it is refused where it is written.
+
+  (let level::U8 300)               ; refused: 300 doesn't fit in a U8
+  (let level::U16 300)
+  (let level::U8 255)
+
+## number-types
+Number types never mix: an Int and a Float, or a U8 and a U32, are added
+only after one is converted. A conversion can lose a fraction or
+wrap a value, so it is written where it happens, with to-float, to-int,
+to-u8 and the rest; nothing converts on its own.
+
+  (+ 1.5 (count items))             ; refused: a Float and an Int
+  (+ 1.5 (to-float (count items)))
+  (quot 7.0 2)                      ; refused: quot divides whole numbers
+  (/ 7.0 2.0)
+
+## reader-marks
+' ` ~ ~@ and @ each mark the form right after them, and : starts a keyword,
+so each needs something to mark: '(a b), @(load), :name. A mark at the end
+of a form, or a lone :, marks nothing.
+
+  (list 1 ')                        ; refused: ' marks nothing
+  (list 1 'x)
+  {: "Bo"}                          ; refused: : names nothing
+  {:name "Bo"}
+
+## short-fn
+#(...) is a small function: % or %1 is its first parameter, %2 the next.
+It is for one short expression, so it doesn't nest, and % means
+nothing outside it; a longer function is written with fn.
+
+  (map #(map #(* % 2) %) rows)      ; refused: #() inside #()
+  (map (fn [row] (map #(* % 2) row)) rows)
+  (inc %)                           ; refused: % outside #()
+  #(inc %)
+
+## written-types
+A type is written only where a name is made, on a let's name or a
+function's parameter, with :: and no space: (let seed::U32 1). The
+checker knows most types itself; what is written is what comes from
+outside, or what a reader needs to see.
+
+  (+ 1 2::Int)                      ; refused: a type inside an expression
+  (let total::Int (+ 1 2))
+  (let names::(Vector String) [])   ; refused: a vector's type is [String]
+  (let names::[String] [])
+
+## maps
+A map pairs keywords with values: {:name "Bo" :age 31}. Its keys are
+keywords so that the types can check them: a misspelt key is
+caught before the program runs. Each key comes once, and with a value.
+
+  {:name "Bo" :age}                 ; refused: :age has no value
+  {:name "Bo" :age 31}
+  {"name" "Bo"}                     ; refused: a key that is no keyword
+  (dict/insert "name" "Bo" dict/empty)
+
+## no-nil
+There is no nil. A value that may be missing is an Option, None or
+(Some value), and code that reads it says what happens in each case:
+nothing is missing where nobody looked. So an if has an else, a cond a
+last [_ ...], and nil is no name.
+
+  (if (> n 0) "positive")           ; refused: no else
+  (if (> n 0) "positive" "not")
+  (cond [(< n 0) "below"])          ; refused: no [_ ...]
+  (cond [(< n 0) "below"] [_ "not below"])
+
+## not-a-value
+if, let, fn and the other special forms are the language's own grammar,
+and macros run while code is read, so neither is a value that can be passed
+or named. A function that does the same thing is.
+
+  (map if items)                    ; refused: if is no value
+  (reduce and true flags)           ; refused: and is a macro
+  (reduce (fn [a b] (and a b)) true flags)
+
+## names
+A value's name starts with a lowercase letter, since an uppercase one names
+a type or a constructor, and a local name has no /, which belongs to
+modules. Within one list of parameters, bindings or pattern names,
+each name comes once, or the second would hide the first.
+
+  (fn add [x x] (+ x x))            ; refused: x twice
+  (fn add [x y] (+ x y))
+  (let Total 0)                     ; refused: uppercase
+  (let total 0)
+
+## body-lines
+A body is lines: the last gives its value, and the lines before it name
+values with let or change them with set. A line that does neither is
+thrown away, so it is refused: it is a mistake, most often a task left
+without its @.
+
+  (fn greet [name]
+    (str "hi " name)                ; refused: does nothing
+    name)
+  (fn greet [name]
+    (let text (str "hi " name))
+    text)
+
+## form
+Each form has one shape: the words it starts with, then its parts, in
+order. The error's example shows the shape; the parts are found by
+where they are written, not by name, so a missing one changes what the rest
+mean.
+
+  (fn [x])                          ; refused: fn needs a body
+  (fn [x] (* x x))
+  (match n [0])                     ; refused: a pattern without its lines
+  (match n [0 "none"] [_ "some"])
+
+## clauses
+Each clause of a match, cond, let or later is in brackets: its pattern, or
+a cond's test, then its lines. The brackets show where a clause ends,
+so no one counts forms to tell a pattern from what follows it, and the
+lines are a body, as a function's are: the last gives the clause's value.
+
+  (match rank Ace "ace" Two "2")     ; refused: no brackets
+  (match rank [Ace "ace"] [Two "2"])
+  (match (first xs)
+    [(Some x)
+     (let y (* x 2))
+     (+ y 1)]
+    [None 0])
+  (match pair [[a b] (+ a b)])       ; a vector pattern, inside
+
+A cond's last clause is [_ ...], as a match's catch-all is. Inside html a
+[:keyword ...] is an element, so [:else ...] would be one.
+
+  (cond [(< n 0) "below"] [:else "not"])    ; refused: :else
+  (cond [(< n 0) "below"] [_ "not"])
+
+## top-level
+type, macro, ns, on and view are written at the top of a file, on lines of
+their own: they say what the program is, not something to work
+out on the way. A named fn inside a body is a local function, on a line of
+its own; inside an expression, a function is written without a name.
+
+  (fn setup [] (type Shape Square))   ; refused: type inside a function
+  (type Shape Square)
+  (map (fn double [x] (* 2 x)) xs)    ; refused: a named fn in an expression
+  (map (fn [x] (* 2 x)) xs)
+
+## let-clauses
+(let name value clause ...) names what succeeds, and its clauses say what
+happens otherwise: (Err why) for a Result or a task, None for an Option.
+The clauses must take every failure, each gives what the rest of the
+body would, and a clause ends its function or handler there, so the path
+that works reads straight down. The top of a file has nothing to end.
+
+  (let age (parse-age text))        ; a Result, not an age
+  (let age (parse-age text)
+    [(Err why) 0])                  ; the age, or 0
+  (let config @(file/read-text path)
+    [None 0])                       ; refused: a task fails with (Err _)
+
+## quasiquote
+A macro builds code as data: ` quotes a form, ~ puts a value into it, and
+~@ splices a vector of forms into a list or a vector. ~ and ~@ belong
+inside a `, and a macro returns a Form, or a (Result String Form) to refuse
+its input. A macro runs while code is read, before the program does, so it
+can't run tasks or change the file's names.
+
+  (macro twice [x] (+ ~x ~x))       ; refused: ~ outside a `
+  (macro twice [x] `(+ ~x ~x))
+
+## arity
+A function is called with as many arguments as it takes, a constructor
+with its fields, and a pattern names each field once. The operators
+take two or more, as in (+ a b c), and (- x) negates. A call with
+another number would be another function, so it is refused where it is
+written.
+
+  (greet {:name "a"} {:name "b"})    ; refused: greet takes 1
+  (greet {:name "a"})
+  (match o [(Some x y) x] [None 0])  ; refused: Some has 1 field
+  (match o [(Some x) x] [None 0])
+
+## patterns
+A pattern is _, a name, a whole number, a String or a Bool, a constructor
+like (Some x), or a vector of an exact length. Floats are never
+matched exactly, since 0.1 + 0.2 is not 0.3. A match takes every case, and
+a clause that can never match is refused, since one before it already took
+its values.
+
+  (match x [0.5 "half"] [_ "other"]) ; refused: a Float
+  (if (< x 0.5) "below" "not")
+  (match flag [true "yes"])         ; refused: false is missing
+  (match flag [true "yes"] [false "no"])
+
+## unknown-name
+A name is defined before it is used: by let or fn in the file, as a
+parameter, by a required module, or in the prelude. A name nothing
+defines is most often misspelt, or its module not required.
+
+  (gret {:name "Ana"})              ; refused: no gret
+  (greet {:name "Ana"})
+  (clock/now)                       ; refused without vastra.clock
+  (ns app (:require [vastra.clock :as clock]))
+
+## defined-once
+A name, a type or a constructor has one definition in a file, or in one
+submission at the prompt. Two would disagree about what the name
+is; changing it is the prompt's and saving's job.
+
+  (let width 16)
+  (let width 32)                    ; refused: width is already defined
+  (type Coin Heads Tails)
+  (type Die Heads)                  ; refused: Heads is already a constructor
+
+## modules
+(ns app (:require [shop.cart :as cart])) finds shop/cart.vas next to the
+program, or a standard library module. A file declares the
+module its path names, files can't require each other in a circle, and a
+module for one platform runs only there.
+
+  ;; shop/cart.vas
+  (ns cart)                         ; refused: its path names shop.cart
+  (ns shop.cart)
+
+## redefinition
+At the prompt, a name redefined with a new type must leave everything that
+uses it still checking, or be redefined with it in the same submission.
+A type, and the type of a name a file's code changes, change only in
+the file that defines them: the files stay the source of truth, and a
+value made before a type changed keeps the old one.
+
+  (let base "10")                   ; refused while add-base adds to base
+  (do (let base 10)                 ; or both in one submission:
+      (fn add-base [x] (+ x base)))
+
+## one-type
+Every value has one type, which the checker works out before the program
+runs: a function takes the types its body reads, both branches of an
+if give the same type, and so do a vector's elements and a match's results.
+A mistake that would stop the program later is refused where it is written.
+
+  (fn double [x] (* 2 x))
+  (double "two")                    ; refused: * takes numbers
+  (double 2)
+  (if ok 1 "one")                   ; refused: a number or a String?
+  (if ok 1 0)
+
+## compare
+= compares values that hold no function, and < > min max compare numbers
+and Strings. Two functions can't be told equal without running them,
+and maps have no order, so neither is asked; a part that compares is.
+
+  (sort people)                     ; refused: maps don't compare
+  (sort-by :name < people)
+  (= inc dec)                       ; refused: functions
+  (= (inc 1) (dec 3))
+
+## infinite-type
+A value's type can't contain itself: a function given itself would need a
+type that holds its own type, without end. It is most often a
+function called with the wrong one of its arguments.
+
+  (fn [x] (x x))                    ; refused
+  (fn [f x] (f x))
+
+## keys
+A function's type says which keys it reads, and a map it is given must have
+them; other keys pass through. A map type written out means exactly
+its keys. A key ending in ? may be missing, and is a different key from
+the one without it.
+
+  (fn greet [person] (str "Hi " (:name person)))
+  (greet {:nmae "Bo"})              ; refused: no :name
+  (greet {:name "Bo" :pet "cat"})   ; fine: :pet passes through
+
+## paths
+get, set and update take a path: in a map, a key written as a keyword; in a
+vector, an Int; in a dictionary, a key of its type. A change along a
+path keeps the type of what it changes, and goes through keys the map has.
+
+  (get [1 2 3] :first)              ; refused: a vector's step is an Int
+  (get [1 2 3] 0)                   ; (Some 1)
+  (set {:name "Bo"} :email "b@x")   ; refused: no :email to change
+  (assoc {:name "Bo"} :email "b@x")
+
+## html
+html writes elements as [:tag {attributes} children...], checked before
+the page runs. A child is an element, a String, or a vector of them;
+the attributes are a map written right after the tag; and an element's
+children send the same type of message it does.
+
+  (html [:p 42])                    ; refused: a number is no child
+  (html [:p (str 42)])
+  (html [:p "hi" {:class "x"}])     ; refused: attributes after a child
+  (html [:p {:class "x"} "hi"])
+
+## views
+(view place ...) gives what is shown there, a page's html or a window's
+pixels, and runs again after every change. So it only reads: a
+change in it would set itself off again, and a wait would hold up the
+drawing. A button in it sends a message, and a handler makes the change.
+
+  (view "#app" (html [:p (set! seen true)]))     ; refused: a change
+  (view "#app" (html [:button {:on-click Seen} "ok"]))
+  (on Seen (set! seen true))
+
+## messages
+A file's handlers take its one type of message: each message goes to the
+first on that matches it, every message has one, and none can never run.
+A handler can't fail and runs to its end; one that sends a message
+coming back to it before any wait would never stop.
+
+  (type Msg Increment Reset)
+  (on Increment (set! total (inc total)))   ; refused: Reset has no on
+  (on Reset (set! total 0))
+
+## set-names
+set changes a name of its own body, a let or a parameter, and nothing
+outside sees it. set! changes one of the file's names, the program's
+state, from a ! function or a handler, and only from the file that
+defines it. Each says what it changes, so a function's own names never
+change the program, and the program's change shows a !.
+
+  (fn add! [n] (set total (+ total n)))     ; refused: total is the file's
+  (fn add! [n] (set! total (+ total n)))
+  (fn bump [n] (set! n (inc n)) n)          ; refused: n is its own
+  (fn bump [n] (set n (inc n)) n)
+
+## plain-reads-change
+A function without a ! doesn't read a name the file's code changes.
+It gives the same answer for the same arguments, so it works at the prompt
+with any of them, and no function sees half of a change. Give it the value,
+or make it a ! function, which reads the names that change.
+
+  (fn doubled [] (* 2 score))       ; refused: score changes in hit!
+  (fn doubled [n] (* 2 n))
+  (doubled score)
+
+## changing-type
+A name that set! or set changes holds one type, which the change never
+alters. What its starting value leaves open, [] or None, its
+uses fix; a part nothing fixes is written on its let.
+
+  (let log [])
+  (set! log 5)                      ; refused: log holds a vector
+  (let log::[String] [])            ; the type, written
+
+## buffer-held
+A buffer is changed in place, so only one place holds it: a function
+made inside can't hold one from outside, a vector, a dictionary or a task
+can't hold one, and a definition can't keep one, since it lives only while
+code runs. buffer/freeze gives a vector, which any of these can hold.
+
+  (let screen (buffer/repeat 3 0))  ; refused: a definition holds no buffer
+  (let screen (buffer/freeze (buffer/repeat 3 0)))
+
+## tasks-share-errors
+The tasks one @ chain runs fail with one type of error, so the failure
+that reaches the code around them has one type. task/map-err
+turns one error into another.
+
+  (+ @(load-count) @(ask-number))   ; refused: one fails with a String,
+                                    ; the other with a number
+  (+ @(load-count) @(task/map-err (ask-number) str))
+
+## later
+(later task [(Ok x) ...] [(Err e) ...]) starts a task without waiting for
+it; its clauses run on their own when it ends. Nothing is waiting
+there to take a failure, so a task that can fail has a clause for each end,
+and the clauses themselves can't fail.
+
+  (later (http/get-text url))                     ; refused: it can fail
+  (later (http/get-text url)
+    [(Ok text) (set! page text)]
+    [(Err why) (set! problem why)])
+
+## task-failed
+A task that fails, where no let's clause takes the failure, stops the
+program there: the failure is a typed value the program could
+have handled. The error names the form that ran it.
+
+  @(file/read-text "config.json")                 ; stops if it's missing
+  (let text @(file/read-text "config.json")
+    [(Err why) ""])
+
+## vastra-file
+vastra FILE shows each result, and shows tasks without running them; vastra
+run FILE runs the program. A definition that runs a task to get
+its value has nothing to show without running it, so vastra FILE refuses it
+and names vastra run.
+
+  vastra game.vas                   ; refused: (let config @(load))
+  vastra run game.vas
+
+## build
+vastra build compiles a program to OCaml or JavaScript. A few forms
+it doesn't compile yet; it says which, and vastra run runs the same program
+unchanged. Developing and building differ in speed, never in meaning.
+
+  vastra build game.vas             ; refused: a form not compiled yet
+  vastra run game.vas
+
+## decoding
+What comes from outside, JSON or JavaScript, is checked against a type
+written once on a let, with an (Err why) clause, since data from outside
+can always be wrong. The type must be fully known, and a
+constructor decodes from the word written after it.
+
+  (let ages::[Int] data)            ; refused: no (Err why) clause
+  (let ages::[Int] data
+    [(Err why) []])
+  (type Gender Female "female" Male "male")       ; the words JSON has
+
+## parallel
+par/let runs its bindings together, and ^name is the parallel version of
+name. Bindings that run together can't use each other, wait for a
+task, or share a buffer; what one needs is named in a let around them.
+
+  (par/let [a (f x) b (g a)] (+ a b))             ; refused: b uses a
+  (let a (f x))
+  (par/let [b (g a) c (h x)] (+ b c))
+
+## depth
+A call in tail position, the last thing a function does, doesn't grow the
+stack, so a loop written that way repeats without limit. Other
+recursion is limited, and stops with this error when it runs out.
+
+  (fn steps [n] (if (= n 0) 0 (+ 1 (steps (- n 1)))))   ; stops deep down
+  (fn steps [n total] (if (= n 0) total (steps (- n 1) (+ total 1))))
+
+## bug
+An accepted program never fails because of a mistake Vastra could have
+caught, so an internal error is Vastra's own bug, not the program's.
+The program's code is fine as written; the error, with the code that
+reaches it, is what to report.
+
+## stopped
+Ctrl+C stops what the prompt is running, and nothing from that submission
+is kept: it is put back as a failed submission is, so the session is
+as it was before it.
+
+## recording
+A recording keeps each name the program changes by its own name, so
+two names that print alike, from two modules, can't both be in it. Renaming
+one keeps both.
+
+  ;; a.vas and b.vas both (let score 0), and both change it
+  ;; rename one: (let points 0)

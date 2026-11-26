@@ -1,0 +1,5 @@
+;; A name its file leaves open, for the browser checks: the prompt can
+;; fix its type, and a file that fixes it otherwise takes it over.
+
+(let model {:lines [] :picked None})
+(fn pick! [n] (set! model :picked (Some n)))

@@ -1,0 +1,46 @@
+(ns node
+  (:require [vastra.http :as http]
+            [vastra.cli :as cli]
+            [vastra.console :as console]))
+
+; The requests of answers.vas, from a program built for Node. Its
+; arguments: the URL of the folder answers.vas is in, and of a server that
+; answers with a header given twice.
+
+(type Gender
+  Female "female"
+  Male "male")
+
+(type Person
+  {:name String
+   :gender Gender})
+
+(fn people [url]
+  (let people::[Person] @(http/get url)
+    [(Err why) (http/describe-error why)])
+  (string/join ", " (map :name people)))
+
+(fn answer [url header]
+  (let answer @(http/get url)
+    [(Err why) (http/describe-error why)])
+  (let value (dict/get header (:headers answer))
+    [None (str "no " header)])
+  (str (:status answer) " " value " " (string/trim (:body answer))))
+
+(fn requests [folder twice]
+  (let lines @(task/all [(people (str folder "users.json"))
+                         (people (str folder "wrong.json"))
+                         (people (str folder "hello.txt"))
+                         (people (str folder "missing.json"))
+                         (answer (str folder "hello.txt") "cache-control")
+                         (answer twice "x-twice")
+                         (people "http://127.0.0.1:1/users.json")
+                         (people "users.json")]))
+  @(console/print (string/join "\n" lines)))
+
+(fn main [args]
+  (match args
+    [[folder twice] (requests folder twice)]
+    [_ (console/print-error "usage: node node.js FOLDER-URL TWICE-URL")]))
+
+(cli/run main (fn [error] error))

@@ -1,0 +1,42 @@
+(ns vastra.browser
+  "Programs in a web page: recording them, and a page's REPL into itself."
+  (:target :js)
+  (:require [vastra.html :as html]))
+
+; A page's REPL into itself: submits source to the page's session, as the
+; terminal of vastra serve does, so a definition reaches the running
+; programs, which render again. Gives what the REPL shows, part by part, laid
+; out for 60 columns.
+(type Reply
+  (Value String String)   ; a result, or a name it defined, and its type
+  (Note String)           ; a declaration, or a note from the REPL
+  (Problem String))       ; an error, laid out as the REPL shows it
+
+(native submit (-> String (Task e [Reply])))
+
+; Recording and replaying the page's program: the names the file's code
+; changes, as they are, then each message its handlers get. Start and Message
+; stand for them: the checker types them by the file.
+(type Error NotRecording)
+(type Start)
+(type Message)
+
+; Starts recording: the names as they are, then each message, with its time.
+; It stops itself after 30 seconds, keeping what it has.
+(native record (Task e Unit))
+
+; Stops a recording or a loop and gives the recording, :at in seconds from the
+; start.
+(native stop (Task Error {:start Start :messages [{:msg Message :at Float}]}))
+
+; Puts the names back and delivers each message at its moment through the
+; handlers; finishes after the last. While it plays, a set! at the prompt also
+; changes the names it starts from, a press or a key on the page stops it, and
+; other input is dropped.
+(native replay
+  (-> {:start Start :messages [{:msg Message :at Float}]} (Task e Unit)))
+
+; The same, again a second after each last message, until stop. Gives back at
+; once.
+(native loop
+  (-> {:start Start :messages [{:msg Message :at Float}]} (Task e Unit)))

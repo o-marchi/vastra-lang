@@ -1,0 +1,28 @@
+(executable
+ (name vastra_page)
+ (modes js)
+ (libraries vastra_web)
+ (preprocess
+  (pps js_of_ocaml-ppx)))
+
+(rule
+ (target vastra.js)
+ (action
+  (copy vastra_page.bc.js vastra.js)))
+
+; Browser checks, in headless Chrome, of pages served by `vastra serve` and of the
+; counter compiled with `vastra build --js`: dune build @browser
+
+(rule
+ (alias browser)
+ (deps
+  test/check.mjs
+  repl.html
+  %{exe:../bin/main.exe}
+  (package vastra)
+  (source_tree test/fixtures))
+ (action
+  (run
+   sh
+   -c
+   "export OCAMLPATH=$(cd %{workspace_root}/../install/default/lib && pwd) && %{exe:../bin/main.exe} build --js test/fixtures/counter/counter.vas -o counter.js && node test/check.mjs %{exe:../bin/main.exe} counter.js")))

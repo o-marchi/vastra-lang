@@ -1,0 +1,15 @@
+# OCaml (dune build output, local opam switch)
+_build/
+_opam/
+
+# Editors
+.vscode/
+.idea/
+.zed/
+*.swp
+
+# Python
+__pycache__/
+
+# Claude Code's local folder
+.claude/

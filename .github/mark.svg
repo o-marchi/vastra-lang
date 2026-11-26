@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="14.5 7 111 106">
+  <!-- Vastra's mark: two ink strokes, and the thread passing under the
+       left one and over the right, with a gap of 4 wherever they cross. The
+       gaps are masks, so the mark sits on any ground. -->
+  <style>
+    .ink { stroke: #2E281F }
+    .thread { stroke: #755B1F }
+    @media (prefers-color-scheme: dark) {
+      .ink { stroke: #DDDAD4 }
+      .thread { stroke: #D8A64F }
+    }
+  </style>
+  <mask id="under-left" maskUnits="userSpaceOnUse" x="0" y="0" width="140" height="120">
+    <rect width="140" height="120" fill="#fff"/>
+    <path d="M58 16 Q24 60 58 104" stroke="#000" stroke-width="17" fill="none" stroke-linecap="round"/>
+  </mask>
+  <mask id="under-thread" maskUnits="userSpaceOnUse" x="0" y="0" width="140" height="120">
+    <rect width="140" height="120" fill="#fff"/>
+    <path d="M18.5 60 L121.5 60" stroke="#000" stroke-width="16" stroke-linecap="round"/>
+  </mask>
+  <g fill="none" stroke-linecap="round">
+    <path class="ink" d="M82 16 Q116 60 82 104" stroke-width="9" mask="url(#under-thread)"/>
+    <path class="thread" d="M18.5 60 L121.5 60" stroke-width="8" mask="url(#under-left)"/>
+    <path class="ink" d="M58 16 Q24 60 58 104" stroke-width="9"/>
+  </g>
+</svg>

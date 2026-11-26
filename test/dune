@@ -1,0 +1,47 @@
+(rule
+ (alias runtest)
+ (deps
+  %{exe:../bin/main.exe}
+  (source_tree ../conformance))
+ (action
+  (run python3 -I ../conformance/run.py check %{exe:../bin/main.exe})))
+
+; The conformance suite on programs compiled with `vastra build`: dune build @compiled
+
+(rule
+ (alias compiled)
+ (deps
+  %{exe:../bin/main.exe}
+  (package vastra)
+  (source_tree ../conformance))
+ (action
+  (run
+   sh
+   -c
+   "OCAMLPATH=$(cd %{workspace_root}/../install/default/lib && pwd) python3 -I ../conformance/run.py compiled %{exe:../bin/main.exe}")))
+
+; The same, compiled to JavaScript and run with Node: dune build @compiled-js
+
+(rule
+ (alias compiled-js)
+ (deps
+  %{exe:../bin/main.exe}
+  (package vastra)
+  (source_tree ../conformance))
+ (action
+  (run
+   sh
+   -c
+   "OCAMLPATH=$(cd %{workspace_root}/../install/default/lib && pwd) python3 -I ../conformance/run.py compiled-js %{exe:../bin/main.exe}")))
+
+; The pure parts of the REPL's terminal.
+
+(test
+ (name terminal_test)
+ (libraries vastra terminal unix))
+
+; vastra.window, on SDL's dummy video driver: no window opens.
+
+(test
+ (name window_test)
+ (libraries vastra vastra.window tsdl unix))

@@ -1,0 +1,26 @@
+(ns vastra.window
+  "A program in a window: its pixels, the keys, a clock for its frames."
+  (:target :native))
+
+; Keys, named as the web names them (KeyboardEvent.key). A key that types a
+; character is (Char "a"), in lowercase.
+(type Key ArrowLeft ArrowRight ArrowUp ArrowDown Escape Tab Enter (Char String))
+
+; Once a frame, before it is drawn: the seconds since the last frame, from a
+; steady clock, and the keys held down. When a key goes down: a Press, before
+; its frame's Frame.
+(type Event (Frame Float [Key]) (Press Key))
+
+; A window, which opening gives: its view names it as its place.
+(type Window)
+(type Error (CannotOpen String))
+
+; Opens a window :scale times the picture's :width and :height. Its frames run
+; once the file that opened it has: each frame, at the display's refresh, the
+; Press events that came in, then the Frame, go to the file's handlers, and
+; then the window's view is shown: 0xAARRGGBB, row by row from the top left,
+; the alpha ignored. They run until the window closes.
+(native open (-> {:title String :width Int :height Int :scale Int} (Task Error Window)))
+
+; Closes the window, which ends its frames.
+(native close (-> Window (Task e Unit)))

@@ -1,0 +1,26 @@
+(ns vastra.http
+  "Requests over HTTP, as tasks."
+  (:target :js))
+
+; Header names are lowercase, and a repeated header's values are joined with ", ".
+(type Answer
+  {:status Int
+   :headers (Dict String String)
+   :body String})
+
+(type Error
+  (NetworkError String)    ; no answer: network, address, cross-origin
+  (BadStatus Int Answer)   ; an answer outside 200-299, whole
+  (BadBody String))        ; not the data the type says: where and what
+
+(native get-text (-> String (Task Error String)))
+
+; Told the type of its answer by the :: on its let: the body is decoded
+; to a type written there, and with none the answer is the Answer.
+(native get (-> String (Task Error (Told Answer))))
+
+(fn describe-error [error]
+  (match error
+    [(NetworkError message) (str "network error: " message)]
+    [(BadStatus status answer) (str "the server answered " status ": " (:body answer))]
+    [(BadBody message) (str "unexpected answer: " message)]))

@@ -1,0 +1,33 @@
+<!doctype html>
+<!-- The Vastra REPL in the browser: `vastra serve web`, then open /repl.html. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Vastra REPL</title>
+  <style>
+    body { font-family: ui-monospace, monospace; max-width: 50rem; margin: 2rem auto; }
+    #log { white-space: pre-wrap; }
+    .input { color: #555; }
+    textarea { width: 100%; height: 5rem; font: inherit; }
+  </style>
+  <script src="vastra.js" defer></script>
+</head>
+<body>
+  <div id="log"></div>
+  <textarea id="source" placeholder="(+ 1 2), then Ctrl+Enter"></textarea>
+  <script>
+    const source = document.getElementById("source");
+    const log = document.getElementById("log");
+    source.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" || !event.ctrlKey) return;
+      const input = document.createElement("div");
+      input.className = "input";
+      input.textContent = "vastra> " + source.value;
+      const output = document.createElement("div");
+      output.textContent = vastra.eval(source.value);
+      log.append(input, output);
+      source.value = "";
+    });
+  </script>
+</body>
+</html>

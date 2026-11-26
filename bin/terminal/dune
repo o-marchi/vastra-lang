@@ -1,0 +1,5 @@
+; The REPL's terminal, apart from the REPL so that tests reach it.
+
+(library
+ (name terminal)
+ (libraries vastra unix))

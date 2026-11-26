@@ -1,0 +1,18 @@
+(ns vastra.cli
+  "Command-line programs."
+  (:require [vastra.console :as console]))
+
+(native args (Task e [String]))
+; Ends the program with this status; at the prompt or in a page, it sets
+; the status only.
+(native exit (-> Int (Task e Unit)))
+
+(fn run
+  "Runs (main args). If it fails, prints (describe error) and exits with status 1."
+  [main describe]
+  (task/and-then args
+    (fn [arguments]
+      (task/recover (main arguments)
+        (fn [error]
+          @(console/print-error (describe error))
+          @(exit 1))))))
