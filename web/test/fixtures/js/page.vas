@@ -1,16 +1,29 @@
 ;; JavaScript reached from a page, for the browser checks: a module
 ;; beside the page, a package in node_modules, and a button the page's own
 ;; HTML holds, whose clicks a callback counts, and one whose clicks don't fit
-;; what its callback takes.
+;; what its callback takes. JavaScript sends the page messages: through
+;; vastra.send, and through window.pick, which sends Picked.
 
 (ns page
-  (:require [vastra.js :as js] [vastra.html :as html :refer [html]])
+  (:require [vastra.js :as js] [vastra.html :as html :refer [html]]
+            [vastra.browser :as browser])
   (:import [greet "greeter"] [shapes "./shapes.mjs"]))
 
 (let greeting "")
 (let area 0)
 (let clicks 0)
 (let problem "")
+(let zoom 1.0)
+(let picked "")
+
+(type Msg
+  (Zoomed Float)
+  (Picked {:id String}))
+
+(on (Zoomed level) (set! zoom level))
+(on (Picked item) (set! picked (:id item)))
+
+(js/receive Msg [(Err why) (set! problem why)])
 
 (fn clicked! [] (set! clicks (inc clicks)))
 (fn detailed! [event] (set! problem (:detail event)))
@@ -31,6 +44,9 @@
     (js/callback detailed! [event::{:detail String}] [(Err why) (set! problem why)]))
   (let _ @(js/method misfit "addEventListener" ["click" detail])
     [(Err why) (problem! why)])
+  (let window @(js/global "window") [(Err why) (problem! why)])
+  (let _ @(js/set window "pick" (js/message Picked [(Err why) (set! problem why)]))
+    [(Err why) (problem! why)])
   (set! greeting hello)
   (set! area a))
 
@@ -41,4 +57,6 @@
          [:p {:id "greeting"} (html/text greeting)]
          [:p {:id "area"} (html/text (str "area " area))]
          [:p {:id "clicks"} (html/text (str "clicks " clicks))]
-         [:p {:id "problem"} (html/text problem)]]))
+         [:p {:id "problem"} (html/text problem)]
+         [:p {:id "zoom"} (html/text (str "zoom " zoom))]
+         [:p {:id "picked"} (html/text (str "picked " picked))]]))

@@ -2013,6 +2013,10 @@ and infer_call c (func : Ast.expr) args span =
   let func_ty = infer c func in
   let name = match func.kind with Var n -> Some n | _ -> None in
   let ret = call_type c func func_ty name args span in
+  (match (name, args) with
+  | Some ("vastra.js/message*" | "vastra.js/receive*"), given :: _ ->
+      sent c func func_ty given
+  | _ -> ());
   (match resolve c func_ty with
   | Fun (params, _, action) ->
       let added = func.origin = Some "!" in
@@ -2029,6 +2033,35 @@ and infer_call c (func : Ast.expr) args span =
       c.calls <- call :: c.calls
   | _ -> ());
   ret
+
+(* What JavaScript may send the natives of js/message and js/receive: the
+   file's messages, a constructor's values decoded as a let decodes them. They
+   are told the constructor [given] makes, or every one of the type it gives. *)
+and sent c (func : Ast.expr) func_ty (given : Ast.expr) =
+  let made = match resolve c func_ty with Fun (f :: _, _, _) -> resolve c f | t -> t in
+  let params, message = match made with Fun (ps, r, _) -> (ps, r) | t -> ([], t) in
+  let refuse what example =
+    Diagnostic.fail
+      (Diagnostic.make ~why:"messages" Type given.span (what ^ " of the file's messages")
+      |> Diagnostic.note example)
+  in
+  let values (ctor, types) =
+    let form = Reader.Symbol (shown c.env ctor) in
+    (ctor, List.map (describe c { form; span = given.span; origin = None }) types)
+  in
+  let shape =
+    match (func.kind, given.kind, resolve c message) with
+    | Var "vastra.js/message*", Var ctor, _ when Env.mem ctor c.env.ctors ->
+        messages c message given.span;
+        Shape.Message [ values (ctor, params) ]
+    | Var "vastra.js/message*", _, _ ->
+        refuse "js/message takes a constructor" "(js/message Picked [(Err why) ...])"
+    | _, _, Con (k, _) when (Env.find k c.env.types).ctors <> [] ->
+        messages c message given.span;
+        Message (List.map values (Env.find k c.env.types).ctors)
+    | _ -> refuse "js/receive takes the type" "(js/receive Msg [(Err why) ...])"
+  in
+  func.typed <- Told_type shape
 
 and call_type c (func : Ast.expr) func_ty name args span =
   (* A ! added to the call is no macro's. *)

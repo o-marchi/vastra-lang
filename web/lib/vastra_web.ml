@@ -648,22 +648,79 @@ let js_task ?(give = decoded) told act =
       | exception Js_error.Exn e -> k (thrown (Js.Unsafe.inject (Js_error.to_error e)))
       | exception Refused_value why -> k (fails "BadArgument" [ Str why ]))
 
-(* Run as a handler: a task it gives runs too, then what it sent, and the
-   views are drawn again. It answers JavaScript with what it gives. *)
+(* Runs [f] as a handler: a task it gives runs too, then what it sent, and
+   the views are drawn again. Gives what it gives, unless a task. *)
+let as_handler f args =
+  let given = ref None in
+  let run () =
+    (match !apply f args with
+    | Task t -> t (fun _ -> handle_sent (); !redraw ())
+    | v -> given := Some v);
+    handle_sent ();
+    !redraw ()
+  in
+  if in_page then guard ~source:"" ~origin:"page" run else run ();
+  !given
+
+let arguments n (args : Js.Unsafe.any_js_array) = List.init n (Js.Unsafe.get args)
+
+(* It answers JavaScript with what it gives. *)
 let callback n f =
-  let called (args : Js.Unsafe.any_js_array) =
-    let answer = ref (Js.Unsafe.inject Js.undefined) in
-    let run () =
-      (match !apply f (List.init n (fun i -> Opaque (Js (Js.Unsafe.get args i)))) with
-      | Task t -> t (fun _ -> handle_sent (); !redraw ())
-      | v -> ( try answer := encode v with Refused_value _ -> ()));
-      handle_sent ();
-      !redraw ()
-    in
-    if in_page then guard ~source:"" ~origin:"page" run else run ();
-    !answer
+  let called args =
+    let as_js v = try encode v with Refused_value _ -> Js.Unsafe.inject Js.undefined in
+    let given = as_handler f (List.map (fun v -> Opaque (Js v)) (arguments n args)) in
+    Option.fold ~none:(Js.Unsafe.inject Js.undefined) ~some:as_js given
   in
   Opaque (Js (Js.Unsafe.inject (Js.Unsafe.callback_with_arguments called)))
+
+let short ctor = List.hd (List.rev (String.split_on_char '/' ctor))
+
+exception Misfit of string
+
+(* A message JavaScript sent, its values decoded now. On the next turn, as
+   send! has it, it is handled as the page's are; or [misfit] runs, with why. *)
+let sent (ctor, shapes) misfit values =
+  let value i shape =
+    let missing = Js.Unsafe.inject Js.undefined in
+    let v = Option.value (List.nth_opt values i) ~default:missing in
+    match Json.decode shape (Opaque (Js v)) with
+    | Ctor ("Ok", [ x ]) -> x
+    | Ctor (_, [ Str why ]) when List.length shapes = 1 -> raise (Misfit why)
+    | Ctor (_, [ Str why ]) -> raise (Misfit (Printf.sprintf "value %d: %s" (i + 1) why))
+    | _ -> raise (Internal "vastra.js: a message's value")
+  in
+  let handle =
+    match Ctor (ctor, List.mapi value shapes) with
+    | m when in_page -> fun () -> dispatch (fun () -> m)
+    | m -> fun () -> Value.deliver ~window:false m
+    | exception Misfit why ->
+        fun () -> ignore (as_handler misfit [ Str (short ctor ^ ": " ^ why) ])
+  in
+  let _cancel = !Clock.after 0. handle in
+  ()
+
+(* What vastra.send may send, once js/receive opens it. *)
+let receiving = ref None
+
+let throw message =
+  let error = Js.Unsafe.js_expr "(function(m){throw new Error(m)})" in
+  Js.Unsafe.fun_call error [| Js.Unsafe.inject (Js.string message) |]
+
+(* JavaScript's vastra.send(name, ...values). A message the program doesn't
+   have is JavaScript's to handle. *)
+let send (args : Js.Unsafe.any_js_array) =
+  let all = arguments (Js.Unsafe.get args "length") args in
+  match (!receiving, all) with
+  | None, _ ->
+      throw "this program takes no messages from JavaScript: js/receive opens them"
+  | Some (ctors, misfit), name :: values -> (
+      let name = Js.to_string (Js.Unsafe.fun_call (get global "String") [| name |]) in
+      match List.find_opt (fun (ctor, _) -> short ctor = name) ctors with
+      | Some message -> sent message misfit values
+      | None ->
+          let names = String.concat ", " (List.map (fun (ctor, _) -> short ctor) ctors) in
+          throw (Printf.sprintf "no message %s; the program takes %s" name names))
+  | Some _, [] -> throw "vastra.send takes a message's name, then its values"
 
 let js_natives =
   let native name run = ("vastra.js/" ^ name, Builtin { builtin_name = name; run }) in
@@ -720,6 +777,16 @@ let js_natives =
     native "callback*" (function
       | [ Int n; f ] -> callback (Z.to_int n) f
       | _ -> wrong "callback*");
+    native "message*" (function
+      | [ Opaque (Json.Shape (Message [ (_, shapes) as message ])); _; misfit ] ->
+          let called args = sent message misfit (arguments (List.length shapes) args) in
+          Opaque (Js (Js.Unsafe.inject (Js.Unsafe.callback_with_arguments called)))
+      | _ -> wrong "message*");
+    native "receive*" (function
+      | [ Opaque (Json.Shape (Message ctors)); _; misfit ] ->
+          receiving := Some (ctors, misfit);
+          Unit
+      | _ -> wrong "receive*");
   ]
 
 (* -- The clock -------------------------------------------------------- *)
@@ -987,6 +1054,7 @@ let run_page () =
          ( "eval",
            Js.Unsafe.inject
              (Js.wrap_callback (fun s -> Js.string (eval (Js.to_string s)))) );
+         ("send", Js.Unsafe.inject (Js.Unsafe.callback_with_arguments send));
        |]);
   if Js.to_string document##.readyState = "loading" then
     ignore

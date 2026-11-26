@@ -11,3 +11,4 @@ type t =
   | Option of t (* null *)
   | Record of (string * t) list (* these keys; the data's others are ignored *)
   | Words of (string * string) list (* each constructor, by its outside word *)
+  | Message of (string * t list) list (* the constructors JavaScript may send *)

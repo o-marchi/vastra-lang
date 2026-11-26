@@ -105,6 +105,36 @@
                  (vastra.js/reply (f# ~@(map :name args)))))
              ~f)))]))
 
+; JavaScript sends the file's messages, a constructor's values decoded by
+; their types, and they are handled as the page's messages are. When the
+; values don't fit, the function given runs instead, with why. The checker
+; tells each the constructor its first argument makes, or every one of the
+; type it gives.
+(native message* (-> f (->! String a) Value))
+(native receive* (-> (-> m m) (->! String a) Unit))
+
+; [(Err why) line ...] as (fn [why] line ...).
+(fn misfit [clause]
+  (let items (match (form/view clause) [(VectorView items) items] [_ []]))
+  (let err? #(match (form/view %) [(SymbolView "Err") true] [_ false]))
+  (let needed (Err (str "a message from JavaScript needs an (Err why) clause\n"
+                        "data from outside can always be wrong")))
+  (match (map form/view (take 1 items))
+    [[(ListView [err why])] (if (err? err) (Ok `(fn [~why] ~@(drop 1 items))) needed)]
+    [_ needed]))
+
+; (message Picked [(Err why) ...]) is a function JavaScript can call to send
+; (Picked ...): its arguments fill the values in order.
+(macro message [ctor clause]
+  (result/map (misfit clause) (fn [f] `(vastra.js/message* ~ctor ~f))))
+
+; (receive Msg [(Err why) ...]) lets JavaScript's vastra.send send any Msg,
+; by its name and then its values. One that doesn't exist throws there.
+(macro receive [messages clause]
+  (let each (gensym "message"))
+  (result/map (misfit clause)
+              (fn [f] `(vastra.js/receive* (fn [~(typed each messages)] ~each) ~f))))
+
 ; (call f [a b]) is (call* f [(value a) (value b)]); a vector that isn't
 ; written out is a vector of Values already.
 (fn values [args]

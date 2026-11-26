@@ -675,6 +675,35 @@ const greeted = ask('(js/to-json @(js/call greet ["prompt"]))');
 check("an import is tried at the prompt",
   await heard('JString "hello, prompt")', greeted), true);
 
+// JavaScript sends the page its messages: values that don't fit run the
+// program's clause, and a message it doesn't have throws in JavaScript.
+const sent = (js) => evaluate(`(() => { try { ${js}; return "sent"; } catch (e) { return e.message; } })()`);
+const shows = (selector, wanted) => until(async () => (await text(selector)) === wanted);
+check("vastra.send sends a message, handled as the page's are",
+  [await sent('vastra.send("Zoomed", 2.5)'), await shows("#zoom", "zoom 2.5")], ["sent", true]);
+check("values that don't fit run the clause js/receive was given",
+  [await sent('vastra.send("Zoomed", "big")'),
+    await shows("#problem", 'Zoomed: expected a number, found "big"')], ["sent", true]);
+check("a message the program doesn't have throws in JavaScript",
+  await sent('vastra.send("Zomed", 2.5)'), "no message Zomed; the program takes Zoomed, Picked");
+check("js/message gives JavaScript a function that sends one",
+  [await sent('pick({id: "a7"})'), await shows("#picked", "picked a7")], ["sent", true]);
+check("its arguments decoded by the constructor's types",
+  [await sent("pick({id: 7})"),
+    await shows("#problem", "Picked: in id: expected a string, found a number")], ["sent", true]);
+check("js/message refuses what isn't a constructor of the file's messages",
+  await heard("type error: js/message takes a constructor of the file's messages",
+    ask("(js/message inc [(Err _) unit])")), true);
+await heard("unit : Unit", ask("browser/record"));
+await sent('vastra.send("Zoomed", 3.0)');
+await shows("#zoom", "zoom 3.0");
+check("a recording holds what JavaScript sent",
+  await heard("[(Zoomed 3.0)]", ask("(map :msg (:messages @browser/stop))")), true);
+await open("/fixtures/counter/index.html");
+check("a program without js/receive takes no messages from JavaScript",
+  await sent('vastra.send("Increment")'),
+  "this program takes no messages from JavaScript: js/receive opens them");
+
 // A page's state changed from the prompt along paths, and by saving its file,
 // with real mouse input.
 console.log("a page's state, changed from the prompt:");

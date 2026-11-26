@@ -251,6 +251,7 @@ let decode (shape : Shape.t) j =
     | Int, _ -> expected "a whole number"
     | Vector _, _ -> expected "an array"
     | Record _, _ -> expected "an object"
+    | Message _, _ -> raise (Internal "a message is decoded by its values")
   in
   let j = match j with Opaque o -> !of_opaque shape o | j -> j in
   match go [] shape j with
