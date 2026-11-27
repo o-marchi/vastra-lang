@@ -118,7 +118,8 @@ let needed entries =
     entries;
   seen
 
-let generate ~show ~js ?(window = false) ?(names = []) ~source entries =
+let generate ~show ~js ?(window = false) ?(submits = false) ?(names = []) ~source
+    entries =
   let how = globals entries in
   let needed = needed entries in
   let used n = Hashtbl.mem needed n in
@@ -443,6 +444,7 @@ let generate ~show ~js ?(window = false) ?(names = []) ~source entries =
   in
   "[@@@warning \"-a\"]\nopen Vastra\n\nlet () =\n"
   ^ (if js then "  Vastra_web.install ();\n" else "")
+  ^ (if submits then "  Page_session.install ();\n" else "")
   ^ (if window then "  Vastra_window.install ();\n" else "")
   ^ "  Rt.show_mode := " ^ string_of_bool show ^ ";\n"
   ^ p "  Rt.source := (%S, %S);\n" (fst source) (snd source)
@@ -484,11 +486,16 @@ let program ~show ~js path source =
           (keys env.ctors @ keys env.vars)
       in
       let window = List.mem "vastra.window" s.state.loaded in
-      let library =
-        if js then "vastra.web" else if window then "vastra.window" else "vastra"
-      in
       let entries = List.rev (Option.value s.trace ~default:[]) in
-      match generate ~show ~js ~window ~names ~source:(path, source) entries with
+      (* The checker and interpreter go into a page only to run what it submits. *)
+      let submits = js && Hashtbl.mem (needed entries) "vastra.browser/submit" in
+      let library =
+        if submits then "vastra.web.session"
+        else if js then "vastra.web"
+        else if window then "vastra.window"
+        else "vastra"
+      in
+      match generate ~show ~js ~window ~submits ~names ~source:(path, source) entries with
       | code -> Ok (code, library)
       | exception Unsupported (what, span) ->
           Error

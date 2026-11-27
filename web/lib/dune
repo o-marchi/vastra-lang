@@ -1,6 +1,15 @@
 (library
  (name vastra_web)
  (public_name vastra.web)
+ (modules vastra_web)
  (libraries vastra js_of_ocaml zarith_stubs_js)
+ (preprocess
+  (pps js_of_ocaml-ppx)))
+
+(library
+ (name page_session)
+ (public_name vastra.web.session)
+ (modules page_session)
+ (libraries vastra_web)
  (preprocess
   (pps js_of_ocaml-ppx)))

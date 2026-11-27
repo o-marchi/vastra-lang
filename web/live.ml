@@ -29,7 +29,7 @@ let pathname url =
    Otherwise the script starts again from a fresh session. Serve sends
    only saves that check, with the files that require them. After a saved
    module, the script's file is taken again, since it uses the module. *)
-let reload (script : Vastra_web.script) saved =
+let reload (script : Page_session.script) saved =
   let source = Vastra_web.read script.url in
   let s = script.session in
   let changed = ref [] and notes = ref [] and restarted = ref [] and fresh = ref [] in
@@ -90,9 +90,9 @@ let reload (script : Vastra_web.script) saved =
                  (String.concat ", " names))
            :: !notes))
   | Some why ->
-      let fresh = Vastra_web.session () in
+      let fresh = Page_session.session () in
       script.session <- fresh;
-      Vastra_web.run_script fresh ~origin:script.url source;
+      Page_session.run_script fresh ~origin:script.url source;
       script.expressions <- fresh.expressions;
       say (Printf.sprintf "%s: started again, because %s" saved why)
 
@@ -111,9 +111,9 @@ let first_line text =
 
 (* The REPL's session: that of the page's last script, or one of its own. *)
 let session () =
-  match List.rev !Vastra_web.scripts with
+  match List.rev !Page_session.scripts with
   | script :: _ -> script.session
-  | [] -> Lazy.force Vastra_web.repl
+  | [] -> Lazy.force Page_session.repl
 
 let answer message =
   let id, rest = first_line message in
@@ -168,10 +168,10 @@ let receive message =
   | "page" -> me := rest
   | "vas" ->
       List.iter
-        (fun (script : Vastra_web.script) ->
+        (fun (script : Page_session.script) ->
           let files = script.url :: Session.files script.session in
           List.iter (fun file -> if pathname file = rest then reload script file) files)
-        !Vastra_web.scripts
+        !Page_session.scripts
   | "reload" -> Dom_html.window##.location##reload
   | "repl" -> answer rest
   | _ -> ()

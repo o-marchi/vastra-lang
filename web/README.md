@@ -2,8 +2,8 @@
 
 `vastra.js` is the Vastra implementation compiled to JavaScript with
 js_of_ocaml (`web/lib/vastra_web.ml` adds what only a browser has: JavaScript
-calls, rendering, events and HTTP; `live.ml` is the page's side of `vastra
-serve`). The `vastra` command carries it, and `vastra serve` gives it to every
+calls, rendering, events and HTTP; `lib/page_session.ml` runs the page's
+scripts; `live.ml` is the page's side of `vastra serve`). The `vastra` command carries it, and `vastra serve` gives it to every
 page it serves:
 
 ```bash
