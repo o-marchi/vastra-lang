@@ -14,7 +14,7 @@ python3 -I conformance/run.py check BINARY        # does BINARY match the spec?
 python3 -I conformance/run.py compare BIN1 BIN2   # do two implementations agree?
 python3 -I conformance/run.py bless BINARY        # record BINARY's behaviour as the spec
 python3 -I conformance/run.py compiled BINARY     # the same, on programs built with `vastra build`
-python3 -I conformance/run.py compiled-js BINARY  # ... built with `vastra build --js`, run with Node
+python3 -I conformance/run.py compiled-js BINARY  # ... built with `vastra build --js`, compact and --readable, run with Node
 ```
 
 From dune: `dune test` (interpreter), `dune build @compiled`,

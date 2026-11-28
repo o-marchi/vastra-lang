@@ -407,6 +407,12 @@
     "stderr": "",
     "stdout": "\"123\" : String\n6 : Int\n"
   },
+  "a-loop-written-out-in-a-branch-ends": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "count-up : (-> number number)\npick : (-> Bool number)\n11 : Int\n"
+  },
   "a-macro-cannot-change-names": {
     "exit": 1,
     "mode": "file",
@@ -2368,6 +2374,18 @@
     "mode": "repl",
     "stderr": "",
     "stdout": "vastra> #<fn task/race> : (-> (Task a b) (Task a b) (Task a b))\nvastra> #<fn task/first-of> : (-> [(Task a b)] (Task a (Option b)))\nvastra> vastra> \n"
+  },
+  "random-numbers-from-a-seed-are-the-same-everywhere": {
+    "exit": 0,
+    "mode": "file",
+    "stderr": "",
+    "stdout": "module r\nseed : {:state U32}\n2581720956 : U32\n1925393290 : U32\n0.6011037519201636 : Float\n4 : Int\n6 : Int\n"
+  },
+  "random-seed-comes-from-the-platform": {
+    "exit": 0,
+    "mode": "run",
+    "stderr": "",
+    "stdout": "true\n"
   },
   "range-counts-from-zero": {
     "exit": 0,

@@ -1,0 +1,33 @@
+(ns vastra.random
+  "Random numbers: a seed taken from the platform once, then pure steps from
+   it, which give the same numbers from the same seed on every platform.")
+
+; Where a run of random numbers stands. The same seed gives the same numbers,
+; so a game or a test can be played again.
+(type Seed {:state U32})
+
+; A seed from the platform's randomness: a different one each run.
+(native seed (Task e Seed))
+
+; A seed from a number, for numbers that are the same every run.
+(fn from [n] {:state (to-u32 n)})
+
+; The next 32 random bits, and the seed after them: mulberry32, whose steps
+; are 32-bit sums, products, shifts and xors, which wrap the same everywhere.
+(fn bits [seed]
+  (let t (+ (get seed :state) 0x6D2B79F5))
+  (let a (* (bit/xor t (bit/shift-right t 15)) (bit/or t 1)))
+  (let b (bit/xor a (+ a (* (bit/xor a (bit/shift-right a 7)) (bit/or a 61)))))
+  {:value (bit/xor b (bit/shift-right b 14)) :seed {:state t}})
+
+; A Float from 0 up to 1, never 1.
+(fn float [seed]
+  (let drawn (bits seed))
+  {:value (/ (to-float (get drawn :value)) 4294967296.0) :seed (get drawn :seed)})
+
+; An Int from low to high, both included; low when high is below it.
+(fn int [seed low high]
+  (let drawn (float seed))
+  (let span (to-float (inc (- high low))))
+  {:value (if (< high low) low (+ low (to-int (floor (* (get drawn :value) span)))))
+   :seed (get drawn :seed)})

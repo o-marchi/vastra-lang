@@ -3869,3 +3869,22 @@ window.vas
 (twice 2)
 (macro twice [x] `(* ~x 2))
 (twice 3)
+;;; file: random-numbers-from-a-seed-are-the-same-everywhere
+(ns r (:require [vastra.random :as random]))
+(let seed (random/from 42))
+(get (random/bits seed) :value)
+(get (random/bits (get (random/bits seed) :seed)) :value)
+(get (random/float seed) :value)
+(get (random/int seed 1 6) :value)
+(get (random/int seed 6 1) :value)
+;;; run: random-seed-comes-from-the-platform
+seed.vas
+;;;; file: seed.vas
+(ns seed (:require [vastra.random :as random] [vastra.console :as console]))
+(let s @random/seed)
+@(console/print (str (< (get (random/float s) :value) 1.0)))
+;;; file: a-loop-written-out-in-a-branch-ends
+; The loop is written out where returned is set: it ends with a break.
+(fn count-up [i] (if (= i 10) i (count-up (inc i))))
+(fn pick [c] (let returned (if c (do (let k (* 2 0)) (count-up k)) 5)) (+ returned 1))
+(pick true)

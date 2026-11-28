@@ -45,3 +45,9 @@
 (test
  (name window_test)
  (libraries vastra vastra.window tsdl unix))
+
+; runtime.js: every paragraph has a name, and every name one uses is defined.
+
+(test
+ (name runtime_test)
+ (libraries vastra.javascript))

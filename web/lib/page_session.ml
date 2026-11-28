@@ -1,6 +1,6 @@
 (* Vastra's checker and interpreter in a page: vastra.js runs the page's
    <script type="text/vastra"> programs with them, and browser/submit is a
-   page's REPL into itself. A build links this only if its program submits. *)
+   page's REPL into itself. *)
 
 open Js_of_ocaml
 open Vastra

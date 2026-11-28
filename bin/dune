@@ -2,7 +2,8 @@
  (name main)
  (public_name vastra)
  (package vastra)
- (libraries vastra vastra.window terminal unix threads.posix tiny_httpd))
+ (libraries vastra vastra.window vastra.javascript terminal unix threads.posix
+  tiny_httpd))
 
 ; vastra serve gives pages the vastra.js this command was built with.
 

@@ -199,6 +199,8 @@ let pad name side =
         Str (if side = `Left then fill ^ s else s ^ fill)
     | _ -> wrong name)
 
+let entropy = lazy (Random.State.make_self_init ())
+
 let all =
   [
     arith "+" Z.add ( +. ) Int32.add;
@@ -494,6 +496,12 @@ let all =
       | _ -> wrong "print-error");
     ("vastra.clock/now", Task (fun k -> k (Ok (Float (Unix.gettimeofday ())))));
     ("vastra.clock/elapsed", Task (fun k -> k (Ok (Float (!Clock.elapsed ())))));
+    (* The platform's randomness, made once and drawn from for each seed. *)
+    ( "vastra.random/seed",
+      Task
+        (fun k ->
+          let bits = Random.State.bits32 (Lazy.force entropy) in
+          k (Ok (Record [ ("state", Fixed (Num.U32, bits)) ]))) );
     (* NaN is not more than zero either: it returns at once. *)
     fn "vastra.clock/sleep" (function
       | [ Float s ] ->

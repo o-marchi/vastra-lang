@@ -7,7 +7,7 @@ Usage:
     python3 -I conformance/run.py compare BIN1 BIN2  compare two implementations directly
     python3 -I conformance/run.py compiled BINARY    check programs compiled with `vastra build`
                                                      (needs the vastra library: OCAMLPATH)
-    python3 -I conformance/run.py compiled-js BINARY check programs compiled with `vastra build --js`,
+    python3 -I conformance/run.py compiled-js BINARY check programs compiled with `vastra build --js`, compact and readable,
                                                      run with Node
 
 Options:
@@ -87,7 +87,7 @@ def outcome(result):
             "stderr": result.stderr.decode("utf-8", "replace")}
 
 
-def run_compiled(binary, mode, name, source, workdir, js=False):
+def run_compiled(binary, mode, name, source, workdir, js=False, readable=False):
     """Builds a file or run case with `vastra build`, then runs the program."""
     directory = os.path.join(workdir, name.replace("/", "_"))
     os.makedirs(directory, exist_ok=True)
@@ -99,7 +99,7 @@ def run_compiled(binary, mode, name, source, workdir, js=False):
         with open(os.path.join(directory, args[0]), "w", encoding="utf-8") as f:
             f.write(source)
     program = os.path.join(workdir, name.replace("/", "_") + (".js" if js else ".exe"))
-    flags = (["--show"] if mode == "file" else []) + (["--js"] if js else [])
+    flags = (["--show"] if mode == "file" else []) + (["--js"] if js else []) + (["--readable"] if readable else [])
     built = subprocess.run([binary, "build"] + flags + [args[0], "-o", program], cwd=directory,
                            capture_output=True, timeout=300)
     if built.returncode != 0:
@@ -200,6 +200,10 @@ def main():
                 want = {k: expected[name][k] for k in ("exit", "stdout", "stderr")}
                 got = run_compiled(binaries[0], mode, name, source, workdir, js=command == "compiled-js")
                 labels = ("expected", "compiled")
+                if command == "compiled-js" and got == want:
+                    # The readable form is the same program laid out for reading: it behaves the same.
+                    got = run_compiled(binaries[0], mode, name, source, workdir, js=True, readable=True)
+                    labels = ("expected", "readable")
             elif command == "check":
                 if name not in expected:
                     failures += 1

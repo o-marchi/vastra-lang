@@ -32,6 +32,7 @@ and typed =
   | Generic of int list (* a function told the types of these number variables *)
   | Decodes of Shape.t (* a let decoding a Json value by its written type *)
   | Told_type of Shape.t (* a native told the written type of what it gives *)
+  | Type of Types.t (* any other expression's type, for a printer that needs it *)
 
 (* [Hidden v]: the type an enclosing generic function is told for its variable v. *)
 and num = Known of Num.t | Hidden of int

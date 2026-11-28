@@ -5,10 +5,11 @@ let max_depth = 100_000
 let usage =
   "usage: vastra [FILE]                  run FILE, printing each result (no FILE: the REPL)\n\
   \       vastra run FILE ARGS          run FILE as a program: its tasks run, with ARGS\n\
-  \       vastra build [--show] [--js] FILE [-o OUT]\n\
+  \       vastra build [--show] [--js [--readable]] FILE [-o OUT]\n\
   \                                    compile FILE to a native program (like `run`;\n\
   \                                    with --show, like printing each result;\n\
-  \                                    with --js, to JavaScript for a page or Node)\n\
+  \                                    with --js, to JavaScript for a page or Node,\n\
+  \                                    laid out for reading with --readable)\n\
   \       vastra serve [--port N] [FOLDER]\n\
   \                                    develop a web page: serve FOLDER (default: this\n\
   \                                    folder) at http://localhost:8000 (or port N);\n\
@@ -72,14 +73,23 @@ let program path source outcomes =
       1
   | None -> !Builtins.exit_code
 
-(* Generates OCaml and compiles it with ocamlfind against the installed vastra library. *)
-let build ~show ~js path out =
+(* JavaScript is written directly. A native program is OCaml, compiled with
+   ocamlfind against the installed vastra library. *)
+let build ~show ~js ~readable path out =
   match read_file path with
   | Error m ->
       prerr_endline (Printf.sprintf "cannot read %s: %s" path m);
       1
+  | Ok source when js -> (
+      match Vastra_javascript.build ~show ~readable path source with
+      | Ok code ->
+          Out_channel.with_open_text out (fun oc -> output_string oc code);
+          0
+      | Error message ->
+          prerr_endline message;
+          1)
   | Ok source -> (
-      match Compile.program ~show ~js path source with
+      match Compile.program ~show path source with
       | Error d ->
           prerr_endline (Diagnostic.render d source path);
           1
@@ -89,17 +99,8 @@ let build ~show ~js path out =
           Out_channel.with_open_text main (fun oc -> output_string oc code);
           let q = Filename.quote in
           let command =
-            if js then
-              let byte = Filename.concat dir "main.byte" in
-              Printf.sprintf
-                "ocamlfind ocamlc -package %s -linkpkg %s -o %s 2> %s/errors && \
-                 js_of_ocaml \"$(ocamlfind query zarith_stubs_js)/runtime.js\" \
-                 \"$(ocamlfind query mtime.clock)/runtime.js\" %s -o %s 2>> %s/errors"
-                library (q main) (q byte) (q dir) (q byte) (q out) (q dir)
-            else
-              Printf.sprintf
-                "ocamlfind ocamlopt -package %s -linkpkg %s -o %s 2> %s/errors" library
-                (q main) (q out) (q dir)
+            Printf.sprintf "ocamlfind ocamlopt -package %s -linkpkg %s -o %s 2> %s/errors"
+              library (q main) (q out) (q dir)
           in
           if Sys.command command = 0 then 0
           else (
@@ -122,13 +123,16 @@ let () =
         (Builtins.ending := fun () -> exit !Builtins.exit_code);
         run path ~program:true (program path)
     | "build" :: rest -> (
+        let flags = [ "--show"; "--js"; "--readable" ] in
         let show = List.mem "--show" rest and js = List.mem "--js" rest in
-        let rest = List.filter (fun a -> a <> "--show" && a <> "--js") rest in
+        let readable = List.mem "--readable" rest in
+        let rest = List.filter (fun a -> not (List.mem a flags)) rest in
         match rest with
+        | _ when readable && not js -> wrong "vastra build: --readable is for --js"
         | [ path ] ->
-            build ~show ~js path
+            build ~show ~js ~readable path
               (Filename.remove_extension path ^ if js then ".js" else "")
-        | [ path; "-o"; out ] -> build ~show ~js path out
+        | [ path; "-o"; out ] -> build ~show ~js ~readable path out
         | [] -> wrong "vastra build: which file? as in vastra build game.vas"
         | _ -> wrong ("vastra build: unknown arguments: " ^ String.concat " " rest))
     | "serve" :: rest -> (

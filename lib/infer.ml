@@ -1590,7 +1590,24 @@ let keyed c key =
   let value = if Util.may_miss key then Con ("Option", [ field ]) else field in
   (Record (Row_extend (key, field, rest)), value)
 
+(* A type for the code that runs: a number still open is an Int, as for literals,
+   unless a generic function is told it. *)
+let as_written c t =
+  map_type
+    (function
+      | Var v as ty -> (
+          match Dynarray.get c.table v with
+          | Unbound (_, Some (Integer | Number)) when not (List.mem v c.generic) -> int
+          | _ -> ty)
+      | ty -> ty)
+    t
+
 let rec infer c (e : Ast.expr) =
+  let t = infer_kind c e in
+  later c (fun () -> if e.typed = Untyped then e.typed <- Type (as_written c (zonk c t)));
+  t
+
+and infer_kind c (e : Ast.expr) =
   (* What an earlier check noted may have changed with a redefinition. *)
   e.typed <- Untyped;
   match e.kind with

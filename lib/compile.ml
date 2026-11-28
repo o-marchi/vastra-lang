@@ -118,8 +118,7 @@ let needed entries =
     entries;
   seen
 
-let generate ~show ~js ?(window = false) ?(submits = false) ?(names = []) ~source
-    entries =
+let generate ~show ?(window = false) ?(names = []) ~source entries =
   let how = globals entries in
   let needed = needed entries in
   let used n = Hashtbl.mem needed n in
@@ -434,44 +433,25 @@ let generate ~show ~js ?(window = false) ?(submits = false) ?(names = []) ~sourc
         else acc)
       how []
   in
-  let imports =
-    List.concat_map
-      (function
-        | Ast.Ns { imports; _ }, _, _ ->
-            List.map (fun (i : Ast.import) -> p "%S" i.spec) imports
-        | _ -> [])
-      entries
-  in
   "[@@@warning \"-a\"]\nopen Vastra\n\nlet () =\n"
-  ^ (if js then "  Vastra_web.install ();\n" else "")
-  ^ (if submits then "  Page_session.install ();\n" else "")
   ^ (if window then "  Vastra_window.install ();\n" else "")
   ^ "  Rt.show_mode := " ^ string_of_bool show ^ ";\n"
   ^ p "  Rt.source := (%S, %S);\n" (fst source) (snd source)
   ^ p "  Rt.names := [ %s ];\n"
       (String.concat "; " (List.map (fun (n, m) -> p "(%S, %S)" n m) names))
-  (* It runs once the ES modules it imports are loaded. *)
-  ^ (if js then p "  Vastra_web.preload [ %s ] (fun () ->\n" (String.concat "; " imports)
-     else "")
-  ^ "  Rt.main "
-  (* A page goes on after its last line; Node ends there, its timers too. *)
-  ^ (if js then
-       "~exit:(fun code -> if code <> 0 || not Vastra_web.in_page then exit code) "
-     else "")
-  ^ "(fun () ->\n" ^ String.concat "" cells
+  ^ "  Rt.main (fun () ->\n" ^ String.concat "" cells
   ^ String.concat "" statements
   (* What it sent is handled, and a window it opened runs its frames. *)
   ^ "Value.handle_sent ();\n!Value.loop ();\nRt.finish ()" ^ String.make !waits ')'
-  ^ (if js then "))\n" else ")\n")
+  ^ ")\n"
 
 (* Checks the program in [path] like `vastra run` does, and gives its OCaml source
    and the library it links with: a window's links SDL. *)
-let program ~show ~js path source =
+let program ~show path source =
   let s = Session.create ~base_dir:(Filename.dirname path) ~trace:true () in
   s.check_only <- true;
   (* Like `vastra FILE` when showing results, like `vastra run` otherwise. *)
   s.run_tasks <- not show;
-  if js then s.platform <- "js";
   match Session.eval_source ~file:path s source with
   | Error d -> Error d
   | Ok _ -> (
@@ -487,15 +467,8 @@ let program ~show ~js path source =
       in
       let window = List.mem "vastra.window" s.state.loaded in
       let entries = List.rev (Option.value s.trace ~default:[]) in
-      (* The checker and interpreter go into a page only to run what it submits. *)
-      let submits = js && Hashtbl.mem (needed entries) "vastra.browser/submit" in
-      let library =
-        if submits then "vastra.web.session"
-        else if js then "vastra.web"
-        else if window then "vastra.window"
-        else "vastra"
-      in
-      match generate ~show ~js ~window ~submits ~names ~source:(path, source) entries with
+      let library = if window then "vastra.window" else "vastra" in
+      match generate ~show ~window ~names ~source:(path, source) entries with
       | code -> Ok (code, library)
       | exception Unsupported (what, span) ->
           Error

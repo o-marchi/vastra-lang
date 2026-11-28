@@ -30,11 +30,12 @@
 | `lib/session.ml` | A submission end to end: scopes, modules, macros, redefinition |
 | `lib/prelude.vas`, `lib/stdlib/*.vas` | The core and the standard library, in Vastra |
 | `lib/compile.ml`, `lib/rt.ml` | `vastra build`: Vastra → OCaml, and its runtime |
+| `lib/javascript/` | `vastra build --js`: Vastra → plain JavaScript, and `runtime.js`, what a built program takes from Vastra; a library of its own, which `vastra.js` doesn't link |
 | `bin/main.ml`, `bin/repl.ml` | The `vastra` command and the REPL |
 | `bin/terminal/` | The REPL's terminal: `term.ml` keys and the terminal's answers, `look.ml` styled rows, `theme.ml` the colours for the terminal's ground, `syntax.ml` and `input.ml` the text being typed and the history, `area.ml` the live area, `waiting.ml` the waiting line, `screen.ml` where the transcript and the live area go, `show.ml` results laid out by their shape and `explore.ml` opening a value |
 | `bin/serve.ml`, `web/live.ml` | `vastra serve`, and its side in the page: serving, reloading on save, the REPL into the page |
 | `web/lib/vastra_web.ml` | The browser: JavaScript calls, rendering, events, HTTP, recording and replaying |
-| `web/lib/page_session.ml` | The checker and interpreter in a page: running its scripts, `vastra.eval`, `browser/submit`; a build links it only if its program submits |
+| `web/lib/page_session.ml` | The checker and interpreter in a page: running its scripts, `vastra.eval`, `browser/submit` |
 | `lib/window/vastra_window.ml` | A window, through tsdl: a library of its own, which `vastra.js` doesn't link |
 
 ## Building and testing
